@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Asset Management Module (F20, F21, F22)
  * F20: Asset Register — full CRUD with categories, conditions, assignments
@@ -27,6 +28,7 @@ const CONDITION_VARIANT = {
 };
 
 export default function AssetManagementPage() {
+  useDocumentTitle("Asset Management");
   const { role } = useRole();
   const [showForm, setShowForm] = useState(false);
 
@@ -270,3 +272,5 @@ function DeleteAssetButton({ assetId, name, onDeleted }) {
     </>
   );
 }
+
+

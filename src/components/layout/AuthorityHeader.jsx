@@ -2,14 +2,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 import useRole from "../../hooks/useRole";
 import useUnreadCount from "../../hooks/useUnreadCount";
 import { roles } from "../../config/roles";
+import ThemeToggle from "../ui/ThemeToggle";
 
 function formatTitle(pathname) {
   const segments = pathname.split("/").filter(Boolean);
-  
+
   // If only authority segment exists (e.g., /executive)
   if (segments.length === 1) return "Dashboard";
 
-  const last = segments[segments.length - 1];
+  const last = segments[segments.length - 1].replace(/-/g, " ");
 
   return last.charAt(0).toUpperCase() + last.slice(1);
 }
@@ -18,8 +19,8 @@ function BellIcon() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -43,28 +44,31 @@ export default function AuthorityHeader() {
   const title = formatTitle(location.pathname);
 
   return (
-    <div className="flex items-center justify-between border-b border-gray-200 pb-4 mb-6">
-      <div>
-        <div className="text-sm text-gray-500 uppercase tracking-wide">
+    <div className="mb-6 flex min-w-0 items-center justify-between gap-3 border-b border-[var(--color-border)] pb-4">
+      <div className="min-w-0">
+        <div className="text-sm font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
           {roleMeta?.label}
         </div>
-        <div className="text-2xl font-semibold">
+        <h1 className="truncate text-2xl font-bold text-[var(--color-text-primary)]">
           {title}
-        </div>
+        </h1>
       </div>
 
-      <div
-        className="relative cursor-pointer text-gray-500 hover:text-gray-800"
-        onClick={() => navigate("/notifications")}
-        role="button"
-        aria-label="Notifications"
-      >
-        <BellIcon />
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] leading-none px-1.5 py-0.5 rounded-full">
-            {unreadCount}
-          </span>
-        )}
+      <div className="shrink-0 flex items-center gap-2">
+        <ThemeToggle />
+        <button
+          type="button"
+          className="relative inline-flex h-8 w-8 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text-primary)]"
+          onClick={() => navigate(`${roleMeta?.defaultRoute || "/executive"}/notifications`)}
+          aria-label="Notifications"
+        >
+          <BellIcon />
+          {unreadCount > 0 && (
+            <span className="absolute -right-2 -top-1 rounded-full bg-[var(--color-danger)] px-1.5 py-0.5 text-[10px] leading-none text-white">
+              {unreadCount}
+            </span>
+          )}
+        </button>
       </div>
     </div>
   );

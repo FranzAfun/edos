@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Budget Deduction UI (F10)
  * Shows department budget status with deductions,
@@ -17,6 +18,7 @@ import * as treasuryStore from "../../../shared/services/treasuryStore";
 import useRole from "../../../hooks/useRole";
 
 export default function BudgetOverviewPage() {
+  useDocumentTitle("Budget Overview");
   const { role } = useRole();
   const [budgets, setBudgets] = useState(() => budgetStore.listBudgets());
   const [treasury, setTreasury] = useState(() => treasuryStore.getTreasury());
@@ -189,3 +191,5 @@ function FreezeToggle({ departmentId, frozen, onToggled }) {
     </>
   );
 }
+
+

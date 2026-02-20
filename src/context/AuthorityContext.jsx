@@ -1,14 +1,13 @@
-import { createContext, useContext, useMemo } from "react";
+import { useMemo } from "react";
 import useRole from "../hooks/useRole";
-import { AUTHORITIES } from "../config/authorities";
-
-const AuthorityContext = createContext(null);
+import { getAuthorityByRole } from "./authorityConfig";
+import AuthorityContext from "./authorityContextStore";
 
 export function AuthorityProvider({ children }) {
   const { role } = useRole();
 
   const value = useMemo(() => {
-    return AUTHORITIES[role] || null;
+    return getAuthorityByRole(role);
   }, [role]);
 
   return (
@@ -16,8 +15,4 @@ export function AuthorityProvider({ children }) {
       {children}
     </AuthorityContext.Provider>
   );
-}
-
-export function useAuthority() {
-  return useContext(AuthorityContext);
 }

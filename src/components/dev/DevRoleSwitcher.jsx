@@ -23,7 +23,7 @@ export default function DevRoleSwitcher() {
       <select
         value={role}
         onChange={handleRoleChange}
-        className="w-32 rounded border border-amber-300 bg-white px-2 py-1 text-xs text-slate-800 outline-none focus:ring-1 focus:ring-amber-500"
+        className="w-32 rounded border border-amber-300 bg-[var(--color-surface)] px-2 py-1 text-xs text-[var(--color-text-primary)] outline-none focus:ring-1 focus:ring-amber-500"
         aria-label="Development role switcher"
       >
         {roleOptions.map((item) => (

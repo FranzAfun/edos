@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Operations Dashboard (F30)
  * Operational overview: approvals, receipts, attendance, assets.
@@ -14,6 +15,7 @@ import * as attendanceStore from "../../../shared/services/attendanceStore";
 import * as assetStore from "../../../shared/services/assetStore";
 
 export default function OperationsDashboard() {
+  useDocumentTitle("Operations Dashboard");
   const approvals = useMemo(() => approvalStore.listApprovals(), []);
   const receipts = useMemo(() => receiptStore.listReceipts(), []);
   const assets = useMemo(() => assetStore.listAssets(), []);
@@ -86,3 +88,5 @@ export default function OperationsDashboard() {
     </div>
   );
 }
+
+

@@ -4,6 +4,7 @@ import Card from "../../../components/ui/Card";
 import Grid from "../../../components/layout/Grid";
 import ModuleBoundary from "../../../shared/components/ModuleBoundary";
 import useModuleQuery from "../../../shared/hooks/useModuleQuery";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import {
   getAllBudgets,
   updateMonthlyLimit,
@@ -12,6 +13,7 @@ import {
 import * as departmentStore from "../../../shared/services/departmentStore";
 
 export default function AdminBudgetsPage() {
+  useDocumentTitle("Admin Budget Management");
   const query = useModuleQuery(getAllBudgets);
 
   return (
@@ -121,3 +123,5 @@ function BudgetRow({ budget, onAction }) {
     </Card>
   );
 }
+
+

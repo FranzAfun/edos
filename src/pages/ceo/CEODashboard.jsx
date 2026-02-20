@@ -1,8 +1,8 @@
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 /**
  * CEO Dashboard (F27)
  * Strategic overview with treasury, revenue, approvals, KPI, risk indicators.
  */
-import { useMemo } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell,
@@ -24,13 +24,13 @@ import { getUserKpiPercentage } from "../../shared/services/trustLevelStore";
 const COLORS = ["#2563EB", "#16A34A", "#D97706", "#DC2626", "#8B5CF6", "#06B6D4"];
 
 export default function CEODashboard() {
-  const treasury = useMemo(() => treasuryStore.getTreasury(), []);
-  const totalRevenue = revenueStore.getTotalRevenue();
+  useDocumentTitle("CEO Dashboard");
+  const treasury = treasuryStore.getTreasury();
   const confirmedRevenue = revenueStore.getConfirmedRevenue();
-  const budgets = useMemo(() => budgetStore.listBudgets(), []);
-  const approvals = useMemo(() => approvalStore.listApprovals(), []);
-  const kpiTasks = useMemo(() => kpiStore.listTasks(), []);
-  const departments = useMemo(() => departmentStore.listDepartments(), []);
+  const budgets = budgetStore.listBudgets();
+  const approvals = approvalStore.listApprovals();
+  const kpiTasks = kpiStore.listTasks();
+  const departments = departmentStore.listDepartments();
 
   const totalBudget = budgets.reduce((s, b) => s + (b.monthlyLimit || 0), 0);
   const totalSpent = budgets.reduce((s, b) => s + ((b.monthlyLimit || 0) - (b.remainingLimit || 0)), 0);
@@ -128,3 +128,5 @@ export default function CEODashboard() {
     </div>
   );
 }
+
+

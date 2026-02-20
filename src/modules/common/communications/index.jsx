@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Communications Module (F24)
  * Internal messaging, announcements, and bulk email simulation.
@@ -21,6 +22,7 @@ function resolveUser(roleKey) {
 }
 
 export default function CommunicationsPage() {
+  useDocumentTitle("Communications");
   const { role } = useRole();
   const currentUser = resolveUser(role);
   const [activeTab, setActiveTab] = useState("inbox");
@@ -63,20 +65,22 @@ export default function CommunicationsPage() {
         </Grid>
       </PageSection>
 
-      <div className="mb-4 flex gap-1 border-b">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === tab.key
-                ? "border-[var(--color-accent)] text-[var(--color-accent)]"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="mb-4 overflow-x-auto border-b">
+        <div className="flex min-w-max gap-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`whitespace-nowrap px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === tab.key
+                  ? "border-[var(--color-accent)] text-[var(--color-accent)]"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {activeTab === "inbox" && (
@@ -268,3 +272,5 @@ function ComposeForm({ currentUser, onSent }) {
     </Card>
   );
 }
+
+

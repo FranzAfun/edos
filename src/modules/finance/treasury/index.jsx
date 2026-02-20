@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Treasury View (F12)
  * Treasury balance display with income/expense recording.
@@ -17,6 +18,7 @@ import * as budgetStore from "../../../shared/services/budgetStore";
 import useRole from "../../../hooks/useRole";
 
 export default function TreasuryPage() {
+  useDocumentTitle("Treasury");
   const { role } = useRole();
   const [treasury, setTreasury] = useState(() => treasuryStore.getTreasury());
   const [budgets, setBudgets] = useState(() => budgetStore.listBudgets());
@@ -159,3 +161,5 @@ function TreasuryAdjustmentForm({ type, onAdjusted }) {
     </Card>
   );
 }
+
+

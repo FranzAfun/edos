@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Monthly Transparency Summary (F40)
  * Public-facing monthly summary of organizational finances and performance.
@@ -19,6 +20,7 @@ import * as assetStore from "../../../shared/services/assetStore";
 import * as departmentStore from "../../../shared/services/departmentStore";
 
 export default function TransparencyPage() {
+  useDocumentTitle("Transparency");
   const treasury = treasuryStore.getTreasury();
   const totalRevenue = revenueStore.getTotalRevenue();
   const confirmedRevenue = revenueStore.getConfirmedRevenue();
@@ -151,3 +153,5 @@ export default function TransparencyPage() {
     </div>
   );
 }
+
+

@@ -19,9 +19,9 @@ export default function ConfirmDialog({
   const cancelBtnRef = useRef(null);
 
   const variantStyles = {
-    danger: "bg-[var(--color-danger)] hover:bg-red-700 text-white",
-    warning: "bg-[var(--color-warning)] hover:bg-amber-700 text-white",
-    accent: "bg-[var(--color-accent)] hover:bg-blue-700 text-white",
+    danger: "bg-[var(--color-danger)] text-white hover:opacity-90",
+    warning: "bg-[var(--color-warning)] text-white hover:opacity-90",
+    accent: "bg-[var(--color-accent)] text-white hover:opacity-90",
   };
 
   const handleKeyDown = useCallback(
@@ -74,7 +74,7 @@ export default function ConfirmDialog({
     >
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50"
+        className="fixed inset-0 bg-black/60"
         onClick={busy ? undefined : onCancel}
         aria-hidden="true"
       />
@@ -85,17 +85,17 @@ export default function ConfirmDialog({
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
         aria-describedby="confirm-dialog-desc"
-        className="relative z-10 bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6"
+        className="relative z-10 mx-4 w-full max-w-md rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-lg"
       >
         <h2
           id="confirm-dialog-title"
-          className="text-lg font-semibold text-[var(--color-primary)]"
+          className="text-lg font-semibold text-[var(--color-text-primary)]"
         >
           {title}
         </h2>
         <p
           id="confirm-dialog-desc"
-          className="mt-2 text-sm text-gray-600"
+          className="mt-2 text-sm text-[var(--color-text-secondary)]"
         >
           {message}
         </p>
@@ -105,7 +105,7 @@ export default function ConfirmDialog({
             type="button"
             onClick={onCancel}
             disabled={busy}
-            className="px-4 py-2 text-sm font-medium rounded-md border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50"
+            className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] disabled:opacity-50"
           >
             {cancelLabel}
           </button>

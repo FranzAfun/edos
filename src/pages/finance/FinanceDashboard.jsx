@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 /**
  * Finance Dashboard (F28)
  * Financial overview: treasury, budgets, revenue, approvals pipeline.
@@ -22,6 +23,7 @@ import * as departmentStore from "../../shared/services/departmentStore";
 const COLORS = ["#2563EB", "#16A34A", "#D97706", "#DC2626", "#8B5CF6"];
 
 export default function FinanceDashboard() {
+  useDocumentTitle("Finance Dashboard");
   const treasury = useMemo(() => treasuryStore.getTreasury(), []);
   const budgets = useMemo(() => budgetStore.listBudgets(), []);
   const approvals = useMemo(() => approvalStore.listApprovals(), []);
@@ -111,3 +113,5 @@ export default function FinanceDashboard() {
     </div>
   );
 }
+
+

@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Fund Request Form (F1)
  * Executive submits: pillar, program, purpose, amount, vendor quotation,
@@ -34,6 +35,7 @@ const RULES = {
 };
 
 export default function FundRequestForm() {
+  useDocumentTitle("Fund Request");
   const { role } = useRole();
   const currentUser = resolveUser(role);
   const currentUserId = currentUser?.id;
@@ -300,3 +302,5 @@ export default function FundRequestForm() {
     </div>
   );
 }
+
+

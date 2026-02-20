@@ -1,9 +1,9 @@
 import { useState, useMemo, useCallback } from "react";
-import BackButton from "../../../components/ui/BackButton";
 import Card from "../../../components/ui/Card";
 import Grid from "../../../components/layout/Grid";
 import ModuleBoundary from "../../../shared/components/ModuleBoundary";
 import useModuleQuery from "../../../shared/hooks/useModuleQuery";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import {
   getNotificationsForUser,
   markNotificationAsRead,
@@ -18,6 +18,7 @@ function resolveUserId(roleKey) {
 }
 
 export default function NotificationsPage() {
+  useDocumentTitle("Notifications");
   const { role } = useRole();
   const userId = resolveUserId(role);
 
@@ -41,12 +42,6 @@ export default function NotificationsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between mb-6">
-        <BackButton />
-      </div>
-
-      <h1 className="text-2xl font-semibold mb-4">Notifications</h1>
-
       {!userId && (
         <div className="text-sm text-gray-500">
           No user configured for this role.
@@ -131,3 +126,5 @@ function NotificationRow({ notification, onRead }) {
     </Card>
   );
 }
+
+

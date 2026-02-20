@@ -23,12 +23,12 @@ export default function FormField({
   if (children) {
     return (
       <div className={`mb-4 ${className}`}>
-        <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor={id} className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)]">
           {label}
           {required && <span className="text-[var(--color-danger)] ml-0.5" aria-hidden="true">*</span>}
         </label>
         {children}
-        {helpText && !hasError && <p className="mt-1 text-xs text-gray-400">{helpText}</p>}
+        {helpText && !hasError && <p className="mt-1 text-xs font-medium text-[var(--color-text-muted)]">{helpText}</p>}
         {hasError && (
           <p id={errorId} className="mt-1 text-xs text-[var(--color-danger)]" role="alert">
             {error}
@@ -41,7 +41,7 @@ export default function FormField({
   if (type === "textarea") {
     return (
       <div className={`mb-4 ${className}`}>
-        <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor={id} className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)]">
           {label}
           {required && <span className="text-[var(--color-danger)] ml-0.5" aria-hidden="true">*</span>}
         </label>
@@ -56,10 +56,10 @@ export default function FormField({
           rows={4}
           aria-invalid={hasError}
           aria-describedby={hasError ? errorId : undefined}
-          className={`w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${hasError ? "border-[var(--color-danger)] focus:ring-[var(--color-danger)]" : "border-gray-300 focus:ring-[var(--color-accent)]"}`}
+          className={`w-full rounded border bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-1 ${hasError ? "border-[var(--color-danger)] focus:ring-[var(--color-danger)]" : "border-[var(--color-border)] focus:ring-[var(--color-accent)]"}`}
           {...rest}
         />
-        {helpText && !hasError && <p className="mt-1 text-xs text-gray-400">{helpText}</p>}
+        {helpText && !hasError && <p className="mt-1 text-xs font-medium text-[var(--color-text-muted)]">{helpText}</p>}
         {hasError && (
           <p id={errorId} className="mt-1 text-xs text-[var(--color-danger)]" role="alert">
             {error}
@@ -72,7 +72,7 @@ export default function FormField({
   if (type === "select") {
     return (
       <div className={`mb-4 ${className}`}>
-        <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor={id} className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)]">
           {label}
           {required && <span className="text-[var(--color-danger)] ml-0.5" aria-hidden="true">*</span>}
         </label>
@@ -85,10 +85,10 @@ export default function FormField({
           required={required}
           aria-invalid={hasError}
           aria-describedby={hasError ? errorId : undefined}
-          className={`w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${hasError ? "border-[var(--color-danger)] focus:ring-[var(--color-danger)]" : "border-gray-300 focus:ring-[var(--color-accent)]"}`}
+          className={`w-full rounded border bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-1 ${hasError ? "border-[var(--color-danger)] focus:ring-[var(--color-danger)]" : "border-[var(--color-border)] focus:ring-[var(--color-accent)]"}`}
           {...rest}
         />
-        {helpText && !hasError && <p className="mt-1 text-xs text-gray-400">{helpText}</p>}
+        {helpText && !hasError && <p className="mt-1 text-xs font-medium text-[var(--color-text-muted)]">{helpText}</p>}
         {hasError && (
           <p id={errorId} className="mt-1 text-xs text-[var(--color-danger)]" role="alert">
             {error}
@@ -100,7 +100,7 @@ export default function FormField({
 
   return (
     <div className={`mb-4 ${className}`}>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor={id} className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)]">
         {label}
         {required && <span className="text-[var(--color-danger)] ml-0.5" aria-hidden="true">*</span>}
       </label>
@@ -115,10 +115,10 @@ export default function FormField({
         required={required}
         aria-invalid={hasError}
         aria-describedby={hasError ? errorId : undefined}
-        className={`w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${hasError ? "border-[var(--color-danger)] focus:ring-[var(--color-danger)]" : "border-gray-300 focus:ring-[var(--color-accent)]"}`}
+        className={`w-full rounded border bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-1 ${hasError ? "border-[var(--color-danger)] focus:ring-[var(--color-danger)]" : "border-[var(--color-border)] focus:ring-[var(--color-accent)]"}`}
         {...rest}
       />
-      {helpText && !hasError && <p className="mt-1 text-xs text-gray-400">{helpText}</p>}
+      {helpText && !hasError && <p className="mt-1 text-xs font-medium text-[var(--color-text-muted)]">{helpText}</p>}
       {hasError && (
         <p id={errorId} className="mt-1 text-xs text-[var(--color-danger)]" role="alert">
           {error}

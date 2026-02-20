@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Special KPI Contributions (F15)
  * Submit and review special contributions for bonus KPI scores.
@@ -29,6 +30,7 @@ function resolveUser(roleKey) {
 }
 
 export default function SpecialContributionsPage() {
+  useDocumentTitle("Special Contributions");
   const { role } = useRole();
   const currentUser = resolveUser(role);
   const [contributions, setContributions] = useState(
@@ -269,3 +271,5 @@ function ReviewContributionCard({ contribution, reviewerId, onReviewed }) {
     </>
   );
 }
+
+

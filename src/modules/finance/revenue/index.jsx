@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Revenue Recording Module (F11)
  * Record revenue entries with pillar, program, payment status,
@@ -23,6 +24,7 @@ const PAYMENT_STATUS_VARIANT = {
 };
 
 export default function RevenuePage() {
+  useDocumentTitle("Revenue");
   const { role } = useRole();
   const [revenue, setRevenue] = useState(() => revenueStore.listRevenue());
   const reload = useCallback(() => setRevenue(revenueStore.listRevenue()), []);
@@ -259,3 +261,5 @@ function RevenueForm({ onRecorded, role }) {
     </Card>
   );
 }
+
+

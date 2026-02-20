@@ -6,6 +6,7 @@ import ModuleBoundary from "../../../shared/components/ModuleBoundary";
 import useAllUsers from "./hooks/useAllUsers";
 import { createUser, deleteUser } from "./services/userService";
 import * as departmentStore from "../../../shared/services/departmentStore";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 const AUTHORITY_LEVELS = [
   { value: 0, label: "0 – Admin" },
@@ -46,6 +47,7 @@ const ROLE_MAP = {
 };
 
 export default function AdminUsersPage() {
+  useDocumentTitle("User Management");
   const usersQuery = useAllUsers();
 
   return (
@@ -233,3 +235,5 @@ function UserRow({ user, onDeleted }) {
     </Card>
   );
 }
+
+

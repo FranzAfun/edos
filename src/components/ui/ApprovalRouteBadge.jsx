@@ -4,9 +4,9 @@
 import { getApprovalRoute } from "../../shared/services/fundRequestStore";
 
 const ROUTE_STYLES = {
-  FO_ONLY: "bg-green-50 text-green-700 border-green-200",
-  FO_CEO: "bg-amber-50 text-amber-700 border-amber-200",
-  CEO_JUSTIFICATION: "bg-red-50 text-red-700 border-red-200",
+  FO_ONLY: "border-[rgba(34,197,94,0.35)] bg-[rgba(34,197,94,0.14)] text-[#22C55E]",
+  FO_CEO: "border-[rgba(245,158,11,0.35)] bg-[rgba(245,158,11,0.14)] text-[#F59E0B]",
+  CEO_JUSTIFICATION: "border-[rgba(239,68,68,0.35)] bg-[rgba(239,68,68,0.14)] text-[#EF4444]",
 };
 
 export default function ApprovalRouteBadge({ amount }) {
@@ -18,7 +18,7 @@ export default function ApprovalRouteBadge({ amount }) {
       <span>{route.label}</span>
       <span className="flex gap-1">
         {route.stages.map((stage) => (
-          <span key={stage} className="rounded bg-white/50 px-1.5 py-0.5 text-[10px] font-semibold">
+          <span key={stage} className="rounded bg-[var(--color-surface)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--color-text-secondary)]">
             {stage}
           </span>
         ))}

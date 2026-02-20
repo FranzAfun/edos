@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * CEO AI Intelligence Dashboard (F16-F19)
  * F16: AI-generated recommendations (mock)
@@ -155,6 +156,7 @@ function generateRiskData() {
 }
 
 export default function CEOIntelligencePage() {
+  useDocumentTitle("CEO Intelligence");
   const forecastData = useMemo(() => generateForecastData(), []);
   const recommendations = useMemo(() => generateRecommendations(), []);
   const riskData = useMemo(() => generateRiskData(), []);
@@ -325,3 +327,5 @@ export default function CEOIntelligencePage() {
     </div>
   );
 }
+
+

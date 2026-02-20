@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import AuthorityHeader from "../components/layout/AuthorityHeader";
-import { useAuthority } from "../context/AuthorityContext";
+import MobileSidebarToggle from "../components/ui/MobileSidebarToggle";
+import { useAuthority } from "../context/useAuthority";
 
 function OperationsLayout() {
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const authority = useAuthority();
 
   if (!authority) {
@@ -11,23 +14,25 @@ function OperationsLayout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-[var(--color-background)]">
       
       {/* Sidebar */}
-      <Sidebar title="EDOS - Operations" />
+      <Sidebar title="EDOS - Operations" mobileOpen={mobileSidebarOpen} onCloseMobile={() => setMobileSidebarOpen(false)} />
 
-      <div className="flex-1 flex flex-col">
-        <div className="md:hidden flex items-center justify-between px-6 py-4 border-b">
-          <h2 className="text-lg font-semibold">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="md:hidden flex items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">
+          <MobileSidebarToggle onClick={() => setMobileSidebarOpen(true)} />
+          <h2 className="text-sm font-semibold">
             EDOS
           </h2>
+          <div className="w-9" aria-hidden="true" />
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto bg-white">
-          <div className="p-6">
+        <main className="min-w-0 flex-1 overflow-y-auto bg-[var(--color-background)]">
+          <div className="flex-1 overflow-x-hidden px-4 py-6 sm:px-6 lg:px-8">
             <AuthorityHeader />
-            <div className="max-w-6xl mx-auto">
+            <div className="mx-auto w-full max-w-6xl space-y-6">
               <Outlet />
             </div>
           </div>
@@ -39,3 +44,6 @@ function OperationsLayout() {
 }
 
 export default OperationsLayout;
+
+
+

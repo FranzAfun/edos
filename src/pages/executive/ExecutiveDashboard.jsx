@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 /**
  * Executive Dashboard (F29)
  * Executive overview: fund requests, KPIs, compliance, trust level.
@@ -16,6 +17,7 @@ import * as userStore from "../../shared/services/userStore";
 import useRole from "../../hooks/useRole";
 
 export default function ExecutiveDashboard() {
+  useDocumentTitle("Executive Dashboard");
   const { role } = useRole();
   const currentUser = useMemo(() => {
     const users = userStore.getUsersByRole(role);
@@ -139,3 +141,5 @@ export default function ExecutiveDashboard() {
     </div>
   );
 }
+
+

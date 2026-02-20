@@ -13,7 +13,7 @@ export default function Grid({
   const columns = columnMap[cols] || columnMap[3];
 
   return (
-    <div className={`grid ${columns} gap-6 ${className}`}>
+    <div className={`grid w-full ${columns} gap-6 ${className}`}>
       {children}
     </div>
   );

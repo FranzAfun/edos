@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Enhanced Finance Approval Queue (F4)
  * Cost reasonableness, historical comparison, AI advisory,
@@ -37,6 +38,7 @@ function resolveUserId(roleKey) {
 }
 
 export default function FinanceApprovalsPage() {
+  useDocumentTitle("Finance Approvals");
   const { role } = useRole();
   const userId = resolveUserId(role);
   const query = useApprovalQueue(getFoQueue);
@@ -226,7 +228,7 @@ function EnhancedApprovalCard({ item, userId, onAction }) {
           )}
           <div className="flex items-end gap-2 flex-wrap">
             <input type="text" placeholder="Optional note..." value={note} onChange={(e) => setNote(e.target.value)}
-              className="flex-1 min-w-[200px] rounded border px-2 py-1 text-xs" aria-label="Review note" />
+              className="w-full rounded border px-2 py-1 text-xs sm:flex-1" aria-label="Review note" />
             <button onClick={() => setConfirmAction("approve")} disabled={busy || isApprovalBlocked}
               className={`rounded px-3 py-1 text-xs ${isApprovalBlocked ? "bg-gray-300 cursor-not-allowed" : "bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"}`}>
               Approve
@@ -271,3 +273,5 @@ function ComplianceBadge({ userId }) {
   }
   return null;
 }
+
+

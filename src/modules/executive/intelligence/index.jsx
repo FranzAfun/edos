@@ -5,8 +5,10 @@ import PageSection from "../../../shared/ui/PageSection";
 import GovernanceStageBadge from "../../../governance/GovernanceStageBadge";
 import useGovernedModule from "../../../governance/useGovernedModule";
 import useIntelligenceOverview from "./hooks/useIntelligenceOverview";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 export default function ExecutiveIntelligence() {
+  useDocumentTitle("Executive Intelligence");
   const query = useIntelligenceOverview();
   const {
     governedEntity,
@@ -84,3 +86,5 @@ function Metric({ label, value }) {
     </div>
   );
 }
+
+

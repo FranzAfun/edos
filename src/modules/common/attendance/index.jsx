@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Attendance Module (F23)
  * Clock in/out, daily attendance log, participation rate.
@@ -20,6 +21,7 @@ function resolveUser(roleKey) {
 }
 
 export default function AttendancePage() {
+  useDocumentTitle("Attendance");
   const { role } = useRole();
   const currentUser = resolveUser(role);
 
@@ -136,3 +138,5 @@ export default function AttendancePage() {
     </div>
   );
 }
+
+

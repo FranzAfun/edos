@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Audit Trail UI (F39)
  * View system audit log with filtering by entity, user, action.
@@ -11,6 +12,7 @@ import * as auditStore from "../../../shared/services/auditStore";
 import * as userStore from "../../../shared/services/userStore";
 
 export default function AuditTrailPage() {
+  useDocumentTitle("Audit Trail");
   const [filterAction, setFilterAction] = useState("");
   const [filterEntity, setFilterEntity] = useState("");
 
@@ -101,3 +103,5 @@ export default function AuditTrailPage() {
     </div>
   );
 }
+
+

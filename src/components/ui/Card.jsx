@@ -4,7 +4,7 @@ export default function Card({
 }) {
   return (
     <div
-      className={`bg-white rounded-md shadow-sm p-6 ${className}`}
+      className={`rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-[var(--color-text-primary)] shadow-sm ${className}`}
     >
       {children}
     </div>

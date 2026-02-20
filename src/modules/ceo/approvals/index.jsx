@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Enhanced CEO Approval Queue (F5)
  * - Modify amount option
@@ -36,6 +37,7 @@ function resolveUserId(roleKey) {
 }
 
 export default function CeoApprovalsPage() {
+  useDocumentTitle("CEO Approvals");
   const { role } = useRole();
   const userId = resolveUserId(role);
   const query = useApprovalQueue(getCeoQueue);
@@ -170,7 +172,7 @@ function CeoApprovalCard({ item, userId, onAction }) {
           <div className="flex items-end gap-2 flex-wrap">
             <input type="text" placeholder={requiresJustification ? "Justification note required..." : "Optional note..."}
               value={note} onChange={(e) => setNote(e.target.value)}
-              className="flex-1 min-w-[200px] rounded border px-2 py-1 text-xs" aria-label="CEO review note" />
+              className="w-full rounded border px-2 py-1 text-xs sm:flex-1" aria-label="CEO review note" />
             <button onClick={() => setConfirmAction("approve")}
               disabled={busy || (requiresJustification && !note.trim())}
               className="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 disabled:opacity-50">
@@ -219,3 +221,5 @@ function ComplianceBadge({ userId }) {
   }
   return null;
 }
+
+

@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Department Head Dashboard (F6)
  * Review subordinate requests, recommend approvals to FO,
@@ -24,6 +25,7 @@ function resolveUser(roleKey) {
 }
 
 export default function DeptHeadDashboard() {
+  useDocumentTitle("Department Head Dashboard");
   const { role } = useRole();
   const currentUser = resolveUser(role);
   const dept = currentUser
@@ -226,3 +228,5 @@ function SubordinateRequestCard({ request, currentUser }) {
     </>
   );
 }
+
+

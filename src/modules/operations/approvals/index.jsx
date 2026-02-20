@@ -4,6 +4,7 @@ import Card from "../../../components/ui/Card";
 import Grid from "../../../components/layout/Grid";
 import ModuleBoundary from "../../../shared/components/ModuleBoundary";
 import useApprovalQueue from "../../common/approvals/hooks/useApprovalQueue";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import {
   getOperationsQueue,
   approveApproval,
@@ -23,6 +24,7 @@ function resolveUserId(roleKey) {
 }
 
 export default function OperationsApprovalsPage() {
+  useDocumentTitle("Operations Approvals");
   const { role } = useRole();
   const userId = resolveUserId(role);
   const query = useApprovalQueue(getOperationsQueue);
@@ -152,3 +154,5 @@ function ComplianceBadge({ userId }) {
 
   return null;
 }
+
+

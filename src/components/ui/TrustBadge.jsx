@@ -13,7 +13,7 @@ export default function TrustBadge({ userId, showPercentage = false }) {
     <span className="inline-flex items-center gap-1">
       <StatusBadge label={level.label} variant={level.variant} />
       {showPercentage && (
-        <span className="text-xs text-gray-500">{pct}%</span>
+        <span className="text-xs font-medium text-[var(--color-text-muted)]">{pct}%</span>
       )}
     </span>
   );

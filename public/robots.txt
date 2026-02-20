@@ -1,0 +1,11 @@
+User-agent: *
+Disallow: /admin
+Disallow: /ceo
+Disallow: /finance
+Disallow: /operations
+Disallow: /executive
+Disallow: /dept-head
+Disallow: /notifications
+Allow: /
+
+Sitemap: https://edos.eraaxisgroup.com/sitemap.xml

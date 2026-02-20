@@ -1,7 +1,7 @@
 import createGovernedEntity from "./createGovernedEntity";
 import useGovernanceEnforcement from "./useGovernanceEnforcement";
 import { PIPELINE_REGISTRY } from "./pipelineRegistry";
-import { useAuthority } from "../context/AuthorityContext";
+import { useAuthority } from "../context/useAuthority";
 
 /**
  * useGovernedModule
@@ -40,3 +40,4 @@ export default function useGovernedModule(moduleKey, data = {}) {
     authority,
   };
 }
+

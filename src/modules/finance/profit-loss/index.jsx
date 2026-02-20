@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * P&L Dashboard (F13)
  * Profit & Loss overview with Recharts visualizations.
@@ -38,6 +39,7 @@ const CHART_COLORS = [
 ];
 
 export default function ProfitLossPage() {
+  useDocumentTitle("Profit and Loss");
   const revenue = revenueStore.listRevenue();
   const treasury = treasuryStore.getTreasury();
   const budgets = budgetStore.listBudgets();
@@ -245,3 +247,5 @@ export default function ProfitLossPage() {
     </div>
   );
 }
+
+

@@ -8,12 +8,12 @@ export default function PageSection({
       {(title || subtitle) && (
         <div className="mb-4">
           {title && (
-            <h2 className="text-lg font-semibold">
+            <h2 className="text-lg font-semibold text-[var(--color-text-primary)] font-[var(--font-heading)]">
               {title}
             </h2>
           )}
           {subtitle && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="mt-1 text-sm font-medium text-[var(--color-text-muted)]">
               {subtitle}
             </p>
           )}

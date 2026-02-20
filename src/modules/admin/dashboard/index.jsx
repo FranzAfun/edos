@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Admin Dashboard (F32)
  * System administration overview: users, departments, budgets, compliance.
@@ -16,6 +17,7 @@ import * as approvalStore from "../../../shared/services/approvalStore";
 import * as auditStore from "../../../shared/services/auditStore";
 
 export default function AdminDashboard() {
+  useDocumentTitle("Admin Dashboard");
   const users = useMemo(() => userStore.listUsers(), []);
   const departments = useMemo(() => departmentStore.listDepartments(), []);
   const budgets = useMemo(() => budgetStore.listBudgets(), []);
@@ -113,3 +115,5 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+

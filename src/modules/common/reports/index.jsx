@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Reports Module (F25, F26)
  * F25: Financial Reports — Revenue, Budget, Treasury, P&L reports
@@ -65,6 +66,7 @@ const REPORT_TYPES = [
 ];
 
 export default function ReportsPage() {
+  useDocumentTitle("Reports");
   const [activeReport, setActiveReport] = useState("revenue");
 
   return (
@@ -293,3 +295,5 @@ function TreasurySummary() {
     </div>
   );
 }
+
+

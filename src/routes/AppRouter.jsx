@@ -1,7 +1,9 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import useRole from "../hooks/useRole";
 import { permissions } from "../config/permissions";
 import { roles } from "../config/roles";
+import { SkeletonCard } from "../shared/ui/Skeleton";
 
 import ExecutiveLayout from "../layouts/ExecutiveLayout";
 import FinanceLayout from "../layouts/FinanceLayout";
@@ -10,43 +12,41 @@ import DeptHeadLayout from "../layouts/DeptHeadLayout";
 import OperationsLayout from "../layouts/OperationsLayout";
 import AdminLayout from "../layouts/AdminLayout";
 
-import ExecutiveDashboard from "../pages/executive/ExecutiveDashboard";
-import Intelligence from "../pages/executive/modules/intelligence";
-import Compliance from "../pages/executive/modules/compliance";
-import FinanceDashboard from "../pages/finance/FinanceDashboard";
-import CEODashboard from "../pages/ceo/CEODashboard";
-import Strategy from "../pages/ceo/modules/strategy";
-import Oversight from "../pages/ceo/modules/oversight";
-import CeoApprovalsPage from "../modules/ceo/approvals";
-import FinanceApprovalsPage from "../modules/finance/approvals";
-import OperationsApprovalsPage from "../modules/operations/approvals";
-import DeptHeadDashboard from "../modules/dept_head/dashboard";
-import OperationsDashboard from "../modules/operations/dashboard";
-import AdminDashboard from "../modules/admin/dashboard";
-import ExecutiveKpiPage from "../modules/executive/kpi";
-import AdminKpiPage from "../modules/admin/kpi";
-import AdminUsersPage from "../modules/admin/users";
-import AdminBudgetsPage from "../modules/admin/budgets";
-import NotificationsPage from "../modules/common/notifications";
 import NotFound from "../pages/NotFound";
-
-// New module imports
-import FundRequestForm from "../modules/executive/fund-request";
-import ReceiptsPage from "../modules/common/receipts";
-import BudgetOverviewPage from "../modules/common/budgets";
-import RevenuePage from "../modules/finance/revenue";
-import TreasuryPage from "../modules/finance/treasury";
-import ProfitLossPage from "../modules/finance/profit-loss";
-import CEOIntelligencePage from "../modules/ceo/intelligence";
-import SpecialContributionsPage from "../modules/common/contributions";
-import AssetManagementPage from "../modules/common/assets";
-import AttendancePage from "../modules/common/attendance";
-import CommunicationsPage from "../modules/common/communications";
-import ReportsPage from "../modules/common/reports";
-import AuditTrailPage from "../modules/common/audit";
-import TransparencyPage from "../modules/common/transparency";
-
 import RequirePermission from "./RequirePermission";
+
+const ExecutiveDashboard = lazy(() => import("../pages/executive/ExecutiveDashboard"));
+const Intelligence = lazy(() => import("../pages/executive/modules/intelligence"));
+const Compliance = lazy(() => import("../pages/executive/modules/compliance"));
+const FinanceDashboard = lazy(() => import("../pages/finance/FinanceDashboard"));
+const CEODashboard = lazy(() => import("../pages/ceo/CEODashboard"));
+const Strategy = lazy(() => import("../pages/ceo/modules/strategy"));
+const Oversight = lazy(() => import("../pages/ceo/modules/oversight"));
+const CeoApprovalsPage = lazy(() => import("../modules/ceo/approvals"));
+const FinanceApprovalsPage = lazy(() => import("../modules/finance/approvals"));
+const OperationsApprovalsPage = lazy(() => import("../modules/operations/approvals"));
+const DeptHeadDashboard = lazy(() => import("../modules/dept_head/dashboard"));
+const OperationsDashboard = lazy(() => import("../modules/operations/dashboard"));
+const AdminDashboard = lazy(() => import("../modules/admin/dashboard"));
+const ExecutiveKpiPage = lazy(() => import("../modules/executive/kpi"));
+const AdminKpiPage = lazy(() => import("../modules/admin/kpi"));
+const AdminUsersPage = lazy(() => import("../modules/admin/users"));
+const AdminBudgetsPage = lazy(() => import("../modules/admin/budgets"));
+const NotificationsPage = lazy(() => import("../modules/common/notifications"));
+const FundRequestForm = lazy(() => import("../modules/executive/fund-request"));
+const ReceiptsPage = lazy(() => import("../modules/common/receipts"));
+const BudgetOverviewPage = lazy(() => import("../modules/common/budgets"));
+const RevenuePage = lazy(() => import("../modules/finance/revenue"));
+const TreasuryPage = lazy(() => import("../modules/finance/treasury"));
+const ProfitLossPage = lazy(() => import("../modules/finance/profit-loss"));
+const CEOIntelligencePage = lazy(() => import("../modules/ceo/intelligence"));
+const SpecialContributionsPage = lazy(() => import("../modules/common/contributions"));
+const AssetManagementPage = lazy(() => import("../modules/common/assets"));
+const AttendancePage = lazy(() => import("../modules/common/attendance"));
+const CommunicationsPage = lazy(() => import("../modules/common/communications"));
+const ReportsPage = lazy(() => import("../modules/common/reports"));
+const AuditTrailPage = lazy(() => import("../modules/common/audit"));
+const TransparencyPage = lazy(() => import("../modules/common/transparency"));
 
 function RoleRootRedirect() {
   const { role } = useRole();
@@ -55,11 +55,28 @@ function RoleRootRedirect() {
   return <Navigate to={defaultRoute} replace />;
 }
 
+function RoleNotificationsRedirect() {
+  const { role } = useRole();
+  const defaultRoute = roles[role]?.defaultRoute || "/executive";
+
+  return <Navigate to={`${defaultRoute}/notifications`} replace />;
+}
+
+function LoadingFallback() {
+  return (
+    <div className="mx-auto max-w-6xl space-y-4 p-6">
+      <SkeletonCard />
+      <SkeletonCard />
+    </div>
+  );
+}
+
 export default function AppRouter() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<RoleRootRedirect />} />
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          <Route path="/" element={<RoleRootRedirect />} />
 
         <Route path="/executive" element={<ExecutiveLayout />}>
           <Route
@@ -139,6 +156,14 @@ export default function AppRouter() {
             element={
               <RequirePermission permission={permissions.VIEW_CONTRIBUTIONS}>
                 <SpecialContributionsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="notifications"
+            element={
+              <RequirePermission permission={permissions.VIEW_NOTIFICATIONS}>
+                <NotificationsPage />
               </RequirePermission>
             }
           />
@@ -234,6 +259,14 @@ export default function AppRouter() {
               </RequirePermission>
             }
           />
+          <Route
+            path="notifications"
+            element={
+              <RequirePermission permission={permissions.VIEW_NOTIFICATIONS}>
+                <NotificationsPage />
+              </RequirePermission>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Route>
 
@@ -318,6 +351,14 @@ export default function AppRouter() {
               </RequirePermission>
             }
           />
+          <Route
+            path="notifications"
+            element={
+              <RequirePermission permission={permissions.VIEW_NOTIFICATIONS}>
+                <NotificationsPage />
+              </RequirePermission>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Route>
 
@@ -359,6 +400,14 @@ export default function AppRouter() {
             element={
               <RequirePermission permission={permissions.VIEW_CONTRIBUTIONS}>
                 <SpecialContributionsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="notifications"
+            element={
+              <RequirePermission permission={permissions.VIEW_NOTIFICATIONS}>
+                <NotificationsPage />
               </RequirePermission>
             }
           />
@@ -411,6 +460,14 @@ export default function AppRouter() {
             element={
               <RequirePermission permission={permissions.VIEW_COMMUNICATIONS}>
                 <CommunicationsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="notifications"
+            element={
+              <RequirePermission permission={permissions.VIEW_NOTIFICATIONS}>
+                <NotificationsPage />
               </RequirePermission>
             }
           />
@@ -506,20 +563,25 @@ export default function AppRouter() {
               </RequirePermission>
             }
           />
+          <Route
+            path="notifications"
+            element={
+              <RequirePermission permission={permissions.VIEW_NOTIFICATIONS}>
+                <NotificationsPage />
+              </RequirePermission>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Route>
 
         <Route
           path="/notifications"
-          element={
-            <RequirePermission permission={permissions.VIEW_NOTIFICATIONS}>
-              <NotificationsPage />
-            </RequirePermission>
-          }
+          element={<RoleNotificationsRedirect />}
         />
 
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

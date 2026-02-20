@@ -1,4 +1,4 @@
-import { useAuthority } from "../context/AuthorityContext";
+import { useAuthority } from "../context/useAuthority";
 import { PIPELINE_REGISTRY } from "./pipelineRegistry";
 
 /**
@@ -44,3 +44,4 @@ export default function useGovernanceEnforcement(moduleKey) {
     enforcementGap,
   };
 }
+

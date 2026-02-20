@@ -13,9 +13,10 @@ export default function BackButton({ label = "Back" }) {
         text-sm font-medium
         rounded-xl
         border
-        border-gray-200
-        bg-white
-        hover:bg-gray-50
+        border-[var(--color-border)]
+        bg-[var(--color-surface)]
+        text-[var(--color-text-primary)]
+        hover:bg-[var(--color-surface-hover)]
         transition-colors
         shadow-sm
       "

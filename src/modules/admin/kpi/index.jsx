@@ -7,12 +7,14 @@ import useAllKpis from "./hooks/useAllKpis";
 import useAllEvidence from "./hooks/useAllEvidence";
 import { createKpiTask, gradeEvidence } from "./services/kpiAdminService";
 import { getExecutives } from "../../admin/users/services/userService";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 const IMPACT_CATEGORIES = ["Operational", "Important", "Strategic"];
 const EVIDENCE_TYPES = ["File", "Image", "Link", "Report", "Text"];
 const GRADE_OPTIONS = ["COMPLETED", "PARTIAL", "REJECTED", "LATE"];
 
 export default function AdminKpiPage() {
+  useDocumentTitle("Admin KPI Management");
   const kpiQuery = useAllKpis();
   const evidenceQuery = useAllEvidence();
 
@@ -271,3 +273,5 @@ function EvidenceRow({ evidence, task, onGraded }) {
     </Card>
   );
 }
+
+

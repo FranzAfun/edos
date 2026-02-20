@@ -67,7 +67,7 @@ export const NAVIGATION = {
     },
     {
       label: "Notifications",
-      path: "/notifications",
+      path: "/executive/notifications",
       permission: PERMISSIONS.VIEW_NOTIFICATIONS,
     },
   ],
@@ -130,7 +130,7 @@ export const NAVIGATION = {
     },
     {
       label: "Notifications",
-      path: "/notifications",
+      path: "/finance/notifications",
       permission: PERMISSIONS.VIEW_NOTIFICATIONS,
     },
   ],
@@ -189,7 +189,7 @@ export const NAVIGATION = {
     },
     {
       label: "Notifications",
-      path: "/notifications",
+      path: "/ceo/notifications",
       permission: PERMISSIONS.VIEW_NOTIFICATIONS,
     },
   ],
@@ -222,7 +222,7 @@ export const NAVIGATION = {
     },
     {
       label: "Notifications",
-      path: "/notifications",
+      path: "/dept-head/notifications",
       permission: PERMISSIONS.VIEW_NOTIFICATIONS,
     },
   ],
@@ -260,7 +260,7 @@ export const NAVIGATION = {
     },
     {
       label: "Notifications",
-      path: "/notifications",
+      path: "/operations/notifications",
       permission: PERMISSIONS.VIEW_NOTIFICATIONS,
     },
   ],
@@ -324,7 +324,7 @@ export const NAVIGATION = {
     },
     {
       label: "Notifications",
-      path: "/notifications",
+      path: "/admin/notifications",
       permission: PERMISSIONS.VIEW_NOTIFICATIONS,
     },
   ],

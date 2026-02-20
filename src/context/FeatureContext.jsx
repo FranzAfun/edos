@@ -1,17 +1,10 @@
-import { createContext, useContext } from "react";
-import { FEATURES } from "../config/features";
-
-const FeatureContext = createContext(FEATURES);
+import { FEATURE_FLAGS } from "./featureConfig";
+import FeatureContext from "./featureContextStore";
 
 export function FeatureProvider({ children }) {
   return (
-    <FeatureContext.Provider value={FEATURES}>
+    <FeatureContext.Provider value={FEATURE_FLAGS}>
       {children}
     </FeatureContext.Provider>
   );
-}
-
-export function useFeature(flag) {
-  const features = useContext(FeatureContext);
-  return !!features[flag];
 }

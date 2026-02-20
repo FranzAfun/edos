@@ -8,6 +8,7 @@ import useMyKpis from "./hooks/useMyKpis";
 import useMyScores from "./hooks/useMyScores";
 import { submitKpiEvidence } from "./services/kpiService";
 import * as userStore from "../../../shared/services/userStore";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 function resolveExecUserId() {
   const execs = userStore.getUsersByRole("executive");
@@ -30,6 +31,7 @@ function statusToStage(status) {
 }
 
 export default function ExecutiveKpiPage() {
+  useDocumentTitle("Executive KPI");
   const userId = resolveExecUserId();
   const kpiQuery = useMyKpis(userId);
   const scoresQuery = useMyScores(userId);
@@ -168,3 +170,5 @@ function KpiCard({ task, score, onSubmitted }) {
     </Card>
   );
 }
+
+

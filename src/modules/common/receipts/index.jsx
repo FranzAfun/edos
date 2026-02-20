@@ -1,3 +1,4 @@
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Receipt Upload & Management (F7 + F8 + F9)
  * - F7: Receipt Upload System — upload receipt after spending
@@ -42,6 +43,7 @@ function resolveUser(roleKey) {
 }
 
 export default function ReceiptsPage() {
+  useDocumentTitle("Receipts");
   const { role } = useRole();
   const [receipts, setReceipts] = useState(() => receiptStore.listReceipts());
   const reload = useCallback(() => setReceipts(receiptStore.listReceipts()), []);
@@ -418,3 +420,5 @@ function ReminderTimelineCard({ receipt }) {
     </Card>
   );
 }
+
+

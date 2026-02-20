@@ -1,7 +1,6 @@
 import createModuleService from "../../../../shared/services/createModuleService";
 import * as kpiStore from "../../../../shared/services/kpiStore";
 import * as notificationStore from "../../../../shared/services/notificationStore";
-import * as userStore from "../../../../shared/services/userStore";
 
 /**
  * Admin KPI service

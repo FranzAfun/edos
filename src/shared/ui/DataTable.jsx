@@ -79,21 +79,21 @@ export default function DataTable({
               setSearch(e.target.value);
               setPage(0);
             }}
-            className="w-full max-w-xs rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+            className="w-full max-w-xs rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
             aria-label="Search table"
           />
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-md border border-gray-200">
+      <div className="overflow-x-auto rounded-md border border-[var(--color-border)] bg-[var(--color-surface)]">
         <table className="min-w-full text-sm" role="grid">
           <thead>
-            <tr className="bg-gray-50 border-b">
+            <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-hover)]">
               {columns.map((col) => (
                 <th
                   key={col.key}
                   scope="col"
-                  className={`px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 ${col.sortable !== false ? "cursor-pointer select-none hover:text-gray-800" : ""}`}
+                  className={`px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-[var(--color-text-muted)] ${col.sortable !== false ? "cursor-pointer select-none hover:text-[var(--color-text-primary)]" : ""}`}
                   onClick={col.sortable !== false ? () => handleSort(col.key) : undefined}
                   aria-sort={sortKey === col.key ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
                 >
@@ -110,7 +110,7 @@ export default function DataTable({
           <tbody>
             {pagedData.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={columns.length} className="px-4 py-8 text-center text-[var(--color-text-muted)]">
                   {emptyText}
                 </td>
               </tr>
@@ -118,10 +118,10 @@ export default function DataTable({
               pagedData.map((row, idx) => (
                 <tr
                   key={row.id || idx}
-                  className="border-b last:border-0 hover:bg-gray-50"
+                  className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-hover)]"
                 >
                   {columns.map((col) => (
-                    <td key={col.key} className="px-4 py-3 text-gray-700">
+                    <td key={col.key} className="px-4 py-3 text-[var(--color-text-secondary)]">
                       {col.render ? col.render(row[col.key], row) : (row[col.key] ?? "—")}
                     </td>
                   ))}
@@ -135,14 +135,14 @@ export default function DataTable({
       {/* Pagination */}
       {totalPages > 1 && (
         <nav className="flex items-center justify-between mt-4" aria-label="Table pagination">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs font-medium text-[var(--color-text-muted)]">
             Showing {safePage * pageSize + 1}–{Math.min((safePage + 1) * pageSize, sortedData.length)} of {sortedData.length}
           </p>
           <div className="flex gap-1">
             <button
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={safePage === 0}
-              className="px-3 py-1 text-xs rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-40"
+              className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1 text-xs font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] disabled:opacity-40"
               aria-label="Previous page"
             >
               Previous
@@ -155,7 +155,7 @@ export default function DataTable({
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  className={`px-3 py-1 text-xs rounded border ${p === safePage ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]" : "border-gray-300 hover:bg-gray-50"}`}
+                  className={`rounded border px-3 py-1 text-xs font-medium ${p === safePage ? "border-[var(--color-accent)] bg-[var(--color-accent)] text-white" : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]"}`}
                   aria-label={`Page ${p + 1}`}
                   aria-current={p === safePage ? "page" : undefined}
                 >
@@ -166,7 +166,7 @@ export default function DataTable({
             <button
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={safePage >= totalPages - 1}
-              className="px-3 py-1 text-xs rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-40"
+              className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1 text-xs font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] disabled:opacity-40"
               aria-label="Next page"
             >
               Next
