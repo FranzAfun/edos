@@ -1,16 +1,68 @@
-# React + Vite
+# ERA Digital Operating System (EDOS)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Internal governance, financial intelligence, and performance control platform for ERA AXIS.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Overview
 
-## React Compiler
+EDOS is the centralized internal operating system for ERA AXIS.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+It integrates:
 
-## Expanding the ESLint configuration
+- Performance Management (KPI System)
+- Financial Governance
+- Treasury & Budget Control
+- Revenue Tracking
+- Asset Management
+- Attendance Monitoring
+- Communication Logging
+- Executive Intelligence Dashboard
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+This platform is not an accounting tool.
+
+It is a behavior-control and decision-support system that enforces:
+
+Work → Proof → Score → Trust → Approval → Spending → Verification → Insight
+
+---
+
+## Tech Stack
+
+Frontend:
+- React (Vite)
+- Tailwind CSS (planned)
+
+Backend:
+- Node.js
+- Express
+
+Database:
+- MySQL (Laragon)
+
+Version Control:
+- Git (main + dev branching model)
+
+---
+
+## Branch Strategy
+
+- main → Stable / production-ready code only
+- dev → Active development branch
+
+---
+
+## System Philosophy
+
+- Budget is spending permission, not money transfer.
+- Treasury balance is separate from department budgets.
+- Spending is controlled before it happens.
+- Authority is earned through measurable performance.
+- All actions must be logged and auditable.
+
+---
+
+## Status
+
+Initial Vite + React setup completed.
+Core architecture implementation in progress.
