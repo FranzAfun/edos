@@ -1,8 +1,15 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import AuthorityHeader from "../components/layout/AuthorityHeader";
+import { useAuthority } from "../context/AuthorityContext";
 
 function CEOLayout() {
+  const authority = useAuthority();
+
+  if (!authority) {
+    return null;
+  }
+
   return (
     <div className="flex h-screen overflow-hidden">
       

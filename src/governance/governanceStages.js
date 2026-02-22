@@ -1,0 +1,10 @@
+export const GOVERNANCE_STAGES = [
+  "WORK",
+  "EVIDENCE",
+  "SCORING",
+  "AUTHORITY_REVIEW",
+  "APPROVAL",
+  "SPENDING",
+  "VERIFICATION",
+  "INSIGHT",
+];
