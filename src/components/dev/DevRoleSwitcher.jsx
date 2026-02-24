@@ -1,6 +1,6 @@
 import useRole from "../../hooks/useRole";
 
-const roleOptions = ["executive", "finance", "ceo"];
+const roleOptions = ["executive", "dept_head", "finance", "operations", "ceo", "admin"];
 
 export default function DevRoleSwitcher() {
   const { role, setRole } = useRole();

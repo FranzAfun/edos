@@ -34,6 +34,17 @@ export const NAVIGATION = {
       path: "/executive/reports",
       permission: PERMISSIONS.VIEW_REPORTS,
     },
+    {
+      label: "KPIs",
+      path: "/executive/kpi",
+      permission: PERMISSIONS.EXEC_VIEW_KPI,
+      feature: "VIEW_KPI",
+    },
+    {
+      label: "Notifications",
+      path: "/notifications",
+      permission: PERMISSIONS.VIEW_NOTIFICATIONS,
+    },
   ],
 
   finance: [
@@ -56,6 +67,16 @@ export const NAVIGATION = {
       label: "Budgets",
       path: "/finance/budgets",
       permission: PERMISSIONS.VIEW_BUDGETS,
+    },
+    {
+      label: "Approvals",
+      path: "/finance/approvals",
+      permission: PERMISSIONS.VIEW_FO_APPROVALS,
+    },
+    {
+      label: "Notifications",
+      path: "/notifications",
+      permission: PERMISSIONS.VIEW_NOTIFICATIONS,
     },
   ],
 
@@ -80,6 +101,71 @@ export const NAVIGATION = {
       label: "Approvals",
       path: "/ceo/approvals",
       permission: PERMISSIONS.VIEW_APPROVALS,
+    },
+    {
+      label: "Notifications",
+      path: "/notifications",
+      permission: PERMISSIONS.VIEW_NOTIFICATIONS,
+    },
+  ],
+
+  dept_head: [
+    {
+      label: "Dashboard",
+      path: "/dept-head",
+      permission: PERMISSIONS.VIEW_DEPT_HEAD_DASHBOARD,
+    },
+    {
+      label: "Notifications",
+      path: "/notifications",
+      permission: PERMISSIONS.VIEW_NOTIFICATIONS,
+    },
+  ],
+
+  operations: [
+    {
+      label: "Dashboard",
+      path: "/operations",
+      permission: PERMISSIONS.VIEW_OPERATIONS_DASHBOARD,
+    },
+    {
+      label: "Approvals",
+      path: "/operations/approvals",
+      permission: PERMISSIONS.VIEW_OPS_APPROVALS,
+    },
+    {
+      label: "Notifications",
+      path: "/notifications",
+      permission: PERMISSIONS.VIEW_NOTIFICATIONS,
+    },
+  ],
+
+  admin: [
+    {
+      label: "Dashboard",
+      path: "/admin",
+      permission: PERMISSIONS.VIEW_ADMIN_DASHBOARD,
+    },
+    {
+      label: "KPI Control",
+      path: "/admin/kpi",
+      permission: PERMISSIONS.ADMIN_ASSIGN_KPI,
+      feature: "ASSIGN_KPI",
+    },
+    {
+      label: "Users",
+      path: "/admin/users",
+      permission: PERMISSIONS.ADMIN_MANAGE_USERS,
+    },
+    {
+      label: "Budgets",
+      path: "/admin/budgets",
+      permission: PERMISSIONS.ADMIN_MANAGE_USERS,
+    },
+    {
+      label: "Notifications",
+      path: "/notifications",
+      permission: PERMISSIONS.VIEW_NOTIFICATIONS,
     },
   ],
 };

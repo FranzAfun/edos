@@ -7,4 +7,8 @@ export const FEATURES = {
   EXEC_INTELLIGENCE_V2: true,
   FIN_BUDGET_ADVANCED: false,
   CEO_STRATEGIC_INSIGHT: true,
+  ASSIGN_KPI: true,
+  GRADE_KPI: true,
+  VIEW_KPI: true,
+  SUBMIT_KPI_EVIDENCE: true,
 };

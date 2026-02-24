@@ -1,0 +1,235 @@
+import { useState } from "react";
+import PageSection from "../../../components/layout/PageSection";
+import Card from "../../../components/ui/Card";
+import Grid from "../../../components/layout/Grid";
+import ModuleBoundary from "../../../shared/components/ModuleBoundary";
+import useAllUsers from "./hooks/useAllUsers";
+import { createUser, deleteUser } from "./services/userService";
+import * as departmentStore from "../../../shared/services/departmentStore";
+
+const AUTHORITY_LEVELS = [
+  { value: 0, label: "0 – Admin" },
+  { value: 1, label: "1 – Executive" },
+  { value: 2, label: "2 – Department Head" },
+  { value: 3, label: "3 – Financial Officer" },
+  { value: 4, label: "4 – Operations" },
+  { value: 5, label: "5 – CEO" },
+];
+
+const ALL_FEATURES = [
+  "EXEC_INTELLIGENCE_V2",
+  "FIN_BUDGET_ADVANCED",
+  "CEO_STRATEGIC_INSIGHT",
+  "ASSIGN_KPI",
+  "GRADE_KPI",
+  "VIEW_KPI",
+  "SUBMIT_KPI_EVIDENCE",
+];
+
+const FEATURE_LABELS = {
+  EXEC_INTELLIGENCE_V2: "Executive Intelligence",
+  FIN_BUDGET_ADVANCED: "Advanced Budget Tools",
+  CEO_STRATEGIC_INSIGHT: "CEO Strategic Insight",
+  ASSIGN_KPI: "Assign KPIs",
+  GRADE_KPI: "Grade KPIs",
+  VIEW_KPI: "View KPIs",
+  SUBMIT_KPI_EVIDENCE: "Submit KPI Evidence",
+};
+
+const ROLE_MAP = {
+  0: "admin",
+  1: "executive",
+  2: "dept_head",
+  3: "finance",
+  4: "operations",
+  5: "ceo",
+};
+
+export default function AdminUsersPage() {
+  const usersQuery = useAllUsers();
+
+  return (
+    <div>
+      <PageSection title="Create User">
+        <CreateUserForm onCreated={() => usersQuery.reload()} />
+      </PageSection>
+
+      <PageSection title="All Users">
+        <ModuleBoundary query={usersQuery} title="Users" emptyText="No users registered.">
+          <Grid cols={1}>
+            {(usersQuery.data || []).map((user) => (
+              <UserRow
+                key={user.id}
+                user={user}
+                onDeleted={() => usersQuery.reload()}
+              />
+            ))}
+          </Grid>
+        </ModuleBoundary>
+      </PageSection>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Create User Form
+// ---------------------------------------------------------------------------
+
+function CreateUserForm({ onCreated }) {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    authorityLevel: 1,
+    departmentId: "",
+    featureFlags: [],
+  });
+  const [saving, setSaving] = useState(false);
+
+  const allDepartments = departmentStore.listDepartments();
+
+  function update(field, value) {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function toggleFlag(flag) {
+    setForm((prev) => {
+      const flags = prev.featureFlags.includes(flag)
+        ? prev.featureFlags.filter((f) => f !== flag)
+        : [...prev.featureFlags, flag];
+      return { ...prev, featureFlags: flags };
+    });
+  }
+
+  async function handleCreate(e) {
+    e.preventDefault();
+    if (!form.name.trim()) return;
+    setSaving(true);
+    const level = Number(form.authorityLevel);
+    await createUser({
+      ...form,
+      authorityLevel: level,
+      roleKey: ROLE_MAP[level] || "executive",
+    });
+    setForm({
+      name: "",
+      email: "",
+      authorityLevel: 1,
+      departmentId: "",
+      featureFlags: [],
+    });
+    setSaving(false);
+    onCreated();
+  }
+
+  return (
+    <Card>
+      <form onSubmit={handleCreate} className="flex flex-col gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <input
+            type="text"
+            placeholder="Name"
+            value={form.name}
+            onChange={(e) => update("name", e.target.value)}
+            className="rounded border px-2 py-1 text-sm"
+            required
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={(e) => update("email", e.target.value)}
+            className="rounded border px-2 py-1 text-sm"
+          />
+          <select
+            value={form.authorityLevel}
+            onChange={(e) => update("authorityLevel", e.target.value)}
+            className="rounded border px-2 py-1 text-sm"
+          >
+            {AUTHORITY_LEVELS.map((lvl) => (
+              <option key={lvl.value} value={lvl.value}>
+                {lvl.label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={form.departmentId}
+            onChange={(e) => update("departmentId", e.target.value)}
+            className="rounded border px-2 py-1 text-sm"
+          >
+            <option value="">Select Department</option>
+            {allDepartments.map((dept) => (
+              <option key={dept.id} value={dept.id}>
+                {dept.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-xs font-medium text-gray-600 block mb-1">Feature Flags</label>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {ALL_FEATURES.map((flag) => (
+              <label key={flag} className="flex items-center gap-1.5 text-xs">
+                <input
+                  type="checkbox"
+                  checked={form.featureFlags.includes(flag)}
+                  onChange={() => toggleFlag(flag)}
+                />
+                {FEATURE_LABELS[flag] ?? flag}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={saving || !form.name.trim()}
+          className="self-start rounded bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+        >
+          {saving ? "Creating…" : "Create User"}
+        </button>
+      </form>
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// User Row
+// ---------------------------------------------------------------------------
+
+function UserRow({ user, onDeleted }) {
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDelete() {
+    setDeleting(true);
+    await deleteUser({ id: user.id });
+    setDeleting(false);
+    onDeleted();
+  }
+
+  return (
+    <Card>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h3 className="text-sm font-semibold">{user.name}</h3>
+          <p className="text-xs text-gray-500 mt-1">
+            {user.email} &middot; Level {user.authorityLevel} &middot; {user.roleKey} &middot;{" "}
+            {departmentStore.getDepartmentById(user.departmentId)?.name ?? user.departmentId}
+          </p>
+          {user.featureFlags?.length > 0 && (
+            <p className="text-xs text-gray-400 mt-1">
+              Flags: {user.featureFlags.join(", ")}
+            </p>
+          )}
+        </div>
+        <button
+          onClick={handleDelete}
+          disabled={deleting}
+          className="rounded border border-red-300 px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
+        >
+          {deleting ? "…" : "Delete"}
+        </button>
+      </div>
+    </Card>
+  );
+}

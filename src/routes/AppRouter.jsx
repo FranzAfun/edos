@@ -6,6 +6,9 @@ import { roles } from "../config/roles";
 import ExecutiveLayout from "../layouts/ExecutiveLayout";
 import FinanceLayout from "../layouts/FinanceLayout";
 import CEOLayout from "../layouts/CEOLayout";
+import DeptHeadLayout from "../layouts/DeptHeadLayout";
+import OperationsLayout from "../layouts/OperationsLayout";
+import AdminLayout from "../layouts/AdminLayout";
 
 import ExecutiveDashboard from "../pages/executive/ExecutiveDashboard";
 import Intelligence from "../pages/executive/modules/intelligence";
@@ -18,7 +21,17 @@ import Budgets from "../pages/finance/modules/budgets";
 import CEODashboard from "../pages/ceo/CEODashboard";
 import Strategy from "../pages/ceo/modules/strategy";
 import Oversight from "../pages/ceo/modules/oversight";
-import Approvals from "../pages/ceo/modules/approvals";
+import CeoApprovalsPage from "../modules/ceo/approvals";
+import FinanceApprovalsPage from "../modules/finance/approvals";
+import OperationsApprovalsPage from "../modules/operations/approvals";
+import DeptHeadDashboard from "../modules/dept_head/dashboard";
+import OperationsDashboard from "../modules/operations/dashboard";
+import AdminDashboard from "../modules/admin/dashboard";
+import ExecutiveKpiPage from "../modules/executive/kpi";
+import AdminKpiPage from "../modules/admin/kpi";
+import AdminUsersPage from "../modules/admin/users";
+import AdminBudgetsPage from "../modules/admin/budgets";
+import NotificationsPage from "../modules/common/notifications";
 import NotFound from "../pages/NotFound";
 
 import RequirePermission from "./RequirePermission";
@@ -69,6 +82,14 @@ export default function AppRouter() {
               </RequirePermission>
             }
           />
+          <Route
+            path="kpi"
+            element={
+              <RequirePermission permission={permissions.EXEC_VIEW_KPI}>
+                <ExecutiveKpiPage />
+              </RequirePermission>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Route>
 
@@ -105,6 +126,14 @@ export default function AppRouter() {
               </RequirePermission>
             }
           />
+          <Route
+            path="approvals"
+            element={
+              <RequirePermission permission={permissions.VIEW_FO_APPROVALS}>
+                <FinanceApprovalsPage />
+              </RequirePermission>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Route>
 
@@ -137,12 +166,89 @@ export default function AppRouter() {
             path="approvals"
             element={
               <RequirePermission permission={permissions.VIEW_APPROVALS}>
-                <Approvals />
+                <CeoApprovalsPage />
               </RequirePermission>
             }
           />
           <Route path="*" element={<NotFound />} />
         </Route>
+
+        <Route path="/dept-head" element={<DeptHeadLayout />}>
+          <Route
+            index
+            element={
+              <RequirePermission permission={permissions.VIEW_DEPT_HEAD_DASHBOARD}>
+                <DeptHeadDashboard />
+              </RequirePermission>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+
+        <Route path="/operations" element={<OperationsLayout />}>
+          <Route
+            index
+            element={
+              <RequirePermission permission={permissions.VIEW_OPERATIONS_DASHBOARD}>
+                <OperationsDashboard />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="approvals"
+            element={
+              <RequirePermission permission={permissions.VIEW_OPS_APPROVALS}>
+                <OperationsApprovalsPage />
+              </RequirePermission>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route
+            index
+            element={
+              <RequirePermission permission={permissions.VIEW_ADMIN_DASHBOARD}>
+                <AdminDashboard />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="kpi"
+            element={
+              <RequirePermission permission={permissions.ADMIN_ASSIGN_KPI}>
+                <AdminKpiPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="users"
+            element={
+              <RequirePermission permission={permissions.ADMIN_MANAGE_USERS}>
+                <AdminUsersPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="budgets"
+            element={
+              <RequirePermission permission={permissions.ADMIN_MANAGE_USERS}>
+                <AdminBudgetsPage />
+              </RequirePermission>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+
+        <Route
+          path="/notifications"
+          element={
+            <RequirePermission permission={permissions.VIEW_NOTIFICATIONS}>
+              <NotificationsPage />
+            </RequirePermission>
+          }
+        />
 
         <Route path="*" element={<NotFound />} />
       </Routes>

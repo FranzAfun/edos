@@ -8,13 +8,13 @@
  */
 export const PIPELINE_REGISTRY = {
   intelligence: {
-    requiredAuthorityLevel: 3,
+    requiredAuthorityLevel: 5,
     requiresEvidence: true,
     requiresScoring: true,
   },
 
   budget: {
-    requiredAuthorityLevel: 4,
+    requiredAuthorityLevel: 3,
     requiresEvidence: true,
     requiresScoring: true,
   },
@@ -23,5 +23,18 @@ export const PIPELINE_REGISTRY = {
     requiredAuthorityLevel: 5,
     requiresEvidence: false,
     requiresScoring: false,
+  },
+
+  kpi: {
+    requiredAuthorityLevel: 1,
+    requiresEvidence: true,
+    requiresScoring: true,
+  },
+
+  approval: {
+    requiredAuthorityLevel: 3,
+    requiresEvidence: false,
+    requiresScoring: false,
+    approvalChain: ["finance", "operations", "ceo"],
   },
 };

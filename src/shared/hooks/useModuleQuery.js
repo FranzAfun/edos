@@ -25,14 +25,24 @@ export default function useModuleQuery(serviceFn, options = {}) {
 
   const mountedRef = useRef(true);
 
+  // Stabilize isEmpty so inline arrow functions don't trigger re-fetches
+  const isEmptyRef = useRef(isEmpty);
+  isEmptyRef.current = isEmpty;
+
+  // Stabilize params by serializing to avoid object identity changes
+  const paramsKey = JSON.stringify(params);
+  const paramsRef = useRef(params);
+  paramsRef.current = params;
+
   const run = useCallback(async () => {
     if (!enabled || typeof serviceFn !== "function") return;
 
+    if (!mountedRef.current) return;
     setStatus("loading");
     setError(null);
 
     try {
-      const res = await serviceFn(params);
+      const res = await serviceFn(paramsRef.current);
 
       if (!mountedRef.current) return;
 
@@ -45,7 +55,7 @@ export default function useModuleQuery(serviceFn, options = {}) {
       const nextData = res.data ?? null;
       setData(nextData);
 
-      if (isEmpty(nextData)) {
+      if (isEmptyRef.current(nextData)) {
         setStatus("empty");
       } else {
         setStatus("success");
@@ -55,7 +65,8 @@ export default function useModuleQuery(serviceFn, options = {}) {
       setStatus("error");
       setError(e);
     }
-  }, [enabled, serviceFn, params, isEmpty]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, serviceFn, paramsKey]);
 
   // Initial + param changes
   useEffect(() => {
