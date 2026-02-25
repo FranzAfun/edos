@@ -79,10 +79,10 @@ function BudgetRow({ budget, onAction }) {
             )}
           </div>
           <p className="text-xs text-gray-500 mt-1">
-            Monthly Limit: ₦{Number(budget.monthlyLimit).toLocaleString()}
+            Monthly Limit: GHS {Number(budget.monthlyLimit).toLocaleString()}
           </p>
           <p className="text-xs text-gray-500">
-            Remaining: ₦{Number(budget.remainingLimit).toLocaleString()}
+            Remaining: GHS {Number(budget.remainingLimit).toLocaleString()}
           </p>
           <p className="text-xs text-gray-400">
             Updated: {new Date(budget.updatedAt).toLocaleString()}

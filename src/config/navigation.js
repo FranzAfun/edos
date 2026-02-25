@@ -19,6 +19,11 @@ export const NAVIGATION = {
       permission: PERMISSIONS.VIEW_EXECUTIVE_DASHBOARD,
     },
     {
+      label: "Fund Request",
+      path: "/executive/fund-request",
+      permission: PERMISSIONS.VIEW_FUND_REQUEST,
+    },
+    {
       label: "Intelligence",
       path: "/executive/intelligence",
       permission: PERMISSIONS.VIEW_INTELLIGENCE,
@@ -41,6 +46,26 @@ export const NAVIGATION = {
       feature: "VIEW_KPI",
     },
     {
+      label: "Receipts",
+      path: "/executive/receipts",
+      permission: PERMISSIONS.VIEW_RECEIPTS,
+    },
+    {
+      label: "Contributions",
+      path: "/executive/contributions",
+      permission: PERMISSIONS.VIEW_CONTRIBUTIONS,
+    },
+    {
+      label: "Attendance",
+      path: "/executive/attendance",
+      permission: PERMISSIONS.VIEW_ATTENDANCE,
+    },
+    {
+      label: "Communications",
+      path: "/executive/communications",
+      permission: PERMISSIONS.VIEW_COMMUNICATIONS,
+    },
+    {
       label: "Notifications",
       path: "/notifications",
       permission: PERMISSIONS.VIEW_NOTIFICATIONS,
@@ -54,14 +79,24 @@ export const NAVIGATION = {
       permission: PERMISSIONS.VIEW_FINANCE_DASHBOARD,
     },
     {
+      label: "Approvals",
+      path: "/finance/approvals",
+      permission: PERMISSIONS.VIEW_FO_APPROVALS,
+    },
+    {
       label: "Treasury",
       path: "/finance/treasury",
       permission: PERMISSIONS.VIEW_TREASURY,
     },
     {
-      label: "Audit",
-      path: "/finance/audit",
-      permission: PERMISSIONS.VIEW_AUDIT,
+      label: "Revenue",
+      path: "/finance/revenue",
+      permission: PERMISSIONS.VIEW_REVENUE,
+    },
+    {
+      label: "Profit & Loss",
+      path: "/finance/profit-loss",
+      permission: PERMISSIONS.VIEW_PROFIT_LOSS,
     },
     {
       label: "Budgets",
@@ -69,9 +104,29 @@ export const NAVIGATION = {
       permission: PERMISSIONS.VIEW_BUDGETS,
     },
     {
-      label: "Approvals",
-      path: "/finance/approvals",
-      permission: PERMISSIONS.VIEW_FO_APPROVALS,
+      label: "Receipts",
+      path: "/finance/receipts",
+      permission: PERMISSIONS.VIEW_RECEIPTS,
+    },
+    {
+      label: "Reports",
+      path: "/finance/reports",
+      permission: PERMISSIONS.VIEW_REPORTS,
+    },
+    {
+      label: "Audit",
+      path: "/finance/audit",
+      permission: PERMISSIONS.VIEW_AUDIT,
+    },
+    {
+      label: "Attendance",
+      path: "/finance/attendance",
+      permission: PERMISSIONS.VIEW_ATTENDANCE,
+    },
+    {
+      label: "Communications",
+      path: "/finance/communications",
+      permission: PERMISSIONS.VIEW_COMMUNICATIONS,
     },
     {
       label: "Notifications",
@@ -87,6 +142,16 @@ export const NAVIGATION = {
       permission: PERMISSIONS.VIEW_CEO_DASHBOARD,
     },
     {
+      label: "Approvals",
+      path: "/ceo/approvals",
+      permission: PERMISSIONS.VIEW_APPROVALS,
+    },
+    {
+      label: "Intelligence",
+      path: "/ceo/intelligence",
+      permission: PERMISSIONS.VIEW_CEO_INTELLIGENCE,
+    },
+    {
       label: "Strategy",
       path: "/ceo/strategy",
       permission: PERMISSIONS.VIEW_STRATEGY,
@@ -98,9 +163,29 @@ export const NAVIGATION = {
       permission: PERMISSIONS.VIEW_OVERSIGHT,
     },
     {
-      label: "Approvals",
-      path: "/ceo/approvals",
-      permission: PERMISSIONS.VIEW_APPROVALS,
+      label: "Contributions",
+      path: "/ceo/contributions",
+      permission: PERMISSIONS.VIEW_CONTRIBUTIONS,
+    },
+    {
+      label: "Reports",
+      path: "/ceo/reports",
+      permission: PERMISSIONS.VIEW_REPORTS,
+    },
+    {
+      label: "Transparency",
+      path: "/ceo/transparency",
+      permission: PERMISSIONS.VIEW_TRANSPARENCY,
+    },
+    {
+      label: "Attendance",
+      path: "/ceo/attendance",
+      permission: PERMISSIONS.VIEW_ATTENDANCE,
+    },
+    {
+      label: "Communications",
+      path: "/ceo/communications",
+      permission: PERMISSIONS.VIEW_COMMUNICATIONS,
     },
     {
       label: "Notifications",
@@ -114,6 +199,26 @@ export const NAVIGATION = {
       label: "Dashboard",
       path: "/dept-head",
       permission: PERMISSIONS.VIEW_DEPT_HEAD_DASHBOARD,
+    },
+    {
+      label: "Receipts",
+      path: "/dept-head/receipts",
+      permission: PERMISSIONS.VIEW_RECEIPTS,
+    },
+    {
+      label: "Contributions",
+      path: "/dept-head/contributions",
+      permission: PERMISSIONS.VIEW_CONTRIBUTIONS,
+    },
+    {
+      label: "Attendance",
+      path: "/dept-head/attendance",
+      permission: PERMISSIONS.VIEW_ATTENDANCE,
+    },
+    {
+      label: "Communications",
+      path: "/dept-head/communications",
+      permission: PERMISSIONS.VIEW_COMMUNICATIONS,
     },
     {
       label: "Notifications",
@@ -132,6 +237,26 @@ export const NAVIGATION = {
       label: "Approvals",
       path: "/operations/approvals",
       permission: PERMISSIONS.VIEW_OPS_APPROVALS,
+    },
+    {
+      label: "Receipts",
+      path: "/operations/receipts",
+      permission: PERMISSIONS.VIEW_RECEIPTS,
+    },
+    {
+      label: "Assets",
+      path: "/operations/assets",
+      permission: PERMISSIONS.VIEW_ASSETS,
+    },
+    {
+      label: "Attendance",
+      path: "/operations/attendance",
+      permission: PERMISSIONS.VIEW_ATTENDANCE,
+    },
+    {
+      label: "Communications",
+      path: "/operations/communications",
+      permission: PERMISSIONS.VIEW_COMMUNICATIONS,
     },
     {
       label: "Notifications",
@@ -160,7 +285,42 @@ export const NAVIGATION = {
     {
       label: "Budgets",
       path: "/admin/budgets",
-      permission: PERMISSIONS.ADMIN_MANAGE_USERS,
+      permission: PERMISSIONS.VIEW_BUDGETS,
+    },
+    {
+      label: "Assets",
+      path: "/admin/assets",
+      permission: PERMISSIONS.VIEW_ASSETS,
+    },
+    {
+      label: "Reports",
+      path: "/admin/reports",
+      permission: PERMISSIONS.VIEW_REPORTS,
+    },
+    {
+      label: "Audit",
+      path: "/admin/audit",
+      permission: PERMISSIONS.VIEW_AUDIT,
+    },
+    {
+      label: "Contributions",
+      path: "/admin/contributions",
+      permission: PERMISSIONS.VIEW_CONTRIBUTIONS,
+    },
+    {
+      label: "Transparency",
+      path: "/admin/transparency",
+      permission: PERMISSIONS.VIEW_TRANSPARENCY,
+    },
+    {
+      label: "Attendance",
+      path: "/admin/attendance",
+      permission: PERMISSIONS.VIEW_ATTENDANCE,
+    },
+    {
+      label: "Communications",
+      path: "/admin/communications",
+      permission: PERMISSIONS.VIEW_COMMUNICATIONS,
     },
     {
       label: "Notifications",

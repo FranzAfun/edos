@@ -149,7 +149,7 @@ export const createApproval = createModuleService(async (payload) => {
   notifyUser(
     foUser?.id,
     "APPROVAL_CREATED",
-    `New approval request: "${entry.title}" (₦${Number(
+    `New approval request: "${entry.title}" (GHS ${Number(
       entry.amount
     ).toLocaleString()}) awaits FO review.`
   );

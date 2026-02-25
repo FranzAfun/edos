@@ -21,5 +21,15 @@ export const permissions = {
   ADMIN_MANAGE_USERS: "admin_manage_users",
   VIEW_NOTIFICATIONS: "view_notifications",
   VIEW_FO_APPROVALS: "view_fo_approvals",
-  VIEW_OPS_APPROVALS: "view_ops_approvals"
+  VIEW_OPS_APPROVALS: "view_ops_approvals",
+  VIEW_FUND_REQUEST: "view_fund_request",
+  VIEW_RECEIPTS: "view_receipts",
+  VIEW_REVENUE: "view_revenue",
+  VIEW_PROFIT_LOSS: "view_profit_loss",
+  VIEW_ASSETS: "view_assets",
+  VIEW_ATTENDANCE: "view_attendance",
+  VIEW_COMMUNICATIONS: "view_communications",
+  VIEW_CONTRIBUTIONS: "view_contributions",
+  VIEW_TRANSPARENCY: "view_transparency",
+  VIEW_CEO_INTELLIGENCE: "view_ceo_intelligence"
 };

@@ -13,7 +13,12 @@ export const roles = {
       permissions.VIEW_REPORTS,
       permissions.EXEC_VIEW_KPI,
       permissions.EXEC_SUBMIT_KPI_EVIDENCE,
-      permissions.VIEW_NOTIFICATIONS
+      permissions.VIEW_NOTIFICATIONS,
+      permissions.VIEW_FUND_REQUEST,
+      permissions.VIEW_RECEIPTS,
+      permissions.VIEW_ATTENDANCE,
+      permissions.VIEW_COMMUNICATIONS,
+      permissions.VIEW_CONTRIBUTIONS
     ]
   },
   dept_head: {
@@ -23,7 +28,11 @@ export const roles = {
     tier: 2,
     permissions: [
       permissions.VIEW_DEPT_HEAD_DASHBOARD,
-      permissions.VIEW_NOTIFICATIONS
+      permissions.VIEW_NOTIFICATIONS,
+      permissions.VIEW_RECEIPTS,
+      permissions.VIEW_ATTENDANCE,
+      permissions.VIEW_COMMUNICATIONS,
+      permissions.VIEW_CONTRIBUTIONS
     ]
   },
   finance: {
@@ -37,7 +46,13 @@ export const roles = {
       permissions.VIEW_AUDIT,
       permissions.VIEW_BUDGETS,
       permissions.VIEW_FO_APPROVALS,
-      permissions.VIEW_NOTIFICATIONS
+      permissions.VIEW_NOTIFICATIONS,
+      permissions.VIEW_REVENUE,
+      permissions.VIEW_PROFIT_LOSS,
+      permissions.VIEW_RECEIPTS,
+      permissions.VIEW_ATTENDANCE,
+      permissions.VIEW_COMMUNICATIONS,
+      permissions.VIEW_REPORTS
     ]
   },
   operations: {
@@ -48,7 +63,12 @@ export const roles = {
     permissions: [
       permissions.VIEW_OPERATIONS_DASHBOARD,
       permissions.VIEW_OPS_APPROVALS,
-      permissions.VIEW_NOTIFICATIONS
+      permissions.VIEW_NOTIFICATIONS,
+      permissions.VIEW_RECEIPTS,
+      permissions.VIEW_ASSETS,
+      permissions.VIEW_ATTENDANCE,
+      permissions.VIEW_COMMUNICATIONS,
+      permissions.VIEW_CONTRIBUTIONS
     ]
   },
   ceo: {
@@ -61,7 +81,13 @@ export const roles = {
       permissions.VIEW_STRATEGY,
       permissions.VIEW_OVERSIGHT,
       permissions.VIEW_APPROVALS,
-      permissions.VIEW_NOTIFICATIONS
+      permissions.VIEW_NOTIFICATIONS,
+      permissions.VIEW_CEO_INTELLIGENCE,
+      permissions.VIEW_CONTRIBUTIONS,
+      permissions.VIEW_TRANSPARENCY,
+      permissions.VIEW_REPORTS,
+      permissions.VIEW_ATTENDANCE,
+      permissions.VIEW_COMMUNICATIONS
     ]
   },
   admin: {
@@ -74,7 +100,15 @@ export const roles = {
       permissions.ADMIN_ASSIGN_KPI,
       permissions.ADMIN_GRADE_KPI,
       permissions.ADMIN_MANAGE_USERS,
-      permissions.VIEW_NOTIFICATIONS
+      permissions.VIEW_NOTIFICATIONS,
+      permissions.VIEW_ASSETS,
+      permissions.VIEW_AUDIT,
+      permissions.VIEW_REPORTS,
+      permissions.VIEW_ATTENDANCE,
+      permissions.VIEW_COMMUNICATIONS,
+      permissions.VIEW_TRANSPARENCY,
+      permissions.VIEW_CONTRIBUTIONS,
+      permissions.VIEW_BUDGETS
     ]
   }
 };

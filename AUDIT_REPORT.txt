@@ -1,0 +1,686 @@
+================================================================================
+EDOS PROJECT AUDIT REPORT
+ERA Digital Operating System - Documentation vs Implementation Audit
+Date: February 24, 2026
+================================================================================
+
+================================================================================
+SECTION 1: WHAT IS DONE
+================================================================================
+
+FRONTEND - COMPLETED
+--------------------
+
+1. PROJECT FOUNDATION
+   - React 19 + Vite 7 + Tailwind CSS 4 + PostCSS
+   - Inter font from Google Fonts (400, 500, 600, 700)
+   - Professional CSS variables: primary #0F172A, secondary #1E293B,
+     accent #2563EB, success #16A34A, warning #D97706, danger #DC2626,
+     background #F8FAFC
+   - No emojis, no gradients, no decorative elements
+   - Clean, authority-driven visual language
+
+2. ROLE-BASED ACCESS CONTROL (FULLY WIRED)
+   - 6 roles: executive, dept_head, finance, operations, ceo, admin
+   - 23 permission constants defined and mapped to roles
+   - Authority levels with enforcement weights (0-5)
+   - usePermission hook + Can component for UI-level access control
+   - RequirePermission route guard for page-level access control
+   - Role persisted in localStorage
+
+3. FEATURE FLAGS SYSTEM
+   - 7 runtime toggles (KPI, intelligence, strategy, budget features)
+   - FeatureContext provider + useFeature hook
+   - Sidebar nav items hidden when feature is disabled
+
+4. GOVERNANCE PIPELINE
+   - 8 governance stages: WORK > EVIDENCE > SCORING > AUTHORITY_REVIEW >
+     APPROVAL > SPENDING > VERIFICATION > INSIGHT
+   - GovernanceStageBadge component with color-coded display
+   - createGovernedEntity factory
+   - pipelineRegistry mapping modules to authority requirements
+   - useGovernanceEnforcement + useGovernedModule hooks
+
+5. APPROVAL WORKFLOW (FUNCTIONAL - localStorage)
+   - 4-stage approval pipeline: PENDING_FO > PENDING_OPERATIONS >
+     PENDING_CEO > APPROVED / REJECTED
+   - Approval store with seed data, full CRUD
+   - FO approval queue with compliance + budget freeze enforcement
+   - Operations approval queue
+   - CEO approval queue (final authority)
+   - Notifications triggered on every stage transition
+   - Compliance badges (funding-blocked / evidence-pending)
+
+6. KPI SYSTEM (FUNCTIONAL - localStorage)
+   - Admin: create tasks (title, description, deadline, evidence type,
+     weight, impact category, assigned user)
+   - Admin: view all KPIs, view submitted evidence, grade evidence
+   - Executive: view assigned KPIs, submit evidence, view scores
+   - Score engine: raw_score x weight x impact_multiplier
+   - Impact: Operational=1x, Important=2x, Strategic=4x
+   - Grades: COMPLETED(100), PARTIAL(60), REJECTED(0), LATE(40)
+   - Cross-role notifications: assign, submit, grade
+
+7. USER MANAGEMENT (FUNCTIONAL - localStorage)
+   - Admin: create users (name, email, authority level, department,
+     feature flags via checkboxes)
+   - Admin: delete users
+   - 6 seed users across all roles
+
+8. BUDGET MANAGEMENT (FUNCTIONAL - localStorage)
+   - Admin: set monthly limits per department
+   - Admin: freeze/unfreeze departments
+   - Budget store with seed data tied to department registry
+   - Frozen status blocks FO approval action
+
+9. DEPARTMENT REGISTRY (SEEDED)
+   - 10 departments including 4 ERA AXIS pillars:
+     Education, Manufacturing, Softwares, Open Labs
+   - Plus: Executive Office, System Admin, Planning & Strategy,
+     Finance, Operations, Health
+
+10. NOTIFICATION SYSTEM (FUNCTIONAL - localStorage)
+    - Create, list, mark read, mark all read
+    - Unread badge on sidebar + header (live subscription, no polling)
+    - Notifications page with BackButton navigation
+    - Per-user filtering
+
+11. COMPLIANCE STORE (FUNCTIONAL - localStorage)
+    - Outstanding evidence count per user
+    - Fund blocking/unblocking with reason
+    - Enforced in FO approval queue
+
+12. MODULE ARCHITECTURE (SOLID FOUNDATION)
+    - ModuleBoundary: loading/empty/error/success states
+    - useModuleQuery: normalized fetching hook
+    - createModuleService: normalized { success, data, error } wrapper
+    - httpClient: mock GET/POST (ready for real backend swap)
+
+13. LAYOUT SYSTEM (COMPLETE)
+    - 7 layouts (App, Admin, CEO, DeptHead, Executive, Finance, Operations)
+    - Sidebar: permission-gated, feature-flag-aware
+    - AuthorityHeader: role label, page title, notification bell
+    - Shared UI re-exports: Card, Grid, PageSection
+    - MetricCard, BackButton components
+
+14. ROUTING (COMPLETE)
+    - All 6 role roots with subroutes and permission guards
+    - Role-based root redirect
+    - 404 page
+
+15. DEV TOOLING
+    - DevRoleSwitcher: fixed widget, DEV-only, persists role, reloads page
+
+FRONTEND - PLACEHOLDER PAGES (Shell Only)
+------------------------------------------
+These pages exist but render only a heading title:
+- CEO Dashboard, Strategy, Oversight
+- Finance Dashboard, Treasury, Audit, Budgets (view)
+- Executive Dashboard (has hardcoded mock metric cards)
+- Executive Reports, Compliance
+- Operations Dashboard
+- Dept Head Dashboard
+- Admin Dashboard
+
+BACKEND - NOTHING EXISTS
+------------------------
+No server, no API, no authentication. All data lives in localStorage.
+The httpClient.js returns empty mock responses.
+
+DATABASE - NOTHING EXISTS
+-------------------------
+No database, no schema, no migrations.
+All persistence is browser localStorage.
+
+MIGRATION PLAN: localStorage TO REAL DATABASE
+----------------------------------------------
+Once the backend is set up:
+  1. Create the .env file with database credentials (DB_HOST, DB_PORT,
+     DB_DATABASE, DB_USER, DB_PASSWORD) pointing to Laragon's MySQL.
+  2. Run the schema/migrations to create all tables in the database
+     (viewable and manageable via HeidiSQL in Laragon).
+  3. Once the database is live and API endpoints are connected,
+     ALL localStorage stores will be removed entirely:
+     - approvalStore.js    (replaced by Approvals API + DB)
+     - budgetStore.js      (replaced by Budget API + DB)
+     - complianceStore.js  (replaced by Compliance API + DB)
+     - departmentStore.js  (replaced by Department API + DB)
+     - kpiStore.js         (replaced by KPI API + DB)
+     - notificationStore.js(replaced by Notification API + DB)
+     - userStore.js        (replaced by User API + DB)
+  4. The httpClient.js will be updated to make real HTTP requests
+     to the backend API instead of returning empty mock data.
+  5. The createModuleService wrapper stays — only the data source
+     changes from localStorage to API calls. No UI rewrites needed.
+  6. Seed data currently hardcoded in localStorage stores will be
+     moved to database seeders/migrations.
+
+
+================================================================================
+SECTION 2: WHAT IS YET TO BE DONE
+================================================================================
+
+==========================
+FRONTEND - TO BUILD
+==========================
+
+PHASE 1: CORE FINANCIAL WORKFLOW (CRITICAL PATH)
+-------------------------------------------------
+
+F1. FUND REQUEST FORM
+     Executive submits: pillar, program, purpose, amount, vendor quotation,
+     expected outcome, attachment.
+     System checks department remaining budget before submission.
+     Budget availability warning if insufficient.
+
+F2. APPROVAL THRESHOLD ROUTING
+     0 - 1,000: FO approval only
+     1,000 - 3,000: FO + CEO
+     Above 3,000: CEO mandatory justification review
+     Currently all requests go through FO > OPS > CEO regardless of amount.
+
+F3. ANTI-BYPASS DETECTION UI
+     Flag warning when multiple similar requests within 7 days exceed
+     3,000 total from the same user/department.
+     Display alert badge on approval cards.
+
+F4. FO REVIEW ENHANCEMENTS
+     Cost reasonableness indicators.
+     Historical comparison panel (past similar requests).
+     AI advisory placeholder.
+     Ability to adjust amount, question requester, or return for clarification.
+
+F5. CEO DECISION ENHANCEMENTS
+     Modify amount option.
+     Return for clarification option (not just approve/reject).
+     Justification review panel for requests above 3,000.
+
+F6. DEPARTMENT HEAD REVIEW INTERFACE
+     Review subordinate requests.
+     Recommend approvals to FO.
+     Currently dept_head has only a placeholder dashboard.
+
+PHASE 2: POST-SPENDING ACCOUNTABILITY
+--------------------------------------
+
+F7. RECEIPT UPLOAD SYSTEM
+     Upload UI after authorization: receipt file, vendor name, amount, date.
+     Status: AUTHORIZED > AWAITING_RECEIPT > VERIFIED.
+
+F8. RECEIPT VERIFICATION LOGIC
+     Compare approved vs actual amount.
+     Matches: record expense.
+     Less than approved: return balance to budget.
+     More than approved: require new approval for difference.
+     No receipt: escalation flow.
+
+F9. RECEIPT REMINDER TIMELINE
+     Visual indicator showing:
+     - Immediately: upload link sent
+     - 2 days: reminder
+     - 3 days: warning + FO notified
+     - 5 days: CEO alerted
+     - 7 days: new requests blocked
+     Timer starts when status = AUTHORIZED.
+
+F10. BUDGET DEDUCTION ON AUTHORIZATION
+      Reduce department remaining budget when approval status = AUTHORIZED.
+      Expense NOT recorded until receipt verified.
+
+PHASE 3: REVENUE & TREASURY
+----------------------------
+
+F11. REVENUE RECORDING MODULE
+      FO records income: pillar, program, product/service, customer type,
+      payment method, amount, payment status, profit category.
+      Invoice = not revenue. Partial = partial revenue. Full = confirmed.
+
+F12. TREASURY VIEW
+      Central treasury balance (single number).
+      Cash position display.
+      MUST be visually separated from department budgets.
+      (CRITICAL RULE: budget != treasury)
+
+F13. PROFIT & LOSS DASHBOARD
+      Revenue vs expenses breakdown.
+      Per-pillar P&L.
+      Monthly highest profit category identification.
+
+PHASE 4: PERFORMANCE INTELLIGENCE
+----------------------------------
+
+F14. TRUST LEVEL SYSTEM
+      KPI score determines trust level:
+      < 50%:  Warning + strict approvals
+      50-69%: Normal
+      70-84%: Bonus eligible
+      85-94%: Higher trust
+      95%+:   Priority approvals
+      Display trust badge on user profiles and approval cards.
+      Dynamic approval strictness based on score.
+
+F15. SPECIAL KPI CONTRIBUTIONS
+      Executive submits additional work beyond assigned KPIs.
+      Admin reviews and assigns bonus score.
+
+F16. CEO AI INTELLIGENCE DASHBOARD
+      Financial health: cash balance, cash runway, monthly burn, live P&L.
+      Performance: highest profit pillar, loss-making activities, revenue trends.
+      Efficiency: cost per learner, manufacturing margin, staff cost ratio,
+      budget utilization.
+      Risk alerts: overspending, abnormal expenses, missing receipts, revenue decline.
+
+F17. AI EXECUTIVE SUMMARY
+      Natural language interpretation panel (not raw numbers).
+      Example: "ERA AXIS has 4.2 months runway. Education produces 58%
+      of profit. Manufacturing margin declining due to material cost increase.
+      Current trend reduces runway to 3.5 months within 30 days."
+
+F18. PREDICTIVE FORECASTS
+      Cash depletion timing.
+      Future profit expectation.
+      Budget pressure warnings.
+
+F19. STRATEGIC RECOMMENDATIONS
+      Scale profitable programs.
+      Reduce low-impact spending.
+      Adjust pricing when margins fall.
+      CEO-only access.
+
+PHASE 5: ASSET MANAGEMENT
+--------------------------
+
+F20. ASSET REGISTRATION
+      Form: name, category, department, purchase cost, useful life (years),
+      condition, location, assigned person, receipt.
+      Triggered after purchase/receipt verification.
+
+F21. DEPRECIATION ENGINE (FRONTEND DISPLAY)
+      Straight-line: annual depreciation = cost / useful life.
+      Show current value, age, remaining life.
+      Aging equipment alerts.
+      Replacement forecast.
+
+F22. ASSET DASHBOARD
+      Total organizational asset value.
+      Per-department asset value.
+      Aging equipment alerts.
+      Replacement forecast.
+      Net worth display.
+
+PHASE 6: ATTENDANCE & COMMUNICATION
+-------------------------------------
+
+F23. ATTENDANCE SYSTEM
+      Clock in / clock out UI.
+      Daily attendance log.
+      Participation measurement.
+      Link attendance data to KPI validation.
+
+F24. COMMUNICATION CENTER
+      Send bulk emails (permission-based).
+      Post announcements.
+      Internal messaging.
+      Communication audit log.
+
+PHASE 7: REPORTS
+-----------------
+
+F25. AUTOMATIC REPORT GENERATION
+      - Profit & Loss
+      - Cash position
+      - Burn rate
+      - Cash runway
+      - Profit per pillar
+      - Profit per category
+      - Cost per learner
+      - Manufacturing margin
+      - Revenue trends
+
+F26. REPORT EXPORT
+      PDF and Excel export for all reports.
+      Print-ready layouts.
+
+PHASE 8: DASHBOARD BUILDOUTS
+------------------------------
+
+F27. CEO DASHBOARD
+      Full AI intelligence, financial health, real-time organizational metrics.
+
+F28. FINANCE DASHBOARD
+      Treasury overview, budget status per department, pending receipts,
+      revenue summary, P&L snapshot.
+
+F29. EXECUTIVE DASHBOARD
+      Replace hardcoded mock data with real data:
+      Personal KPI status, fund request tracker, trust level,
+      department budget remaining.
+
+F30. OPERATIONS DASHBOARD
+      Operational overview, pending approval count, department activity.
+
+F31. DEPT HEAD DASHBOARD
+      Team overview, subordinate KPIs, subordinate requests, recommendations.
+
+F32. ADMIN DASHBOARD
+      System overview: total users, KPI stats, budget utilization,
+      notification activity, system health.
+
+PHASE 9: UI/UX POLISH
+-----------------------
+
+F33. MOBILE HAMBURGER MENU
+      Sidebar hidden on mobile. Need toggle button and slide-out menu.
+
+F34. LOADING SKELETONS
+      Replace "Loading..." text with shimmer/skeleton placeholders.
+
+F35. CONFIRMATION DIALOGS
+      Before: delete user, reject approval, freeze budget, block funding.
+
+F36. FORM VALIDATION
+      Inline error messages on all forms.
+      Required field indicators.
+
+F37. DATA TABLES WITH CONTROLS
+      Pagination, sorting, filtering for: users, KPIs, approvals,
+      assets, transactions, revenue entries.
+
+F38. CHARTS & GRAPHS
+      Bar/line/pie charts for all dashboards.
+      Library recommendation: Recharts or Chart.js.
+
+F39. AUDIT TRAIL UI
+      Finance audit page showing full action history with filters.
+
+F40. MONTHLY TRANSPARENCY SUMMARY
+      Auto-generated summary page accessible to all authorized roles.
+
+
+==========================
+BACKEND - TO BUILD
+==========================
+
+B1. TECH STACK SETUP
+     Recommended: Node.js + Express/Fastify + PostgreSQL + Prisma ORM
+     OR: Laravel + PostgreSQL/MySQL
+     Project scaffolding, folder structure, environment config.
+
+B2. AUTHENTICATION
+     Session-based cookie authentication (httpOnly, secure, sameSite).
+     Login / logout / password reset.
+     Server-side session storage (Redis or DB-backed).
+     Session expiry and idle timeout.
+
+B3. AUTHORIZATION MIDDLEWARE
+     Role + permission + feature flag enforcement at API level.
+     Authority level checks on every protected endpoint.
+
+B4. USER MANAGEMENT API
+     Full CRUD. Authority level assignment. Feature flag toggles.
+     Department assignment. Password hashing.
+
+B5. DEPARTMENT API
+     CRUD for departments. Seeded with ERA pillars + org departments.
+
+B6. BUDGET API
+     Set monthly limits. Track remaining. Freeze/unfreeze.
+     Budget != Treasury (CRITICAL SEPARATION).
+
+B7. FUND REQUEST API
+     Submit, review, approve, reject, modify, return for clarification.
+     Threshold-based routing (0-1000, 1000-3000, 3000+).
+     Anti-bypass: 7-day split purchase detection.
+
+B8. RECEIPT API
+     File upload (S3 or local storage).
+     Verification: match / less / more / none.
+     Reminder scheduler integration.
+     Auto-block new requests after 7 days no receipt.
+
+B9. TREASURY API
+     Single central balance. Record expenses only after receipt verified.
+     FORBIDDEN: department wallets, FO wallet, multiple balances.
+
+B10. REVENUE API
+      FO records income. Payment status rules.
+      Profit category classification.
+
+B11. KPI API
+      Task CRUD. Evidence submission with file upload.
+      Grading. Score computation. Trust level calculation.
+      Special contributions.
+
+B12. APPROVAL WORKFLOW ENGINE
+      Multi-stage pipeline with full audit trail.
+      Stage transitions with notifications.
+      Compliance checks at each gate.
+
+B13. ASSET MANAGEMENT API
+      Registration. Straight-line depreciation engine.
+      Queries by department, condition, age.
+
+B14. ATTENDANCE API
+      Clock in/out. Daily logs. Reports.
+      KPI validation linkage.
+
+B15. COMMUNICATION API
+      Internal messaging. Bulk email (SendGrid/SES).
+      Announcements. Full audit logging.
+
+B16. NOTIFICATION API
+      Real-time delivery (WebSocket or SSE).
+      Email notification integration for critical alerts.
+      Scheduled reminders (receipt uploads, KPI deadlines).
+
+B17. AI INTELLIGENCE API
+      Financial analytics engine.
+      Integration with AI service (OpenAI/Claude).
+      Natural language summary generation.
+      Predictive forecasting models.
+      Strategic recommendation engine.
+
+B18. REPORT GENERATION API
+      P&L, cash position, burn rate, runway.
+      Per-pillar, per-category breakdowns.
+      PDF export service.
+
+B19. SCHEDULED JOBS / CRON
+      Receipt reminders: 2, 3, 5, 7 day intervals.
+      Monthly report auto-generation.
+      Budget reset/rollover at month boundary.
+      Compliance auto-checks.
+      30-day outcome verification.
+
+B20. FILE STORAGE SERVICE
+      Receipt uploads. Evidence file uploads. Asset receipt images.
+      Recommendation: S3-compatible storage (AWS S3, MinIO, Cloudflare R2).
+
+
+==========================
+DATABASE - TO BUILD
+==========================
+
+CORE TABLES:
+  D1.  users - id, name, email, password_hash, authority_level, role_key,
+       department_id, feature_flags (JSON), trust_level, created_at
+  D2.  roles - id, key, label, tier
+  D3.  permissions - id, key, description
+  D4.  role_permissions - role_id, permission_id (junction table)
+  D5.  departments - id, name, code, pillar, created_at
+
+FINANCE TABLES:
+  D6.  budgets - id, department_id, monthly_limit, remaining_limit,
+       frozen, period (YYYY-MM), updated_at
+  D7.  treasury_balance - id, balance, last_updated
+       (SINGLE ROW - one source of truth for real money)
+  D8.  fund_requests - id, user_id, department_id, pillar, program,
+       purpose, amount, vendor_quotation, expected_outcome, attachment_path,
+       status, created_at
+  D9.  approvals - id, fund_request_id, current_stage, created_at
+  D10. approval_history - id, approval_id, stage, action, user_id,
+       note, timestamp
+  D11. receipts - id, approval_id, file_path, vendor_name, actual_amount,
+       receipt_date, verification_status, uploaded_at
+  D12. transactions - id, approval_id, receipt_id, department_id, amount,
+       category, recorded_at
+       (actual expenses - ONLY after receipt verified)
+  D13. revenue - id, pillar, program, product_service, customer_type,
+       payment_method, amount, payment_status, profit_category,
+       recorded_by_user_id, recorded_at
+
+KPI TABLES:
+  D14. kpi_tasks - id, title, description, deadline, evidence_type,
+       weight, impact_category, assigned_to_user_id, status, created_at
+  D15. kpi_evidence - id, task_id, user_id, type, file_path,
+       link_or_text, submitted_at
+  D16. kpi_scores - id, task_id, user_id, grade_status, raw_score,
+       computed_score, graded_by_user_id, created_at
+  D17. kpi_special_contributions - id, user_id, description, evidence_path,
+       bonus_score, reviewed_by_user_id, created_at
+
+ASSET TABLES:
+  D18. assets - id, name, category, department_id, purchase_cost,
+       useful_life_years, condition, location, assigned_to_user_id,
+       receipt_id, created_at
+  D19. asset_depreciation - id, asset_id, annual_depreciation,
+       current_value, calculated_at
+
+SYSTEM TABLES:
+  D20. attendance - id, user_id, clock_in, clock_out, date
+  D21. messages - id, from_user_id, to_user_id, subject, body,
+       type (message/announcement/bulk_email), read, created_at
+  D22. notifications - id, to_user_id, type, message, related_id,
+       read, created_at
+  D23. audit_log - id, user_id, action, entity_type, entity_id,
+       details (JSON), timestamp
+  D24. feature_flags - id, key, enabled, description
+
+FORBIDDEN STRUCTURES (per documentation):
+  - NO department_wallets table
+  - NO fo_wallet table
+  - NO multiple internal balance tables
+  - Treasury = ONE row, ONE number
+
+
+================================================================================
+SECTION 3: SUGGESTIONS FOR IMPROVEMENT
+================================================================================
+
+PROFESSIONAL DESIGN:
+  1. Add a secondary heading font (Space Grotesk or DM Sans from Google
+     Fonts) for typographic hierarchy alongside Inter for body text.
+  2. Standardize spacing tokens - define a scale and use consistently.
+  3. Extend CSS variables: --color-text-muted, --color-border,
+     --color-surface for complete design system coverage.
+  4. Currency symbol: use GHS / GH₵ (cedi) not ₦ (naira) - documentation
+     says "every cedi must be justified" indicating Ghanaian currency.
+  5. No emojis anywhere in the UI (currently clean - maintain this).
+  6. No gradients (currently clean - maintain this).
+  7. Consistent font weights: use 400 for body, 500 for labels,
+     600 for subheadings, 700 for headings only.
+
+SECURITY (when backend is built):
+  8. CSRF protection on all state-changing endpoints (CRITICAL with
+     session cookies — browser sends cookies automatically, so CSRF
+     tokens must guard POST/PUT/DELETE routes).
+  9. Password complexity requirements (min 12 chars, mixed case, numbers).
+  10. Session timeout/expiry (30 min idle, 8 hour absolute).
+  11. IP-based rate limiting on login (5 attempts per 15 min).
+  12. Two-factor authentication for CEO and FO roles.
+  13. API request signing for sensitive financial operations.
+
+ARCHITECTURE:
+  14. Add state management (Zustand or TanStack Query) when replacing
+      localStorage with real API calls.
+  15. API versioning strategy (/api/v1/).
+  16. Request/response logging middleware.
+  17. Health check endpoint for monitoring.
+  18. Database connection pooling.
+
+PERFORMANCE & LIGHTHOUSE OPTIMIZATION (ongoing as we build):
+  19. Code-split routes with React.lazy() + Suspense so only the
+      active role's pages are loaded (not the entire app).
+  20. Tree-shake unused Tailwind classes (already handled by Tailwind 4
+      purge, but verify production bundle).
+  21. Lazy-load heavy components (charts, data tables, rich editors).
+  22. Compress and optimize all images (favicon, receipts, evidence).
+      Use WebP/AVIF where possible.
+  23. Add proper meta tags, semantic HTML, and accessible labels to
+      pass Lighthouse Accessibility audit (aim for 90+).
+  24. Preconnect/preload critical resources (fonts, API origin).
+  25. Enable gzip/brotli compression on the backend server.
+  26. Cache static assets with proper Cache-Control headers.
+  27. Minimize layout shifts (CLS) — use explicit width/height on
+      images, skeleton loaders instead of content pop-in.
+  28. Keep JavaScript bundle under 200KB gzipped for fast First
+      Contentful Paint (FCP) and Time to Interactive (TTI).
+  29. Use font-display: swap on Google Fonts (already in link tag)
+      to avoid invisible text during font load.
+  30. Run Lighthouse CI on every build to catch regressions early.
+      Target scores: Performance 90+, Accessibility 90+,
+      Best Practices 90+, SEO 90+.
+
+SEO & DEPLOYMENT PREP (do once now, avoid rework at launch):
+  31. SITEMAP - Generate sitemap.xml for public-facing pages (login,
+      about, status). Internal app routes behind auth don't need
+      indexing but sitemap helps search engines find the entry points.
+  32. ROBOTS.TXT - Add public/robots.txt. Disallow /admin, /ceo,
+      /finance, /operations, /executive, /dept-head (all auth-gated).
+      Allow login/landing pages only.
+  33. CDN SETUP - Serve static assets (JS, CSS, fonts, images) through
+      a CDN (Cloudflare, AWS CloudFront, or Bunny.net). Configure
+      during build so asset URLs point to CDN origin from day one.
+  34. META TAGS - Add per-page <title> and <meta description> via
+      react-helmet-async or a route-level head manager. Include
+      og:title, og:description, og:image for link previews.
+  35. CANONICAL URLS - Set <link rel="canonical"> on every page to
+      prevent duplicate content issues.
+  36. STRUCTURED DATA - Add JSON-LD Organization schema on the
+      login/landing page for search engine identity.
+  37. FAVICON SET - Generate full favicon set: favicon.ico, apple-touch
+      -icon (180x180), android-chrome (192x192, 512x512), site.webmanifest.
+      Currently only favicon.jpg exists.
+  38. WEB APP MANIFEST - Create site.webmanifest with app name, theme
+      color, icons. Needed for PWA and Lighthouse PWA audit.
+  39. SSL/HTTPS - Ensure production server enforces HTTPS. Set
+      Strict-Transport-Security header. Required for secure cookies
+      and Lighthouse Best Practices score.
+  40. COMPRESSION HEADERS - Configure server or CDN to serve brotli
+      (preferred) or gzip for all text assets (JS, CSS, HTML, JSON).
+  41. CACHE BUSTING - Vite already hashes filenames on build. Ensure
+      CDN respects cache headers: immutable for hashed assets,
+      no-cache for index.html.
+  42. PRECONNECT HINTS - Already preconnecting to fonts.googleapis.com.
+      Add preconnect to API origin and CDN origin in index.html.
+  43. 404 / ERROR PAGES - Ensure server returns proper HTTP status
+      codes (404, 500) not just a React component. Important for SEO
+      and monitoring.
+  44. ANALYTICS PLACEHOLDER - Add a slot for Google Analytics /
+      Plausible / PostHog tag. Don't integrate now, but have the
+      hook ready so it's a one-line change at deployment.
+
+FEATURES NOT IN DOCUMENTATION BUT VALUABLE:
+  19. VENDOR REGISTRY - Track approved vendors, history, price anomalies.
+  20. BUDGET UTILIZATION HEATMAP - Visual burn rate per department per week.
+  21. EXECUTIVE PERFORMANCE LEADERBOARD - Ranked by KPI score (CEO/Admin only).
+  22. AUTOMATED BUDGET ALERTS - Notify at 80% and 90% budget consumption.
+  23. DOCUMENT VERSION CONTROL - Track changes to limits, modifications.
+  24. OFFLINE CAPABILITY (PWA) - Clock-in/out and evidence offline, sync later.
+  25. DATA EXPORT - CSV/Excel for any data table view.
+  26. DARK MODE TOGGLE - Professional option, easy with existing CSS variables.
+  27. ACTIVITY FEED - Real-time organizational action stream on dashboards.
+  28. INPUT SANITIZATION - Prevent XSS in text fields (notes, descriptions).
+
+================================================================================
+NOTE ON DEV ROLE SWITCHER
+================================================================================
+The DevRoleSwitcher component at src/components/dev/DevRoleSwitcher.jsx
+is a development-only tool (hidden in production via import.meta.env.DEV check).
+It persists role to localStorage and forces page reload on switch. This is
+correctly implemented for testing purposes and should be retained during
+development. It will automatically be excluded from production builds.
+
+================================================================================
+END OF AUDIT REPORT
+================================================================================

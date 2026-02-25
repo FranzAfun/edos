@@ -1,4 +1,5 @@
-import { NavLink } from "react-router-dom";
+import { useState, useCallback, useEffect } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import useRole from "../hooks/useRole";
 import useUnreadCount from "../hooks/useUnreadCount";
 import Can from "./security/Can";
@@ -9,19 +10,79 @@ export default function Sidebar({ title = "EDOS" }) {
   const { role } = useRole();
   const navItems = NAVIGATION[role] || [];
   const unreadCount = useUnreadCount(role);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+
+  const toggleMobile = useCallback(() => setMobileOpen((v) => !v), []);
 
   return (
-    <aside className="w-64 hidden md:flex bg-[var(--color-primary)] text-white flex-col p-6">
-      <h2 className="text-xl font-semibold tracking-wide mb-8">
-        {title}
-      </h2>
+    <>
+      {/* F33: Mobile hamburger button */}
+      <button
+        onClick={toggleMobile}
+        className="md:hidden fixed top-4 left-4 z-50 rounded bg-[var(--color-primary)] p-2 text-white"
+        aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
+        aria-expanded={mobileOpen}
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        >
+          {mobileOpen ? (
+            <>
+              <line x1="4" y1="4" x2="16" y2="16" />
+              <line x1="16" y1="4" x2="4" y2="16" />
+            </>
+          ) : (
+            <>
+              <line x1="3" y1="5" x2="17" y2="5" />
+              <line x1="3" y1="10" x2="17" y2="10" />
+              <line x1="3" y1="15" x2="17" y2="15" />
+            </>
+          )}
+        </svg>
+      </button>
 
-      <nav className="flex flex-col gap-4 text-sm">
-        {navItems.map((item) => (
-          <SidebarItem key={item.path} item={item} role={role} unreadCount={unreadCount} />
-        ))}
-      </nav>
-    </aside>
+      {/* Mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`
+          fixed md:static z-40 top-0 left-0 h-full w-64
+          bg-[var(--color-primary)] text-white flex flex-col p-6
+          transform transition-transform duration-200 ease-in-out
+          ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
+          md:translate-x-0 md:flex
+        `}
+      >
+        <h2 className="text-xl font-semibold tracking-wide mb-8">
+          {title}
+        </h2>
+
+        <nav className="flex flex-col gap-4 text-sm overflow-y-auto flex-1">
+          {navItems.map((item) => (
+            <SidebarItem key={item.path} item={item} role={role} unreadCount={unreadCount} />
+          ))}
+        </nav>
+      </aside>
+    </>
   );
 }
 

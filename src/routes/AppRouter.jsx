@@ -13,11 +13,7 @@ import AdminLayout from "../layouts/AdminLayout";
 import ExecutiveDashboard from "../pages/executive/ExecutiveDashboard";
 import Intelligence from "../pages/executive/modules/intelligence";
 import Compliance from "../pages/executive/modules/compliance";
-import Reports from "../pages/executive/modules/reports";
 import FinanceDashboard from "../pages/finance/FinanceDashboard";
-import Treasury from "../pages/finance/modules/treasury";
-import Audit from "../pages/finance/modules/audit";
-import Budgets from "../pages/finance/modules/budgets";
 import CEODashboard from "../pages/ceo/CEODashboard";
 import Strategy from "../pages/ceo/modules/strategy";
 import Oversight from "../pages/ceo/modules/oversight";
@@ -33,6 +29,22 @@ import AdminUsersPage from "../modules/admin/users";
 import AdminBudgetsPage from "../modules/admin/budgets";
 import NotificationsPage from "../modules/common/notifications";
 import NotFound from "../pages/NotFound";
+
+// New module imports
+import FundRequestForm from "../modules/executive/fund-request";
+import ReceiptsPage from "../modules/common/receipts";
+import BudgetOverviewPage from "../modules/common/budgets";
+import RevenuePage from "../modules/finance/revenue";
+import TreasuryPage from "../modules/finance/treasury";
+import ProfitLossPage from "../modules/finance/profit-loss";
+import CEOIntelligencePage from "../modules/ceo/intelligence";
+import SpecialContributionsPage from "../modules/common/contributions";
+import AssetManagementPage from "../modules/common/assets";
+import AttendancePage from "../modules/common/attendance";
+import CommunicationsPage from "../modules/common/communications";
+import ReportsPage from "../modules/common/reports";
+import AuditTrailPage from "../modules/common/audit";
+import TransparencyPage from "../modules/common/transparency";
 
 import RequirePermission from "./RequirePermission";
 
@@ -78,7 +90,7 @@ export default function AppRouter() {
             path="reports"
             element={
               <RequirePermission permission={permissions.VIEW_REPORTS}>
-                <Reports />
+                <ReportsPage />
               </RequirePermission>
             }
           />
@@ -87,6 +99,46 @@ export default function AppRouter() {
             element={
               <RequirePermission permission={permissions.EXEC_VIEW_KPI}>
                 <ExecutiveKpiPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="fund-request"
+            element={
+              <RequirePermission permission={permissions.VIEW_FUND_REQUEST}>
+                <FundRequestForm />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="receipts"
+            element={
+              <RequirePermission permission={permissions.VIEW_RECEIPTS}>
+                <ReceiptsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="attendance"
+            element={
+              <RequirePermission permission={permissions.VIEW_ATTENDANCE}>
+                <AttendancePage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="communications"
+            element={
+              <RequirePermission permission={permissions.VIEW_COMMUNICATIONS}>
+                <CommunicationsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="contributions"
+            element={
+              <RequirePermission permission={permissions.VIEW_CONTRIBUTIONS}>
+                <SpecialContributionsPage />
               </RequirePermission>
             }
           />
@@ -106,7 +158,7 @@ export default function AppRouter() {
             path="treasury"
             element={
               <RequirePermission permission={permissions.VIEW_TREASURY}>
-                <Treasury />
+                <TreasuryPage />
               </RequirePermission>
             }
           />
@@ -114,7 +166,7 @@ export default function AppRouter() {
             path="audit"
             element={
               <RequirePermission permission={permissions.VIEW_AUDIT}>
-                <Audit />
+                <AuditTrailPage />
               </RequirePermission>
             }
           />
@@ -122,7 +174,7 @@ export default function AppRouter() {
             path="budgets"
             element={
               <RequirePermission permission={permissions.VIEW_BUDGETS}>
-                <Budgets />
+                <BudgetOverviewPage />
               </RequirePermission>
             }
           />
@@ -131,6 +183,54 @@ export default function AppRouter() {
             element={
               <RequirePermission permission={permissions.VIEW_FO_APPROVALS}>
                 <FinanceApprovalsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="revenue"
+            element={
+              <RequirePermission permission={permissions.VIEW_REVENUE}>
+                <RevenuePage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="profit-loss"
+            element={
+              <RequirePermission permission={permissions.VIEW_PROFIT_LOSS}>
+                <ProfitLossPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="receipts"
+            element={
+              <RequirePermission permission={permissions.VIEW_RECEIPTS}>
+                <ReceiptsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="reports"
+            element={
+              <RequirePermission permission={permissions.VIEW_REPORTS}>
+                <ReportsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="attendance"
+            element={
+              <RequirePermission permission={permissions.VIEW_ATTENDANCE}>
+                <AttendancePage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="communications"
+            element={
+              <RequirePermission permission={permissions.VIEW_COMMUNICATIONS}>
+                <CommunicationsPage />
               </RequirePermission>
             }
           />
@@ -170,6 +270,54 @@ export default function AppRouter() {
               </RequirePermission>
             }
           />
+          <Route
+            path="intelligence"
+            element={
+              <RequirePermission permission={permissions.VIEW_CEO_INTELLIGENCE}>
+                <CEOIntelligencePage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="contributions"
+            element={
+              <RequirePermission permission={permissions.VIEW_CONTRIBUTIONS}>
+                <SpecialContributionsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="transparency"
+            element={
+              <RequirePermission permission={permissions.VIEW_TRANSPARENCY}>
+                <TransparencyPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="reports"
+            element={
+              <RequirePermission permission={permissions.VIEW_REPORTS}>
+                <ReportsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="attendance"
+            element={
+              <RequirePermission permission={permissions.VIEW_ATTENDANCE}>
+                <AttendancePage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="communications"
+            element={
+              <RequirePermission permission={permissions.VIEW_COMMUNICATIONS}>
+                <CommunicationsPage />
+              </RequirePermission>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Route>
 
@@ -179,6 +327,38 @@ export default function AppRouter() {
             element={
               <RequirePermission permission={permissions.VIEW_DEPT_HEAD_DASHBOARD}>
                 <DeptHeadDashboard />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="receipts"
+            element={
+              <RequirePermission permission={permissions.VIEW_RECEIPTS}>
+                <ReceiptsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="attendance"
+            element={
+              <RequirePermission permission={permissions.VIEW_ATTENDANCE}>
+                <AttendancePage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="communications"
+            element={
+              <RequirePermission permission={permissions.VIEW_COMMUNICATIONS}>
+                <CommunicationsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="contributions"
+            element={
+              <RequirePermission permission={permissions.VIEW_CONTRIBUTIONS}>
+                <SpecialContributionsPage />
               </RequirePermission>
             }
           />
@@ -199,6 +379,38 @@ export default function AppRouter() {
             element={
               <RequirePermission permission={permissions.VIEW_OPS_APPROVALS}>
                 <OperationsApprovalsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="receipts"
+            element={
+              <RequirePermission permission={permissions.VIEW_RECEIPTS}>
+                <ReceiptsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="assets"
+            element={
+              <RequirePermission permission={permissions.VIEW_ASSETS}>
+                <AssetManagementPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="attendance"
+            element={
+              <RequirePermission permission={permissions.VIEW_ATTENDANCE}>
+                <AttendancePage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="communications"
+            element={
+              <RequirePermission permission={permissions.VIEW_COMMUNICATIONS}>
+                <CommunicationsPage />
               </RequirePermission>
             }
           />
@@ -233,8 +445,64 @@ export default function AppRouter() {
           <Route
             path="budgets"
             element={
-              <RequirePermission permission={permissions.ADMIN_MANAGE_USERS}>
+              <RequirePermission permission={permissions.VIEW_BUDGETS}>
                 <AdminBudgetsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="assets"
+            element={
+              <RequirePermission permission={permissions.VIEW_ASSETS}>
+                <AssetManagementPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="reports"
+            element={
+              <RequirePermission permission={permissions.VIEW_REPORTS}>
+                <ReportsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="audit"
+            element={
+              <RequirePermission permission={permissions.VIEW_AUDIT}>
+                <AuditTrailPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="attendance"
+            element={
+              <RequirePermission permission={permissions.VIEW_ATTENDANCE}>
+                <AttendancePage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="communications"
+            element={
+              <RequirePermission permission={permissions.VIEW_COMMUNICATIONS}>
+                <CommunicationsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="transparency"
+            element={
+              <RequirePermission permission={permissions.VIEW_TRANSPARENCY}>
+                <TransparencyPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="contributions"
+            element={
+              <RequirePermission permission={permissions.VIEW_CONTRIBUTIONS}>
+                <SpecialContributionsPage />
               </RequirePermission>
             }
           />

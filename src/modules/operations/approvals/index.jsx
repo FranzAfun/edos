@@ -96,7 +96,7 @@ function ApprovalCard({ item, userId, onAction }) {
             {item.description}
           </p>
           <p className="text-xs text-gray-400 mt-1">
-            Amount: ₦{Number(item.amount).toLocaleString()} &middot; Requested{" "}
+            Amount: GHS {Number(item.amount).toLocaleString()} &middot; Requested{" "}
             {new Date(item.createdAt).toLocaleDateString()}
           </p>
           <ComplianceBadge userId={item.requestedByUserId} />
