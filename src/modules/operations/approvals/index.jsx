@@ -14,6 +14,7 @@ import {
   APPROVAL_STAGE_LABELS,
   APPROVAL_STAGE_COLORS,
 } from "../../../governance/approvalStages";
+import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
 import * as userStore from "../../../shared/services/userStore";
 import * as complianceStore from "../../../shared/services/complianceStore";
 import useRole from "../../../hooks/useRole";
@@ -59,76 +60,108 @@ export default function OperationsApprovalsPage() {
 function ApprovalCard({ item, userId, onAction }) {
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
 
   const handleApprove = useCallback(async () => {
     setBusy(true);
-    await approveApproval({ id: item.id, userId, note });
-    setBusy(false);
-    setNote("");
-    onAction();
+    try {
+      await approveApproval({ id: item.id, userId, note });
+      setNote("");
+      setConfirmAction(null);
+      onAction();
+    } finally {
+      setBusy(false);
+    }
   }, [item.id, userId, note, onAction]);
 
   const handleReject = useCallback(async () => {
     setBusy(true);
-    await rejectApproval({ id: item.id, userId, note });
-    setBusy(false);
-    setNote("");
-    onAction();
+    try {
+      await rejectApproval({ id: item.id, userId, note });
+      setNote("");
+      setConfirmAction(null);
+      onAction();
+    } finally {
+      setBusy(false);
+    }
   }, [item.id, userId, note, onAction]);
 
   const stageColor =
     APPROVAL_STAGE_COLORS[item.currentStage] || "bg-gray-100 text-gray-800";
 
   return (
-    <Card>
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span
-              className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${stageColor}`}
-            >
-              {APPROVAL_STAGE_LABELS[item.currentStage]}
-            </span>
-            <span className="text-xs text-gray-400 uppercase">
-              {item.sourceType}
-            </span>
+    <>
+      <Card>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span
+                className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${stageColor}`}
+              >
+                {APPROVAL_STAGE_LABELS[item.currentStage]}
+              </span>
+              <span className="text-xs text-gray-400 uppercase">
+                {item.sourceType}
+              </span>
+            </div>
+            <h3 className="text-sm font-semibold truncate">{item.title}</h3>
+            <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+              {item.description}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              Amount: GHS {Number(item.amount).toLocaleString()} &middot; Requested{" "}
+              {new Date(item.createdAt).toLocaleDateString()}
+            </p>
+            <ComplianceBadge userId={item.requestedByUserId} />
           </div>
-          <h3 className="text-sm font-semibold truncate">{item.title}</h3>
-          <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-            {item.description}
-          </p>
-          <p className="text-xs text-gray-400 mt-1">
-            Amount: GHS {Number(item.amount).toLocaleString()} &middot; Requested{" "}
-            {new Date(item.createdAt).toLocaleDateString()}
-          </p>
-          <ComplianceBadge userId={item.requestedByUserId} />
         </div>
-      </div>
 
-      <div className="mt-3 flex items-end gap-2">
-        <input
-          type="text"
-          placeholder="Optional note…"
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          className="flex-1 rounded border px-2 py-1 text-xs"
-        />
-        <button
-          onClick={handleApprove}
-          disabled={busy}
-          className="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 disabled:opacity-50"
-        >
-          Approve
-        </button>
-        <button
-          onClick={handleReject}
-          disabled={busy}
-          className="rounded bg-red-600 px-3 py-1 text-xs text-white hover:bg-red-700 disabled:opacity-50"
-        >
-          Reject
-        </button>
-      </div>
-    </Card>
+        <div className="mt-3 flex items-end gap-2">
+          <input
+            type="text"
+            placeholder="Optional note…"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            className="flex-1 rounded border px-2 py-1 text-xs"
+          />
+          <button
+            onClick={() => setConfirmAction("approve")}
+            disabled={busy}
+            className="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 disabled:opacity-50"
+          >
+            Approve
+          </button>
+          <button
+            onClick={() => setConfirmAction("reject")}
+            disabled={busy}
+            className="rounded bg-red-600 px-3 py-1 text-xs text-white hover:bg-red-700 disabled:opacity-50"
+          >
+            Reject
+          </button>
+        </div>
+      </Card>
+
+      <ConfirmDialog
+        open={confirmAction === "approve"}
+        title="Approve Request"
+        message={`Approve "${item.title}" for GHS ${Number(item.amount).toLocaleString()}?`}
+        confirmLabel="Approve"
+        variant="accent"
+        onConfirm={handleApprove}
+        onCancel={() => setConfirmAction(null)}
+        busy={busy}
+      />
+      <ConfirmDialog
+        open={confirmAction === "reject"}
+        title="Reject Request"
+        message={`Reject "${item.title}"? This action cannot be undone.`}
+        confirmLabel="Reject"
+        variant="danger"
+        onConfirm={handleReject}
+        onCancel={() => setConfirmAction(null)}
+        busy={busy}
+      />
+    </>
   );
 }
 

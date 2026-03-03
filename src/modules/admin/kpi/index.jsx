@@ -3,6 +3,7 @@ import PageSection from "../../../components/layout/PageSection";
 import Card from "../../../components/ui/Card";
 import Grid from "../../../components/layout/Grid";
 import ModuleBoundary from "../../../shared/components/ModuleBoundary";
+import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
 import useAllKpis from "./hooks/useAllKpis";
 import useAllEvidence from "./hooks/useAllEvidence";
 import { createKpiTask, gradeEvidence } from "./services/kpiAdminService";
@@ -221,56 +222,74 @@ function CreateKpiForm({ onCreated }) {
 function EvidenceRow({ evidence, task, onGraded }) {
   const [grade, setGrade] = useState("COMPLETED");
   const [grading, setGrading] = useState(false);
+  const [confirmGrade, setConfirmGrade] = useState(false);
 
   async function handleGrade() {
     setGrading(true);
-    await gradeEvidence({ evidenceId: evidence.id, gradeStatus: grade });
-    setGrading(false);
-    onGraded();
+    try {
+      await gradeEvidence({ evidenceId: evidence.id, gradeStatus: grade });
+      setConfirmGrade(false);
+      onGraded();
+    } finally {
+      setGrading(false);
+    }
   }
 
   return (
-    <Card>
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h4 className="text-sm font-semibold">
-            {task?.title ?? "Unknown Task"}
-          </h4>
-          <p className="text-xs text-gray-500 mt-1">
-            User: {evidence.userId} &middot; Type: {evidence.type} &middot; Submitted:{" "}
-            {new Date(evidence.submittedAt).toLocaleDateString()}
-          </p>
-          <p className="text-sm mt-1">{evidence.linkOrText}</p>
-        </div>
-
-        {task?.status !== "GRADED" && (
-          <div className="flex items-center gap-2 shrink-0">
-            <select
-              value={grade}
-              onChange={(e) => setGrade(e.target.value)}
-              className="rounded border px-2 py-1 text-xs"
-            >
-              {GRADE_OPTIONS.map((g) => (
-                <option key={g} value={g}>
-                  {g}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={handleGrade}
-              disabled={grading}
-              className="rounded bg-purple-600 px-3 py-1 text-xs text-white hover:bg-purple-700 disabled:opacity-50"
-            >
-              {grading ? "…" : "Grade"}
-            </button>
+    <>
+      <Card>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h4 className="text-sm font-semibold">
+              {task?.title ?? "Unknown Task"}
+            </h4>
+            <p className="text-xs text-gray-500 mt-1">
+              User: {evidence.userId} &middot; Type: {evidence.type} &middot; Submitted:{" "}
+              {new Date(evidence.submittedAt).toLocaleDateString()}
+            </p>
+            <p className="text-sm mt-1">{evidence.linkOrText}</p>
           </div>
-        )}
 
-        {task?.status === "GRADED" && (
-          <span className="text-xs px-2 py-1 rounded bg-green-100 text-green-800">Graded</span>
-        )}
-      </div>
-    </Card>
+          {task?.status !== "GRADED" && (
+            <div className="flex items-center gap-2 shrink-0">
+              <select
+                value={grade}
+                onChange={(e) => setGrade(e.target.value)}
+                className="rounded border px-2 py-1 text-xs"
+              >
+                {GRADE_OPTIONS.map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => setConfirmGrade(true)}
+                disabled={grading}
+                className="rounded bg-purple-600 px-3 py-1 text-xs text-white hover:bg-purple-700 disabled:opacity-50"
+              >
+                {grading ? "…" : "Grade"}
+              </button>
+            </div>
+          )}
+
+          {task?.status === "GRADED" && (
+            <span className="text-xs px-2 py-1 rounded bg-green-100 text-green-800">Graded</span>
+          )}
+        </div>
+      </Card>
+
+      <ConfirmDialog
+        open={confirmGrade}
+        title="Confirm Evidence Grade"
+        message={`Grade evidence for "${task?.title ?? "Unknown Task"}" as ${grade}?`}
+        confirmLabel="Confirm Grade"
+        variant={grade === "REJECTED" ? "danger" : "warning"}
+        onConfirm={handleGrade}
+        onCancel={() => setConfirmGrade(false)}
+        busy={grading}
+      />
+    </>
   );
 }
 

@@ -3,6 +3,7 @@ import PageSection from "../../../components/layout/PageSection";
 import Card from "../../../components/ui/Card";
 import Grid from "../../../components/layout/Grid";
 import ModuleBoundary from "../../../shared/components/ModuleBoundary";
+import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
 import useAllUsers from "./hooks/useAllUsers";
 import { createUser, deleteUser } from "./services/userService";
 import * as departmentStore from "../../../shared/services/departmentStore";
@@ -201,38 +202,56 @@ function CreateUserForm({ onCreated }) {
 
 function UserRow({ user, onDeleted }) {
   const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   async function handleDelete() {
     setDeleting(true);
-    await deleteUser({ id: user.id });
-    setDeleting(false);
-    onDeleted();
+    try {
+      await deleteUser({ id: user.id });
+      setConfirmDelete(false);
+      onDeleted();
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
-    <Card>
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h3 className="text-sm font-semibold">{user.name}</h3>
-          <p className="text-xs text-gray-500 mt-1">
-            {user.email} &middot; Level {user.authorityLevel} &middot; {user.roleKey} &middot;{" "}
-            {departmentStore.getDepartmentById(user.departmentId)?.name ?? user.departmentId}
-          </p>
-          {user.featureFlags?.length > 0 && (
-            <p className="text-xs text-gray-400 mt-1">
-              Flags: {user.featureFlags.join(", ")}
+    <>
+      <Card>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-semibold">{user.name}</h3>
+            <p className="text-xs text-gray-500 mt-1">
+              {user.email} &middot; Level {user.authorityLevel} &middot; {user.roleKey} &middot;{" "}
+              {departmentStore.getDepartmentById(user.departmentId)?.name ?? user.departmentId}
             </p>
-          )}
+            {user.featureFlags?.length > 0 && (
+              <p className="text-xs text-gray-400 mt-1">
+                Flags: {user.featureFlags.join(", ")}
+              </p>
+            )}
+          </div>
+          <button
+            onClick={() => setConfirmDelete(true)}
+            disabled={deleting}
+            className="rounded border border-red-300 px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
+          >
+            {deleting ? "…" : "Delete"}
+          </button>
         </div>
-        <button
-          onClick={handleDelete}
-          disabled={deleting}
-          className="rounded border border-red-300 px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
-        >
-          {deleting ? "…" : "Delete"}
-        </button>
-      </div>
-    </Card>
+      </Card>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        title="Delete User"
+        message={`Delete user "${user.name}" (${user.email || user.id})? This cannot be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDelete(false)}
+        busy={deleting}
+      />
+    </>
   );
 }
 

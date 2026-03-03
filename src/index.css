@@ -48,6 +48,14 @@ body {
   color: var(--color-text-primary);
 }
 
+/* Native select popups are browser/OS-rendered and can keep a light menu in dark theme.
+   Force option contrast so dropdown items remain readable everywhere. */
+select option,
+select optgroup {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
 h1,
 h2,
 h3 {
