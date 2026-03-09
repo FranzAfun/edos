@@ -10,15 +10,12 @@ import {
   approveApproval,
   rejectApproval,
 } from "../../common/approvals/services/approvalService";
-import {
-  APPROVAL_STAGE_LABELS,
-  APPROVAL_STAGE_COLORS,
-} from "../../../governance/approvalStages";
 import { semanticStatus } from "@/theme/semanticColors";
 import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
 import * as userStore from "../../../shared/services/userStore";
 import * as complianceStore from "../../../shared/services/complianceStore";
 import useRole from "../../../hooks/useRole";
+import { formatApprovalSourceType } from "../../../utils/approvalLabels";
 
 function resolveUserId(roleKey) {
   const users = userStore.getUsersByRole(roleKey);
@@ -29,7 +26,7 @@ export default function OperationsApprovalsPage() {
   useDocumentTitle("Technical Approvals");
   const { role } = useRole();
   const userId = resolveUserId(role);
-  const query = useApprovalQueue(getTechReviewQueue);
+  const query = useApprovalQueue(getTechReviewQueue, { params: { role } });
 
   return (
     <div>
@@ -62,6 +59,7 @@ function ApprovalCard({ item, userId, onAction }) {
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
+  const complianceNotice = getComplianceNotice(item.requestedByUserId);
 
   const handleApprove = useCallback(async () => {
     setBusy(true);
@@ -87,25 +85,14 @@ function ApprovalCard({ item, userId, onAction }) {
     }
   }, [item.id, userId, note, onAction]);
 
-  const stageColor = APPROVAL_STAGE_COLORS[item.currentStage] || semanticStatus.info;
-
   return (
     <>
       <Card>
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <span
-                className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
-                style={{
-                  backgroundColor: stageColor.bg,
-                  color: stageColor.text,
-                }}
-              >
-                {APPROVAL_STAGE_LABELS[item.currentStage]}
-              </span>
+            <div className="mb-1">
               <span className="text-xs text-gray-400 uppercase">
-                {item.sourceType}
+                {formatApprovalSourceType(item.sourceType)}
               </span>
             </div>
             <h3 className="text-sm font-semibold truncate">{item.title}</h3>
@@ -116,7 +103,7 @@ function ApprovalCard({ item, userId, onAction }) {
               Amount: GHS {Number(item.amount).toLocaleString()} &middot; Requested{" "}
               {new Date(item.createdAt).toLocaleDateString()}
             </p>
-            <ComplianceBadge userId={item.requestedByUserId} />
+            {complianceNotice ? <InlineNotice className="mt-3">{complianceNotice}</InlineNotice> : null}
           </div>
         </div>
 
@@ -169,39 +156,30 @@ function ApprovalCard({ item, userId, onAction }) {
   );
 }
 
-function ComplianceBadge({ userId }) {
+function getComplianceNotice(userId) {
   const compliance = complianceStore.getCompliance(userId);
-  if (!compliance) return null;
+  if (!compliance) return "";
 
   if (compliance.isFundingBlocked) {
-    return (
-      <span
-        className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold"
-        style={{
-          backgroundColor: semanticStatus.error.bg,
-          color: semanticStatus.error.text,
-        }}
-      >
-        Funding Blocked
-      </span>
-    );
+    return "Funding is currently blocked for this requester.";
   }
 
   if (compliance.outstandingEvidenceCount > 0) {
-    return (
-      <span
-        className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold"
-        style={{
-          backgroundColor: semanticStatus.warning.bg,
-          color: semanticStatus.warning.text,
-        }}
-      >
-        Evidence Pending ({compliance.outstandingEvidenceCount})
-      </span>
-    );
+    return `Evidence pending (${compliance.outstandingEvidenceCount}).`;
   }
 
   return null;
+}
+
+function InlineNotice({ children, className = "" }) {
+  return (
+    <div
+      className={`border-l-4 pl-3 text-xs text-[var(--color-text-secondary)] ${className}`}
+      style={{ borderLeftColor: semanticStatus.warning.text }}
+    >
+      {children}
+    </div>
+  );
 }
 
 

@@ -21,6 +21,7 @@ import * as departmentStore from "../../shared/services/departmentStore";
 import * as userStore from "../../shared/services/userStore";
 import { isRejectedStage, isTerminal } from "../../governance/approvalStages";
 import { getUserKpiPercentage } from "../../shared/services/trustLevelStore";
+import { getSupervisorLabel } from "../../utils/supervisor";
 
 const COLORS = ["#2563EB", "#16A34A", "#D97706", "#DC2626", "#8B5CF6", "#06B6D4"];
 
@@ -39,8 +40,11 @@ export default function CEODashboard() {
   const completedKpis = kpiTasks.filter((t) => t.status === "COMPLETED").length;
   const netPL = confirmedRevenue - totalSpent;
 
-  const pillarSummary = revenueStore.getRevenueByPillarSummary();
-  const pillarData = Object.entries(pillarSummary).map(([name, revenue]) => ({ name, revenue }));
+  const supervisorSummary = revenueStore.getRevenueBySupervisorSummary();
+  const supervisorData = Object.entries(supervisorSummary).map(([name, revenue]) => ({
+    name: getSupervisorLabel(name),
+    revenue,
+  }));
 
   const deptPerf = departments.slice(0, 6).map((d) => {
     const users = userStore.listUsers().filter((u) => u.departmentId === d.id);
@@ -70,10 +74,10 @@ export default function CEODashboard() {
       <PageSection title="Financial Overview">
         <Grid cols={2}>
           <Card>
-            <h3 className="text-sm font-semibold mb-3">Revenue by Pillar</h3>
-            {pillarData.length > 0 ? (
+            <h3 className="text-sm font-semibold mb-3">Revenue by Supervisor</h3>
+            {supervisorData.length > 0 ? (
               <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={pillarData}>
+                <BarChart data={supervisorData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                   <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                   <YAxis tick={{ fontSize: 10 }} />

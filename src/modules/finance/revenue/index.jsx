@@ -1,7 +1,7 @@
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Revenue Recording Module (F11)
- * Record revenue entries with pillar, program, payment status,
+ * Record revenue entries with supervisor, program, payment status,
  * customer type, and profit categorization.
  */
 import { useState, useMemo, useCallback } from "react";
@@ -16,6 +16,7 @@ import useFormValidation from "../../../shared/hooks/useFormValidation";
 import * as revenueStore from "../../../shared/services/revenueStore";
 import * as userStore from "../../../shared/services/userStore";
 import useRole from "../../../hooks/useRole";
+import { SUPERVISOR_OPTIONS, getSupervisorLabel } from "../../../utils/supervisor";
 
 const PAYMENT_STATUS_VARIANT = {
   INVOICE: "warning",
@@ -30,7 +31,7 @@ export default function RevenuePage() {
   const reload = useCallback(() => setRevenue(revenueStore.listRevenue()), []);
   const totalRevenue = revenueStore.getTotalRevenue();
   const confirmedRevenue = revenueStore.getConfirmedRevenue();
-  const pillarSummary = revenueStore.getRevenueByPillarSummary();
+  const supervisorSummary = revenueStore.getRevenueBySupervisorSummary();
 
   const canRecord = role === "finance" || role === "admin" || role === "ceo";
 
@@ -48,15 +49,15 @@ export default function RevenuePage() {
         </Grid>
       </PageSection>
 
-      <PageSection title="Revenue by Pillar" subtitle="Breakdown by organizational pillar">
+      <PageSection title="Revenue by Supervisor" subtitle="Breakdown by CTO and COO oversight">
         <Grid cols={3}>
-          {Object.entries(pillarSummary).map(([pillar, amount]) => (
-            <Card key={pillar}>
-              <p className="text-xs text-gray-500">{pillar}</p>
+          {Object.entries(supervisorSummary).map(([supervisor, amount]) => (
+            <Card key={supervisor}>
+              <p className="text-xs text-gray-500">{getSupervisorLabel(supervisor)}</p>
               <p className="text-lg font-bold mt-1">GHS {amount.toLocaleString()}</p>
             </Card>
           ))}
-          {Object.keys(pillarSummary).length === 0 && (
+          {Object.keys(supervisorSummary).length === 0 && (
             <Card><p className="text-sm text-gray-500">No revenue recorded yet.</p></Card>
           )}
         </Grid>
@@ -71,7 +72,11 @@ export default function RevenuePage() {
       <PageSection title="Revenue Ledger" subtitle="All revenue entries">
         <DataTable
           columns={[
-            { key: "pillar", label: "Pillar" },
+            {
+              key: "supervisor",
+              label: "Supervisor",
+              render: (value) => getSupervisorLabel(value),
+            },
             { key: "program", label: "Program" },
             { key: "productService", label: "Product/Service" },
             {
@@ -112,7 +117,7 @@ function RevenueForm({ onRecorded, role }) {
   }, [role]);
 
   const rules = {
-    pillar: (v) => (!v ? "Pillar is required" : null),
+    supervisor: (v) => (!v ? "Supervisor is required" : null),
     program: (v) => (!v ? "Program is required" : null),
     productService: (v) => (!v ? "Product/Service is required" : null),
     amount: (v) => (!v || Number(v) <= 0 ? "Valid amount is required" : null),
@@ -124,7 +129,7 @@ function RevenueForm({ onRecorded, role }) {
   const { values, errors, touched, handleChange, validate, reset } =
     useFormValidation(
       {
-        pillar: "",
+        supervisor: "",
         program: "",
         productService: "",
         amount: "",
@@ -141,7 +146,7 @@ function RevenueForm({ onRecorded, role }) {
       e.preventDefault();
       if (!validate()) return;
       revenueStore.createRevenue({
-        pillar: values.pillar,
+        supervisor: values.supervisor,
         program: values.program,
         productService: values.productService,
         amount: Number(values.amount),
@@ -162,14 +167,14 @@ function RevenueForm({ onRecorded, role }) {
       <form onSubmit={handleSubmit} className="space-y-4">
         <Grid cols={3}>
           <FormField
-            label="Pillar"
-            name="pillar"
+            label="Supervisor"
+            name="supervisor"
             type="select"
             required
-            value={values.pillar}
+            value={values.supervisor}
             onChange={handleChange}
-            error={touched.pillar ? errors.pillar : null}
-            options={revenueStore.PILLARS.map((p) => ({ value: p, label: p }))}
+            error={touched.supervisor ? errors.supervisor : null}
+            options={SUPERVISOR_OPTIONS}
           />
           <FormField
             label="Program"

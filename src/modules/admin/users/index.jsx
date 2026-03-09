@@ -9,6 +9,7 @@ import { createUser, deleteUser } from "./services/userService";
 import * as departmentStore from "../../../shared/services/departmentStore";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import { AUTHORITY_LEVEL, ROLES } from "../../../config/roles";
+import { semanticStatus } from "@/theme/semanticColors";
 
 const ROLE_OPTIONS = [
   { value: ROLES.ADMIN, label: "Admin", authorityLevel: AUTHORITY_LEVEL.ADMIN },
@@ -226,7 +227,12 @@ function UserRow({ user, onDeleted }) {
           <button
             onClick={() => setConfirmDelete(true)}
             disabled={deleting}
-            className="rounded border border-red-300 px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
+            className="rounded border px-2 py-1 text-xs font-medium transition hover:opacity-90 disabled:opacity-50"
+            style={{
+              backgroundColor: semanticStatus.error.bg,
+              borderColor: semanticStatus.error.border,
+              color: semanticStatus.error.text,
+            }}
           >
             {deleting ? "…" : "Delete"}
           </button>

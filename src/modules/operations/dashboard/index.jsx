@@ -16,6 +16,7 @@ import * as assetStore from "../../../shared/services/assetStore";
 import { APPROVAL_STAGES } from "../../../governance/approvalStages";
 import useRole from "../../../hooks/useRole";
 import { getOperationalRoleLabel } from "../../../config/roles";
+import { normalizeSupervisor } from "../../../utils/supervisor";
 
 export default function OperationsDashboard() {
   const { role } = useRole();
@@ -27,9 +28,14 @@ export default function OperationsDashboard() {
   const assets = useMemo(() => assetStore.listAssets(), []);
   const participationRate = useMemo(() => attendanceStore.getParticipationRate(), []);
 
-  const techQueue = approvals.filter(
-    (a) => a.currentStage === APPROVAL_STAGES.PENDING_TECH_REVIEW
-  ).length;
+  const techQueue = approvals.filter((approval) => {
+    if (approval.currentStage !== APPROVAL_STAGES.PENDING_TECH_REVIEW) {
+      return false;
+    }
+
+    const reviewerRole = normalizeSupervisor(role);
+    return !reviewerRole || approval.supervisor === reviewerRole;
+  }).length;
   const uploadedReceipts = receipts.filter((r) => r.verificationStatus === "UPLOADED").length;
   const agingAlerts = useMemo(() => assetStore.getAgingAlerts(), []);
 

@@ -3,8 +3,8 @@ import useDocumentTitle from "../../../hooks/useDocumentTitle";
  * Enhanced CEO Approval Queue (F5)
  * - Modify amount option
  * - Return for clarification
- * - Justification review panel for requests >3,000
- * - Trust level badges, anti-bypass alerts
+ * - Compact justification notice for requests >3,000
+ * - Minimal review controls
  */
 import { useState, useCallback } from "react";
 import PageSection from "../../../components/layout/PageSection";
@@ -17,20 +17,15 @@ import {
   approveApproval,
   rejectApproval,
 } from "../../common/approvals/services/approvalService";
-import {
-  APPROVAL_STAGE_LABELS,
-  APPROVAL_STAGE_COLORS,
-} from "../../../governance/approvalStages";
 import { semanticStatus } from "@/theme/semanticColors";
-import ApprovalRouteBadge from "../../../components/ui/ApprovalRouteBadge";
-import AntiBypassAlert from "../../../components/ui/AntiBypassAlert";
-import TrustBadge from "../../../components/ui/TrustBadge";
 import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
 import * as userStore from "../../../shared/services/userStore";
 import * as complianceStore from "../../../shared/services/complianceStore";
 import * as approvalStoreRaw from "../../../shared/services/approvalStore";
 import * as notificationStore from "../../../shared/services/notificationStore";
+import { detectAntiBypass } from "../../../shared/services/fundRequestStore";
 import useRole from "../../../hooks/useRole";
+import { formatApprovalSourceType } from "../../../utils/approvalLabels";
 
 function resolveUserId(roleKey) {
   const users = userStore.getUsersByRole(roleKey);
@@ -70,6 +65,28 @@ function CeoApprovalCard({ item, userId, onAction }) {
 
   const requester = userStore.listUsers().find((u) => u.id === item.requestedByUserId);
   const requiresJustification = item.amount > 3000;
+  const compliance = requester ? complianceStore.getCompliance(requester.id) : null;
+  const antiBypass = detectAntiBypass(item.requestedByUserId, requester?.departmentId);
+
+  const noticeMessages = [];
+
+  if (requiresJustification) {
+    noticeMessages.push("Justification required for requests exceeding GHS 3,000.");
+  }
+
+  if (compliance?.isFundingBlocked) {
+    noticeMessages.push("Funding is blocked for this requester.");
+  }
+
+  if (compliance?.outstandingEvidenceCount > 0) {
+    noticeMessages.push(`Outstanding evidence: ${compliance.outstandingEvidenceCount}.`);
+  }
+
+  if (antiBypass.flagged) {
+    noticeMessages.push(
+      `Potential split-purchase bypass detected: ${antiBypass.count} requests totaling GHS ${antiBypass.total.toLocaleString()} in the last 7 days.`
+    );
+  }
 
   const handleApprove = useCallback(async () => {
     setBusy(true);
@@ -111,25 +128,13 @@ function CeoApprovalCard({ item, userId, onAction }) {
     onAction();
   }, [item, userId, note, onAction]);
 
-  const stageColor = APPROVAL_STAGE_COLORS[item.currentStage] || semanticStatus.info;
-
   return (
     <>
       <Card>
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span
-                className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
-                style={{
-                  backgroundColor: stageColor.bg,
-                  color: stageColor.text,
-                }}
-              >
-                {APPROVAL_STAGE_LABELS[item.currentStage]}
-              </span>
-              <span className="text-xs text-gray-400 uppercase">{item.sourceType}</span>
-              {requester && <TrustBadge userId={requester.id} />}
+            <div className="mb-1">
+              <span className="text-xs text-gray-400 uppercase">{formatApprovalSourceType(item.sourceType)}</span>
             </div>
             <h3 className="text-sm font-semibold truncate">{item.title}</h3>
             <p className="text-xs text-gray-500 mt-1 line-clamp-2">{item.description}</p>
@@ -137,40 +142,9 @@ function CeoApprovalCard({ item, userId, onAction }) {
               Amount: GHS {Number(item.amount).toLocaleString()} &middot; Requested{" "}
               {new Date(item.createdAt).toLocaleDateString()} &middot; By: {requester?.name || "Unknown"}
             </p>
-            <div className="mt-2"><ApprovalRouteBadge amount={item.amount} /></div>
-            <ComplianceBadge userId={item.requestedByUserId} />
-            <div className="mt-2">
-              <AntiBypassAlert userId={item.requestedByUserId} departmentId={requester?.departmentId} />
-            </div>
+            {noticeMessages.length > 0 ? <InlineNotice className="mt-3">{noticeMessages.join(" ")}</InlineNotice> : null}
           </div>
         </div>
-
-        {/* Justification Review Panel for > 3,000 (F5) */}
-        {requiresJustification && (
-          <div
-            className="mt-3 rounded-r p-3"
-            style={{
-              backgroundColor: semanticStatus.error.bg,
-              color: semanticStatus.error.text,
-            }}
-          >
-            <p className="text-xs font-semibold mb-1">Mandatory Justification Review</p>
-            <p className="text-xs">
-              This request exceeds GHS 3,000 and requires CEO justification review.
-              Amount: GHS {Number(item.amount).toLocaleString()}.
-            </p>
-            <div className="mt-2">
-              <p className="text-xs font-medium text-gray-600">Approval History:</p>
-              {(item.history || []).map((h, i) => (
-                <div key={i} className="text-xs text-gray-500 mt-1">
-                  <span className="font-medium">{h.action}</span> at {h.stage}
-                  {h.note && <span> — {h.note}</span>}
-                  <span className="text-gray-400 ml-1">({new Date(h.timestamp).toLocaleString()})</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Actions */}
         <div className="mt-4">
@@ -196,20 +170,16 @@ function CeoApprovalCard({ item, userId, onAction }) {
               Reject
             </button>
             <button onClick={() => setShowAdjust(!showAdjust)} disabled={busy}
-              className="rounded border border-gray-300 px-3 py-1 text-xs hover:bg-gray-50 disabled:opacity-50">
+              className="rounded border border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-muted,rgba(255,255,255,0.04))] disabled:opacity-50">
               Modify Amount
             </button>
             <button onClick={() => setConfirmAction("clarify")} disabled={busy}
-              className="rounded px-3 py-1 text-xs disabled:opacity-50"
-              style={{
-                backgroundColor: semanticStatus.warning.bg,
-                color: semanticStatus.warning.text,
-              }}>
+              className="rounded border border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-muted,rgba(255,255,255,0.04))] disabled:opacity-50">
               Return for Clarification
             </button>
           </div>
           {requiresJustification && !note.trim() && (
-            <p className="text-xs mt-1" style={{ color: semanticStatus.error.text }}>A justification note is required for requests exceeding GHS 3,000.</p>
+            <p className="text-xs mt-1 text-[var(--color-text-secondary)]">A justification note is required for requests exceeding GHS 3,000.</p>
           )}
         </div>
       </Card>
@@ -227,36 +197,16 @@ function CeoApprovalCard({ item, userId, onAction }) {
   );
 }
 
-function ComplianceBadge({ userId }) {
-  const compliance = complianceStore.getCompliance(userId);
-  if (!compliance) return null;
-  if (compliance.isFundingBlocked) {
-    return (
-      <span
-        className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold"
-        style={{
-          backgroundColor: semanticStatus.error.bg,
-          color: semanticStatus.error.text,
-        }}
-      >
-        Funding Blocked
-      </span>
-    );
-  }
-  if (compliance.outstandingEvidenceCount > 0) {
-    return (
-      <span
-        className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold"
-        style={{
-          backgroundColor: semanticStatus.warning.bg,
-          color: semanticStatus.warning.text,
-        }}
-      >
-        Evidence Pending ({compliance.outstandingEvidenceCount})
-      </span>
-    );
-  }
-  return null;
+function InlineNotice({ children, className = "" }) {
+  return (
+    <div
+      className={`border-l-4 pl-3 text-xs text-[var(--color-text-secondary)] ${className}`}
+      style={{ borderLeftColor: semanticStatus.warning.text }}
+      role="note"
+    >
+      {children}
+    </div>
+  );
 }
 
 

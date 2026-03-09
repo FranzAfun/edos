@@ -20,6 +20,7 @@ import * as departmentStore from "../../../shared/services/departmentStore";
 import * as userStore from "../../../shared/services/userStore";
 import useRole from "../../../hooks/useRole";
 import { isOperationalRole } from "../../../config/roles";
+import { semanticStatus } from "@/theme/semanticColors";
 
 const CONDITION_VARIANT = {
   New: "success",
@@ -258,7 +259,15 @@ function DeleteAssetButton({ assetId, name, onDeleted }) {
   const [confirm, setConfirm] = useState(false);
   return (
     <>
-      <button onClick={() => setConfirm(true)} className="rounded bg-red-600 px-2 py-0.5 text-xs text-white hover:bg-red-700">
+      <button
+        onClick={() => setConfirm(true)}
+        className="rounded border px-2 py-0.5 text-xs font-medium transition hover:opacity-90"
+        style={{
+          backgroundColor: semanticStatus.error.bg,
+          borderColor: semanticStatus.error.border,
+          color: semanticStatus.error.text,
+        }}
+      >
         Delete
       </button>
       <ConfirmDialog

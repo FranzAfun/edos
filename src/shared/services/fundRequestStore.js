@@ -5,16 +5,34 @@
  *
  * Fund Request shape:
  * {
- *   id, userId, departmentId, pillar, program, purpose,
+ *   id, userId, departmentId, supervisor, program, purpose,
  *   amount, vendorQuotation, expectedOutcome, attachmentName,
- *   status (SUBMITTED | PENDING_FO | PENDING_CEO | APPROVED | REJECTED | REJECTED_COMPLIANCE),
+ *   status (SUBMITTED | PENDING_TECH_REVIEW | PENDING_FO | PENDING_CEO | APPROVED | REJECTED | REJECTED_COMPLIANCE),
  *   approvalId (linked approval),
  *   createdAt
  * }
  */
 
+import { APPROVAL_STAGES } from "../../governance/approvalStages";
+import { mapLegacyPillarToSupervisor, normalizeSupervisor } from "../../utils/supervisor";
+
 const KEY = "edos_fund_requests";
 const REJECTED_REQUEST_STATUSES = new Set(["REJECTED", "REJECTED_COMPLIANCE"]);
+export const FO_FINAL_APPROVAL_LIMIT = 1000;
+export const CEO_JUSTIFICATION_THRESHOLD = 3000;
+
+const SMALL_REQUEST_APPROVAL_PIPELINE = [
+  APPROVAL_STAGES.PENDING_TECH_REVIEW,
+  APPROVAL_STAGES.PENDING_FO,
+  APPROVAL_STAGES.APPROVED,
+];
+
+const CEO_APPROVAL_PIPELINE = [
+  APPROVAL_STAGES.PENDING_TECH_REVIEW,
+  APPROVAL_STAGES.PENDING_FO,
+  APPROVAL_STAGES.PENDING_CEO,
+  APPROVAL_STAGES.APPROVED,
+];
 
 function generateId() {
   return `fr-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -31,6 +49,33 @@ function write(data) {
   localStorage.setItem(KEY, JSON.stringify(data));
 }
 
+function migrateLegacyFundRequests() {
+  const all = read();
+  let changed = false;
+
+  const migrated = all.map((request) => {
+    const supervisor = normalizeSupervisor(request.supervisor)
+      || mapLegacyPillarToSupervisor(request.pillar);
+
+    if (request.supervisor !== supervisor || "pillar" in request) {
+      changed = true;
+    }
+
+    return {
+      ...request,
+      supervisor,
+    };
+  }).map((request) => {
+    const nextRequest = { ...request };
+    delete nextRequest.pillar;
+    return nextRequest;
+  });
+
+  if (changed) {
+    write(migrated);
+  }
+}
+
 function seedIfEmpty() {
   const existing = read();
   if (existing.length > 0) return;
@@ -40,7 +85,7 @@ function seedIfEmpty() {
       id: "fr-seed-1",
       userId: "user-exec-1",
       departmentId: "dept-education",
-      pillar: "Education",
+      supervisor: "cto",
       program: "Digital Literacy Initiative",
       purpose: "Purchase of 50 tablets for student training program",
       amount: 2500,
@@ -55,7 +100,7 @@ function seedIfEmpty() {
       id: "fr-seed-2",
       userId: "user-exec-1",
       departmentId: "dept-manufacturing",
-      pillar: "Manufacturing",
+      supervisor: "coo",
       program: "Raw Material Procurement",
       purpose: "Monthly raw materials for production line",
       amount: 800,
@@ -70,6 +115,7 @@ function seedIfEmpty() {
 }
 
 seedIfEmpty();
+migrateLegacyFundRequests();
 
 export function listFundRequests() { return read(); }
 
@@ -89,6 +135,7 @@ export function createFundRequest(payload) {
   const all = read();
   const entry = {
     ...payload,
+    supervisor: normalizeSupervisor(payload.supervisor) || "cto",
     id: generateId(),
     status: "SUBMITTED",
     createdAt: new Date().toISOString(),
@@ -126,16 +173,35 @@ export function detectAntiBypass(userId, departmentId) {
 
 /**
  * Get approval route info based on amount.
- * 0 - 1,000: FO only
- * 1,000 - 3,000: FO + CEO
- * > 3,000: CEO mandatory justification review
+ * UI tracker reflects the actual governance order and hides
+ * the CEO stage when FO is the final approver.
  */
 export function getApprovalRoute(amount) {
-  if (amount <= 1000) {
-    return { route: "FO_ONLY", label: "FO Approval Only", stages: ["FO"] };
+  if (amount <= FO_FINAL_APPROVAL_LIMIT) {
+    return {
+      route: "FO_ONLY",
+      label: "FO Final Approval",
+      stages: SMALL_REQUEST_APPROVAL_PIPELINE,
+    };
   }
-  if (amount <= 3000) {
-    return { route: "FO_CEO", label: "FO + CEO Approval", stages: ["FO", "CEO"] };
+  if (amount <= CEO_JUSTIFICATION_THRESHOLD) {
+    return {
+      route: "FO_CEO",
+      label: "FO + CEO Approval",
+      stages: CEO_APPROVAL_PIPELINE,
+    };
   }
-  return { route: "CEO_JUSTIFICATION", label: "CEO Mandatory Justification Review", stages: ["FO", "OPS", "CEO"] };
+  return {
+    route: "CEO_JUSTIFICATION",
+    label: "CEO Mandatory Justification Review",
+    stages: CEO_APPROVAL_PIPELINE,
+  };
+}
+
+export function requiresCeoApproval(amount) {
+  return Number(amount) > FO_FINAL_APPROVAL_LIMIT;
+}
+
+export function requiresCeoJustification(amount) {
+  return Number(amount) > CEO_JUSTIFICATION_THRESHOLD;
 }

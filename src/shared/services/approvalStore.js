@@ -13,6 +13,7 @@
  *   amount: number,
  *   sourceType: string,      // e.g. "BUDGET", "PROCUREMENT", "KPI"
  *   sourceId: string | null,
+ *   supervisor?: "cto" | "coo",
  *   requestedByUserId: string,
  *   currentStage: string,    // from APPROVAL_STAGES
  *   history: [{ stage, action, userId, note, timestamp }],
@@ -21,6 +22,8 @@
  */
 
 import { APPROVAL_STAGES } from "../../governance/approvalStages";
+import { getFundRequestById } from "./fundRequestStore";
+import { mapLegacyPillarToSupervisor, normalizeSupervisor } from "../../utils/supervisor";
 
 const KEY = "edos_approvals";
 const LEGACY_STAGE_MAP = {
@@ -58,6 +61,12 @@ function migrateLegacyStages() {
 
   const migrated = approvals.map((approval) => {
     const currentStage = normalizeStage(approval.currentStage);
+    const linkedRequest = approval.sourceType === "FUND_REQUEST" && approval.sourceId
+      ? getFundRequestById(approval.sourceId)
+      : null;
+    const supervisor = normalizeSupervisor(approval.supervisor)
+      || normalizeSupervisor(linkedRequest?.supervisor)
+      || mapLegacyPillarToSupervisor(linkedRequest?.pillar);
     const history = (approval.history || []).map((entry) => {
       const stage = normalizeStage(entry.stage);
       if (stage !== entry.stage) changed = true;
@@ -68,8 +77,13 @@ function migrateLegacyStages() {
       changed = true;
     }
 
+    if (approval.supervisor !== supervisor && linkedRequest) {
+      changed = true;
+    }
+
     return {
       ...approval,
+      supervisor: approval.sourceType === "FUND_REQUEST" ? supervisor : approval.supervisor,
       currentStage,
       history,
     };
@@ -164,6 +178,7 @@ export function createApproval(payload) {
   const now = new Date().toISOString();
   const entry = {
     ...payload,
+    supervisor: normalizeSupervisor(payload.supervisor) || payload.supervisor,
     id: generateId(),
     currentStage: APPROVAL_STAGES.PENDING_TECH_REVIEW,
     history: [

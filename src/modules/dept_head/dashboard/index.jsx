@@ -19,6 +19,7 @@ import * as notificationStore from "../../../shared/services/notificationStore";
 import * as departmentStore from "../../../shared/services/departmentStore";
 import { isTerminal } from "../../../governance/approvalStages";
 import useRole from "../../../hooks/useRole";
+import { formatApprovalStage } from "../../../utils/approvalLabels";
 
 function resolveUser(roleKey) {
   const users = userStore.getUsersByRole(roleKey);
@@ -197,7 +198,7 @@ function SubordinateRequestCard({ request, currentUser }) {
             <p className="text-xs text-gray-400 mt-1">
               By: {requester?.name || "Unknown"} &middot; GHS{" "}
               {Number(request.amount || 0).toLocaleString()} &middot;{" "}
-              {request.currentStage}
+              {formatApprovalStage(request.currentStage)}
             </p>
             {requester && (
               <div className="mt-1">

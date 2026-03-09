@@ -15,6 +15,7 @@ import * as kpiStore from "../../shared/services/kpiStore";
 import * as complianceStore from "../../shared/services/complianceStore";
 import * as userStore from "../../shared/services/userStore";
 import useRole from "../../hooks/useRole";
+import { getSupervisorLabel } from "../../utils/supervisor";
 
 const REJECTED_REQUEST_STATUSES = new Set(["REJECTED", "REJECTED_COMPLIANCE"]);
 
@@ -112,7 +113,7 @@ export default function ExecutiveDashboard() {
                   <div>
                     <h3 className="text-sm font-semibold">{req.purpose}</h3>
                     <p className="text-xs text-gray-500 mt-1">
-                      {req.pillar} &middot; {req.program} &middot; GHS {Number(req.amount).toLocaleString()}
+                      {getSupervisorLabel(req.supervisor)} &middot; {req.program} &middot; GHS {Number(req.amount).toLocaleString()}
                     </p>
                   </div>
                   <StatusBadge variant={req.status === "APPROVED" ? "success" : isRejectedRequest(req.status) ? "danger" : "warning"}>

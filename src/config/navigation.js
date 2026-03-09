@@ -90,11 +90,6 @@ export const NAVIGATION = {
       permission: PERMISSIONS.VIEW_RECEIPTS,
     },
     {
-      label: "Contributions",
-      path: "/executive/contributions",
-      permission: PERMISSIONS.VIEW_CONTRIBUTIONS,
-    },
-    {
       label: "Attendance",
       path: "/executive/attendance",
       permission: PERMISSIONS.VIEW_ATTENDANCE,
@@ -202,11 +197,6 @@ export const NAVIGATION = {
       permission: PERMISSIONS.VIEW_OVERSIGHT,
     },
     {
-      label: "Contributions",
-      path: "/ceo/contributions",
-      permission: PERMISSIONS.VIEW_CONTRIBUTIONS,
-    },
-    {
       label: "Reports",
       path: "/ceo/reports",
       permission: PERMISSIONS.VIEW_REPORTS,
@@ -243,11 +233,6 @@ export const NAVIGATION = {
       label: "Receipts",
       path: "/dept-head/receipts",
       permission: PERMISSIONS.VIEW_RECEIPTS,
-    },
-    {
-      label: "Contributions",
-      path: "/dept-head/contributions",
-      permission: PERMISSIONS.VIEW_CONTRIBUTIONS,
     },
     {
       label: "Attendance",
@@ -308,11 +293,6 @@ export const NAVIGATION = {
       label: "Audit",
       path: "/admin/audit",
       permission: PERMISSIONS.VIEW_AUDIT,
-    },
-    {
-      label: "Contributions",
-      path: "/admin/contributions",
-      permission: PERMISSIONS.VIEW_CONTRIBUTIONS,
     },
     {
       label: "Transparency",

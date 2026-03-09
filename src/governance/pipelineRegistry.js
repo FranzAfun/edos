@@ -35,10 +35,18 @@ export const PIPELINE_REGISTRY = {
     requiredAuthorityLevel: 3,
     requiresEvidence: false,
     requiresScoring: false,
-    approvalChain: ["technical_review", "finance", "ceo"],
+    thresholds: {
+      foFinalApprovalMax: 1000,
+      ceoJustificationAbove: 3000,
+    },
+    approvalChain: ["tech", "fo", "ceo"],
+    conditionalChains: {
+      fo_final: ["tech", "fo", "approved"],
+      ceo_review: ["tech", "fo", "ceo", "approved"],
+    },
     reviewerRoles: {
-      technical_review: ["cto", "coo"],
-      finance: ["finance"],
+      tech: ["cto", "coo"],
+      fo: ["finance"],
       ceo: ["ceo"],
     },
   },

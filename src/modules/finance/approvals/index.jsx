@@ -3,7 +3,7 @@ import useDocumentTitle from "../../../hooks/useDocumentTitle";
  * Enhanced Finance Approval Queue (F4)
  * Cost reasonableness, historical comparison, AI advisory,
  * adjust amount, question requester, return for clarification,
- * anti-bypass detection (F3), trust level badges (F14).
+ * anti-bypass detection (F3).
  */
 import { useState, useCallback, useMemo } from "react";
 import PageSection from "../../../components/layout/PageSection";
@@ -16,22 +16,16 @@ import {
   approveApproval,
   rejectApproval,
 } from "../../common/approvals/services/approvalService";
-import {
-  APPROVAL_STAGE_LABELS,
-  APPROVAL_STAGE_COLORS,
-} from "../../../governance/approvalStages";
 import { semanticStatus } from "@/theme/semanticColors";
-import ApprovalRouteBadge from "../../../components/ui/ApprovalRouteBadge";
-import AntiBypassAlert from "../../../components/ui/AntiBypassAlert";
-import TrustBadge from "../../../components/ui/TrustBadge";
 import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
-import StatusBadge from "../../../shared/ui/StatusBadge";
 import * as userStore from "../../../shared/services/userStore";
 import * as complianceStore from "../../../shared/services/complianceStore";
 import * as budgetStore from "../../../shared/services/budgetStore";
 import * as approvalStoreRaw from "../../../shared/services/approvalStore";
 import * as notificationStore from "../../../shared/services/notificationStore";
+import { detectAntiBypass } from "../../../shared/services/fundRequestStore";
 import useRole from "../../../hooks/useRole";
+import { formatApprovalSourceType } from "../../../utils/approvalLabels";
 
 function resolveUserId(roleKey) {
   const users = userStore.getUsersByRole(roleKey);
@@ -88,10 +82,12 @@ function EnhancedApprovalCard({ item, userId, onAction }) {
   const outstandingReceiptCount = requester
     ? complianceStore.getOutstandingReceiptCount(requester.id)
     : 0;
+  const antiBypass = detectAntiBypass(item.requestedByUserId, requester?.departmentId);
 
   const isBlockedByCompliance = compliance?.isFundingBlocked === true || compliance?.outstandingEvidenceCount > 0;
   const isBlockedByReceipts = hasOutstandingReceipts;
   const isDepartmentFrozen = budget?.frozen === true;
+  const hasAntiBypassWarning = antiBypass.flagged;
   const isApprovalBlocked = isBlockedByCompliance || isBlockedByReceipts || isDepartmentFrozen;
 
   // Historical comparison (F4)
@@ -156,25 +152,45 @@ function EnhancedApprovalCard({ item, userId, onAction }) {
     onAction();
   }, [item, userId, note, onAction]);
 
-  const stageColor = APPROVAL_STAGE_COLORS[item.currentStage] || semanticStatus.info;
+  const noticeMessages = [];
+
+  if (isDepartmentFrozen) {
+    noticeMessages.push("Department budget is frozen.");
+  }
+
+  if (compliance?.isFundingBlocked) {
+    noticeMessages.push("Funding is blocked for this requester.");
+  }
+
+  if (compliance?.outstandingEvidenceCount > 0) {
+    noticeMessages.push(`Outstanding evidence: ${compliance.outstandingEvidenceCount}.`);
+  }
+
+  if (hasOutstandingReceipts) {
+    noticeMessages.push(
+      `Outstanding receipts must be uploaded before this request can move forward${outstandingReceiptCount > 0 ? ` (${outstandingReceiptCount})` : ""}.`
+    );
+  }
+
+  if (hasAntiBypassWarning) {
+    noticeMessages.push(
+      `Potential split-purchase bypass detected: ${antiBypass.count} requests totaling GHS ${antiBypass.total.toLocaleString()} in the last 7 days.`
+    );
+  }
+
+  if (costReasonableness) {
+    noticeMessages.push(
+      `Cost analysis: ${costReasonableness.label} (${costReasonableness.deviation > 0 ? "+" : ""}${Math.round(costReasonableness.deviation)}% vs avg GHS ${avgHistoricalAmount?.toLocaleString()}).`
+    );
+  }
 
   return (
     <>
       <Card>
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span
-                className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
-                style={{
-                  backgroundColor: stageColor.bg,
-                  color: stageColor.text,
-                }}
-              >
-                {APPROVAL_STAGE_LABELS[item.currentStage]}
-              </span>
-              <span className="text-xs text-gray-400 uppercase">{item.sourceType}</span>
-              {requester && <TrustBadge userId={requester.id} />}
+            <div className="mb-1 flex items-center gap-2 flex-wrap">
+              <span className="text-xs text-gray-400 uppercase">{formatApprovalSourceType(item.sourceType)}</span>
             </div>
             <h3 className="text-sm font-semibold truncate">{item.title}</h3>
             <p className="text-xs text-gray-500 mt-1 line-clamp-2">{item.description}</p>
@@ -182,27 +198,9 @@ function EnhancedApprovalCard({ item, userId, onAction }) {
               Amount: GHS {Number(item.amount).toLocaleString()} &middot; Requested{" "}
               {new Date(item.createdAt).toLocaleDateString()} &middot; By: {requester?.name || "Unknown"}
             </p>
-            <div className="mt-2"><ApprovalRouteBadge amount={item.amount} /></div>
-            {hasOutstandingReceipts && (
-              <div className="mt-2">
-                <StatusBadge variant="warning">
-                  Compliance Warning{outstandingReceiptCount > 0 ? ` (${outstandingReceiptCount} outstanding receipt${outstandingReceiptCount === 1 ? "" : "s"})` : ""}
-                </StatusBadge>
-              </div>
-            )}
-            <ComplianceBadge userId={item.requestedByUserId} />
-            <div className="mt-2">
-              <AntiBypassAlert userId={item.requestedByUserId} departmentId={requester?.departmentId} />
-            </div>
-            {costReasonableness && (
-              <div className="mt-2 flex items-center gap-2">
-                <span className="text-xs text-gray-500">Cost Analysis:</span>
-                <StatusBadge label={costReasonableness.label} variant={costReasonableness.variant} />
-                <span className="text-xs text-gray-400">
-                  ({costReasonableness.deviation > 0 ? "+" : ""}{Math.round(costReasonableness.deviation)}% vs avg GHS {avgHistoricalAmount?.toLocaleString()})
-                </span>
-              </div>
-            )}
+            {noticeMessages.length > 0 ? (
+              <InlineNotice className="mt-3">{noticeMessages.join(" ")}</InlineNotice>
+            ) : null}
           </div>
         </div>
 
@@ -223,23 +221,15 @@ function EnhancedApprovalCard({ item, userId, onAction }) {
           )}
         </div>
 
-        <div className="mt-3 border rounded p-3 bg-blue-50/50">
-          <p className="text-xs font-medium text-gray-600 mb-1">AI Advisory</p>
-          <p className="text-xs text-gray-500 italic">
+        <div className="mt-3 rounded border border-[var(--color-border)] p-3">
+          <p className="text-xs font-medium text-[var(--color-text-secondary)] mb-1">AI Advisory</p>
+          <p className="text-xs text-[var(--color-text-secondary)] italic">
             AI analysis will be available when the intelligence backend is connected.
             Risk assessment: {isApprovalBlocked ? "High risk - compliance issues detected." : costReasonableness?.variant === "warning" ? "Moderate risk - amount above historical average." : "Low risk - within normal parameters."}
           </p>
         </div>
 
         <div className="mt-4">
-          {isApprovalBlocked && (
-            <div className="text-xs text-red-600 mb-2">
-              {isDepartmentFrozen && "Department budget is frozen. "}
-              {compliance?.isFundingBlocked && "User is funding-blocked. "}
-              {compliance?.outstandingEvidenceCount > 0 && "User has outstanding evidence to submit."}
-              {hasOutstandingReceipts && "Outstanding receipts must be uploaded before this request can move past Financial Officer review. "}
-            </div>
-          )}
           {showAdjust && (
             <div className="flex items-center gap-2 mb-3">
               <label className="text-xs text-gray-600" htmlFor="adjustAmount">Adjusted Amount (GHS):</label>
@@ -260,15 +250,11 @@ function EnhancedApprovalCard({ item, userId, onAction }) {
               Reject
             </button>
             <button onClick={() => setShowAdjust(!showAdjust)} disabled={busy}
-              className="rounded border border-gray-300 px-3 py-1 text-xs hover:bg-gray-50 disabled:opacity-50">
+              className="rounded border border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-muted,rgba(255,255,255,0.04))] disabled:opacity-50">
               Adjust Amount
             </button>
             <button onClick={() => setConfirmAction("clarify")} disabled={busy}
-              className="rounded px-3 py-1 text-xs disabled:opacity-50"
-              style={{
-                backgroundColor: semanticStatus.warning.bg,
-                color: semanticStatus.warning.text,
-              }}>
+              className="rounded border border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-muted,rgba(255,255,255,0.04))] disabled:opacity-50">
               Return for Clarification
             </button>
           </div>
@@ -288,36 +274,15 @@ function EnhancedApprovalCard({ item, userId, onAction }) {
   );
 }
 
-function ComplianceBadge({ userId }) {
-  const compliance = complianceStore.getCompliance(userId);
-  if (!compliance) return null;
-  if (compliance.isFundingBlocked) {
-    return (
-      <span
-        className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold"
-        style={{
-          backgroundColor: semanticStatus.error.bg,
-          color: semanticStatus.error.text,
-        }}
-      >
-        Funding Blocked
-      </span>
-    );
-  }
-  if (compliance.outstandingEvidenceCount > 0) {
-    return (
-      <span
-        className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold"
-        style={{
-          backgroundColor: semanticStatus.warning.bg,
-          color: semanticStatus.warning.text,
-        }}
-      >
-        Evidence Pending ({compliance.outstandingEvidenceCount})
-      </span>
-    );
-  }
-  return null;
+function InlineNotice({ children, className = "" }) {
+  return (
+    <div
+      className={`border-l-4 pl-3 text-xs text-[var(--color-text-secondary)] ${className}`}
+      style={{ borderLeftColor: semanticStatus.warning.text }}
+    >
+      {children}
+    </div>
+  );
 }
 
 

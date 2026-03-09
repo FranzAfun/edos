@@ -26,6 +26,7 @@ import * as revenueStore from "../../../shared/services/revenueStore";
 import * as treasuryStore from "../../../shared/services/treasuryStore";
 import * as budgetStore from "../../../shared/services/budgetStore";
 import * as approvalStore from "../../../shared/services/approvalStore";
+import { getSupervisorLabel } from "../../../utils/supervisor";
 
 const CHART_COLORS = [
   "var(--color-accent, #2563EB)",
@@ -60,10 +61,9 @@ export default function ProfitLossPage() {
 
   const netPL = confirmedRevenue - totalSpent;
 
-  // Revenue by pillar for bar chart
-  const pillarSummary = revenueStore.getRevenueByPillarSummary();
-  const pillarData = Object.entries(pillarSummary).map(([pillar, amount]) => ({
-    name: pillar,
+  const supervisorSummary = revenueStore.getRevenueBySupervisorSummary();
+  const supervisorData = Object.entries(supervisorSummary).map(([supervisor, amount]) => ({
+    name: getSupervisorLabel(supervisor),
     revenue: amount,
   }));
 
@@ -133,10 +133,10 @@ export default function ProfitLossPage() {
       <PageSection title="Financial Breakdown">
         <Grid cols={2}>
           <Card>
-            <h3 className="text-sm font-semibold mb-3">Revenue by Pillar</h3>
-            {pillarData.length > 0 ? (
+            <h3 className="text-sm font-semibold mb-3">Revenue by Supervisor</h3>
+            {supervisorData.length > 0 ? (
               <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={pillarData} layout="vertical">
+                <BarChart data={supervisorData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                   <XAxis type="number" tick={{ fontSize: 11 }} />
                   <YAxis

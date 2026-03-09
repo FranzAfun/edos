@@ -17,6 +17,8 @@ import * as approvalStore from "../../../shared/services/approvalStore";
 import * as departmentStore from "../../../shared/services/departmentStore";
 import * as assetStore from "../../../shared/services/assetStore";
 import * as receiptStore from "../../../shared/services/receiptStore";
+import { formatApprovalSourceType, formatApprovalStage } from "../../../utils/approvalLabels";
+import { getSupervisorLabel } from "../../../utils/supervisor";
 
 async function exportToExcel(data, columns, fileName) {
   const XLSX = await import("xlsx");
@@ -137,7 +139,7 @@ function ExportButtons({ data, columns, title }) {
 function RevenueReport() {
   const revenue = useMemo(() => revenueStore.listRevenue(), []);
   const columns = [
-    { key: "pillar", label: "Pillar" },
+    { key: "supervisor", label: "Supervisor" },
     { key: "program", label: "Program" },
     { key: "productService", label: "Product/Service" },
     { key: "amount", label: "Amount (GHS)" },
@@ -146,10 +148,14 @@ function RevenueReport() {
     { key: "profitCategory", label: "Category" },
     { key: "recordedAt", label: "Date" },
   ];
+  const rows = revenue.map((entry) => ({
+    ...entry,
+    supervisor: getSupervisorLabel(entry.supervisor),
+  }));
   return (
     <div>
-      <ExportButtons data={revenue} columns={columns} title="Revenue_Report" />
-      <DataTable columns={columns} data={revenue} pageSize={10} emptyText="No revenue data." />
+      <ExportButtons data={rows} columns={columns} title="Revenue_Report" />
+      <DataTable columns={columns} data={rows} pageSize={10} emptyText="No revenue data." />
     </div>
   );
 }
@@ -190,7 +196,15 @@ function BudgetReport() {
 }
 
 function ApprovalsReport() {
-  const approvals = useMemo(() => approvalStore.listApprovals(), []);
+  const approvals = useMemo(
+    () =>
+      approvalStore.listApprovals().map((approval) => ({
+        ...approval,
+        sourceType: formatApprovalSourceType(approval.sourceType),
+        currentStage: formatApprovalStage(approval.currentStage),
+      })),
+    []
+  );
   const columns = [
     { key: "title", label: "Title" },
     { key: "amount", label: "Amount (GHS)" },

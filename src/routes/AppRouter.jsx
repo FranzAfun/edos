@@ -139,6 +139,14 @@ export default function AppRouter() {
             }
           />
           <Route
+            path="kpi/contribution"
+            element={
+              <RequirePermission permission={permissions.VIEW_CONTRIBUTIONS}>
+                <SpecialContributionsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
             path="fund-request"
             element={
               <RequirePermission permission={permissions.VIEW_FUND_REQUEST}>
@@ -170,14 +178,7 @@ export default function AppRouter() {
               </RequirePermission>
             }
           />
-          <Route
-            path="contributions"
-            element={
-              <RequirePermission permission={permissions.VIEW_CONTRIBUTIONS}>
-                <SpecialContributionsPage />
-              </RequirePermission>
-            }
-          />
+          <Route path="contributions" element={<Navigate to="/executive/kpi/contribution" replace />} />
           <Route
             path="notifications"
             element={

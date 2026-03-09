@@ -1,7 +1,7 @@
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Fund Request Form (F1)
- * Executive submits: pillar, program, purpose, amount, vendor quotation,
+ * Executive submits: supervisor, program, purpose, amount, vendor quotation,
  * expected outcome, attachment. Budget check before submission.
  */
 import { useState, useCallback } from "react";
@@ -18,8 +18,7 @@ import * as approvalStore from "../../../shared/services/approvalStore";
 import * as notificationStore from "../../../shared/services/notificationStore";
 import useRole from "../../../hooks/useRole";
 import { semanticStatus } from "@/theme/semanticColors";
-
-const PILLARS = ["Education", "Manufacturing", "Softwares", "Open Labs"];
+import { SUPERVISOR_OPTIONS, getSupervisorLabel } from "../../../utils/supervisor";
 
 function resolveUser(roleKey) {
   const users = userStore.getUsersByRole(roleKey);
@@ -27,7 +26,7 @@ function resolveUser(roleKey) {
 }
 
 const RULES = {
-  pillar: (v) => (!v ? "Pillar is required" : null),
+  supervisor: (v) => (!v ? "Supervisor is required" : null),
   program: (v) => (!v?.trim() ? "Program name is required" : null),
   purpose: (v) => (!v?.trim() ? "Purpose is required" : v.trim().length < 10 ? "Purpose must be at least 10 characters" : null),
   amount: (v) => (!v || Number(v) <= 0 ? "Amount must be greater than 0" : null),
@@ -49,7 +48,7 @@ export default function FundRequestForm() {
 
   const { values, errors, handleChange, validate, reset } = useFormValidation(
     {
-      pillar: "",
+      supervisor: "",
       program: "",
       purpose: "",
       amount: "",
@@ -67,21 +66,25 @@ export default function FundRequestForm() {
       setBudgetWarning(null);
       return;
     }
+
     const budget = budgetStore.getBudgetByDepartment(deptId);
     if (!budget) {
       setBudgetWarning(null);
       return;
     }
+
     if (budget.frozen) {
       setBudgetWarning("Department budget is frozen. Requests cannot be submitted.");
       return;
     }
+
     if (Number(values.amount) > budget.remainingLimit) {
       setBudgetWarning(
         `Insufficient budget. Remaining: GHS ${budget.remainingLimit.toLocaleString()}. Requested: GHS ${Number(values.amount).toLocaleString()}.`
       );
       return;
     }
+
     setBudgetWarning(null);
   }, [values.amount, values.departmentId, currentUserDeptId]);
 
@@ -101,11 +104,10 @@ export default function FundRequestForm() {
       const budget = budgetStore.getBudgetByDepartment(values.departmentId || currentUserDeptId);
       if (budget?.frozen) return;
 
-      // Create fund request
-      const fr = fundRequestStore.createFundRequest({
+      const fundRequest = fundRequestStore.createFundRequest({
         userId: currentUserId,
         departmentId: values.departmentId || currentUserDeptId,
-        pillar: values.pillar,
+        supervisor: values.supervisor,
         program: values.program,
         purpose: values.purpose,
         amount: Number(values.amount),
@@ -114,33 +116,36 @@ export default function FundRequestForm() {
         attachmentName: values.attachmentName || null,
       });
 
-      // Create linked approval
       const approval = approvalStore.createApproval({
         title: `Fund Request: ${values.program}`,
         description: values.purpose,
         amount: Number(values.amount),
         sourceType: "FUND_REQUEST",
-        sourceId: fr.id,
+        sourceId: fundRequest.id,
+        supervisor: values.supervisor,
         requestedByUserId: currentUserId,
       });
 
-      // Update fund request with approval link
-      fundRequestStore.updateFundRequest(fr.id, { approvalId: approval.id });
+      fundRequestStore.updateFundRequest(fundRequest.id, { approvalId: approval.id });
 
-      // Notify FO
-      const foUser = resolveUser("finance");
-      if (foUser) {
+      const technicalReviewer = resolveUser(values.supervisor);
+      if (technicalReviewer) {
         notificationStore.createNotification({
-          toUserId: foUser.id,
+          toUserId: technicalReviewer.id,
           type: "FUND_REQUEST",
-          message: `New fund request: "${values.program}" for GHS ${Number(values.amount).toLocaleString()} from ${currentUserName || "Unknown"}.`,
+          message: `New fund request: "${values.program}" for GHS ${Number(values.amount).toLocaleString()} from ${currentUserName || "Unknown"} awaits ${getSupervisorLabel(values.supervisor)} review.`,
         });
       }
 
       setSubmitted(true);
       reset({
-        pillar: "", program: "", purpose: "", amount: "",
-        vendorQuotation: "", expectedOutcome: "", attachmentName: "",
+        supervisor: "",
+        program: "",
+        purpose: "",
+        amount: "",
+        vendorQuotation: "",
+        expectedOutcome: "",
+        attachmentName: "",
         departmentId: currentUserDeptId || "",
       });
       setTimeout(() => setSubmitted(false), 4000);
@@ -171,25 +176,27 @@ export default function FundRequestForm() {
           <form onSubmit={handleSubmit} noValidate>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
               <FormField
-                label="Pillar"
-                name="pillar"
+                label="Supervisor"
+                name="supervisor"
                 type="select"
-                value={values.pillar}
+                value={values.supervisor}
                 onChange={handleChange}
-                error={errors.pillar}
+                error={errors.supervisor}
                 required
               >
                 <select
-                  id="field-pillar"
-                  name="pillar"
-                  value={values.pillar}
+                  id="field-supervisor"
+                  name="supervisor"
+                  value={values.supervisor}
                   onChange={handleChange}
                   required
-                  className={`w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${errors.pillar ? "border-[var(--color-danger)] focus:ring-[var(--color-danger)]" : "border-gray-300 focus:ring-[var(--color-accent)]"}`}
+                  className={`w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${errors.supervisor ? "border-[var(--color-danger)] focus:ring-[var(--color-danger)]" : "border-gray-300 focus:ring-[var(--color-accent)]"}`}
                 >
-                  <option value="">Select pillar</option>
-                  {PILLARS.map((p) => (
-                    <option key={p} value={p}>{p}</option>
+                  <option value="">Select supervisor</option>
+                  {SUPERVISOR_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
                   ))}
                 </select>
               </FormField>
@@ -232,8 +239,10 @@ export default function FundRequestForm() {
                   className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
                 >
                   <option value="">Select department</option>
-                  {departments.map((d) => (
-                    <option key={d.id} value={d.id}>{d.name}</option>
+                  {departments.map((department) => (
+                    <option key={department.id} value={department.id}>
+                      {department.name}
+                    </option>
                   ))}
                 </select>
               </FormField>
@@ -280,15 +289,13 @@ export default function FundRequestForm() {
               helpText="Enter attachment file name. File uploads will be available when backend is connected."
             />
 
-            {/* Approval Route Indicator (F2) */}
             {values.amount > 0 && (
               <div className="mb-4">
-                <p className="text-xs font-medium text-gray-500 mb-1">Approval Path</p>
+                <p className="mb-1 text-xs font-medium text-gray-500">Approval Path</p>
                 <ApprovalRouteBadge amount={Number(values.amount)} />
               </div>
             )}
 
-            {/* Budget Warning */}
             {budgetWarning && (
               <div
                 className="mb-4 rounded p-3 text-sm"
@@ -306,7 +313,7 @@ export default function FundRequestForm() {
               <button
                 type="submit"
                 disabled={!!budgetWarning && budgetWarning.includes("frozen")}
-                className="rounded bg-[var(--color-accent)] px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded bg-[var(--color-accent)] px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Submit Request
               </button>

@@ -19,6 +19,7 @@ import * as receiptStore from "../../../shared/services/receiptStore";
 import * as assetStore from "../../../shared/services/assetStore";
 import * as departmentStore from "../../../shared/services/departmentStore";
 import { isRejectedStage } from "../../../governance/approvalStages";
+import { getSupervisorLabel } from "../../../utils/supervisor";
 
 export default function TransparencyPage() {
   useDocumentTitle("Transparency");
@@ -140,13 +141,13 @@ export default function TransparencyPage() {
 
       <PageSection title="Revenue Breakdown">
         <Grid cols={3}>
-          {Object.entries(revenueStore.getRevenueByPillarSummary()).map(([pillar, amount]) => (
-            <Card key={pillar}>
-              <p className="text-xs text-gray-500">{pillar}</p>
+          {Object.entries(revenueStore.getRevenueBySupervisorSummary()).map(([supervisor, amount]) => (
+            <Card key={supervisor}>
+              <p className="text-xs text-gray-500">{getSupervisorLabel(supervisor)}</p>
               <p className="text-lg font-bold mt-1">GHS {amount.toLocaleString()}</p>
             </Card>
           ))}
-          {Object.keys(revenueStore.getRevenueByPillarSummary()).length === 0 && (
+          {Object.keys(revenueStore.getRevenueBySupervisorSummary()).length === 0 && (
             <Card><p className="text-sm text-gray-500">No revenue data recorded.</p></Card>
           )}
         </Grid>
