@@ -15,6 +15,7 @@ import * as budgetStore from "../../../shared/services/budgetStore";
 import * as complianceStore from "../../../shared/services/complianceStore";
 import * as approvalStore from "../../../shared/services/approvalStore";
 import * as auditStore from "../../../shared/services/auditStore";
+import { isTerminal } from "../../../governance/approvalStages";
 
 export default function AdminDashboard() {
   useDocumentTitle("Admin Dashboard");
@@ -104,7 +105,7 @@ export default function AdminDashboard() {
           />
           <MetricCard
             label="Pending"
-            value={approvals.filter((a) => !["APPROVED", "REJECTED"].includes(a.currentStage)).length}
+            value={approvals.filter((a) => !isTerminal(a.currentStage)).length}
           />
           <MetricCard
             label="Approved"

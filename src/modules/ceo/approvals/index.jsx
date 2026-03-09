@@ -21,6 +21,7 @@ import {
   APPROVAL_STAGE_LABELS,
   APPROVAL_STAGE_COLORS,
 } from "../../../governance/approvalStages";
+import { semanticStatus } from "@/theme/semanticColors";
 import ApprovalRouteBadge from "../../../components/ui/ApprovalRouteBadge";
 import AntiBypassAlert from "../../../components/ui/AntiBypassAlert";
 import TrustBadge from "../../../components/ui/TrustBadge";
@@ -110,7 +111,7 @@ function CeoApprovalCard({ item, userId, onAction }) {
     onAction();
   }, [item, userId, note, onAction]);
 
-  const stageColor = APPROVAL_STAGE_COLORS[item.currentStage] || "bg-gray-100 text-gray-800";
+  const stageColor = APPROVAL_STAGE_COLORS[item.currentStage] || semanticStatus.info;
 
   return (
     <>
@@ -118,7 +119,13 @@ function CeoApprovalCard({ item, userId, onAction }) {
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${stageColor}`}>
+              <span
+                className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
+                style={{
+                  backgroundColor: stageColor.bg,
+                  color: stageColor.text,
+                }}
+              >
                 {APPROVAL_STAGE_LABELS[item.currentStage]}
               </span>
               <span className="text-xs text-gray-400 uppercase">{item.sourceType}</span>
@@ -140,9 +147,15 @@ function CeoApprovalCard({ item, userId, onAction }) {
 
         {/* Justification Review Panel for > 3,000 (F5) */}
         {requiresJustification && (
-          <div className="mt-3 border-l-4 border-red-400 bg-red-50 p-3 rounded-r">
-            <p className="text-xs font-semibold text-red-800 mb-1">Mandatory Justification Review</p>
-            <p className="text-xs text-red-700">
+          <div
+            className="mt-3 rounded-r p-3"
+            style={{
+              backgroundColor: semanticStatus.error.bg,
+              color: semanticStatus.error.text,
+            }}
+          >
+            <p className="text-xs font-semibold mb-1">Mandatory Justification Review</p>
+            <p className="text-xs">
               This request exceeds GHS 3,000 and requires CEO justification review.
               Amount: GHS {Number(item.amount).toLocaleString()}.
             </p>
@@ -187,12 +200,16 @@ function CeoApprovalCard({ item, userId, onAction }) {
               Modify Amount
             </button>
             <button onClick={() => setConfirmAction("clarify")} disabled={busy}
-              className="rounded border border-amber-400 bg-amber-50 px-3 py-1 text-xs text-amber-700 hover:bg-amber-100 disabled:opacity-50">
+              className="rounded px-3 py-1 text-xs disabled:opacity-50"
+              style={{
+                backgroundColor: semanticStatus.warning.bg,
+                color: semanticStatus.warning.text,
+              }}>
               Return for Clarification
             </button>
           </div>
           {requiresJustification && !note.trim() && (
-            <p className="text-xs text-red-500 mt-1">A justification note is required for requests exceeding GHS 3,000.</p>
+            <p className="text-xs mt-1" style={{ color: semanticStatus.error.text }}>A justification note is required for requests exceeding GHS 3,000.</p>
           )}
         </div>
       </Card>
@@ -214,10 +231,30 @@ function ComplianceBadge({ userId }) {
   const compliance = complianceStore.getCompliance(userId);
   if (!compliance) return null;
   if (compliance.isFundingBlocked) {
-    return <span className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold bg-red-100 text-red-800">Funding Blocked</span>;
+    return (
+      <span
+        className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold"
+        style={{
+          backgroundColor: semanticStatus.error.bg,
+          color: semanticStatus.error.text,
+        }}
+      >
+        Funding Blocked
+      </span>
+    );
   }
   if (compliance.outstandingEvidenceCount > 0) {
-    return <span className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800">Evidence Pending ({compliance.outstandingEvidenceCount})</span>;
+    return (
+      <span
+        className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold"
+        style={{
+          backgroundColor: semanticStatus.warning.bg,
+          color: semanticStatus.warning.text,
+        }}
+      >
+        Evidence Pending ({compliance.outstandingEvidenceCount})
+      </span>
+    );
   }
   return null;
 }

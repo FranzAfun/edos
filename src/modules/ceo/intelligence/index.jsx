@@ -34,6 +34,7 @@ import * as approvalStore from "../../../shared/services/approvalStore";
 import * as kpiStore from "../../../shared/services/kpiStore";
 import * as userStore from "../../../shared/services/userStore";
 import * as departmentStore from "../../../shared/services/departmentStore";
+import { isTerminal } from "../../../governance/approvalStages";
 import { getUserKpiPercentage } from "../../../shared/services/trustLevelStore";
 
 const CHART_COLORS = {
@@ -129,7 +130,7 @@ function generateRiskData() {
   const risks = [];
 
   const highValueApprovals = approvals.filter(
-    (a) => a.amount > 3000 && !["APPROVED", "REJECTED"].includes(a.currentStage)
+    (a) => a.amount > 3000 && !isTerminal(a.currentStage)
   );
   if (highValueApprovals.length > 0) {
     risks.push({

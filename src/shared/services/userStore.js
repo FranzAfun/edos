@@ -83,11 +83,21 @@ function seedIfEmpty() {
       createdAt: now,
     },
     {
-      id: "user-ops-1",
+      id: "user-cto-1",
       name: "Chidi Nwosu",
-      email: "ops1@edos.gov",
-      authorityLevel: 4,
-      roleKey: "operations",
+      email: "cto@edos.gov",
+      authorityLevel: 2,
+      roleKey: "cto",
+      departmentId: "dept-operations",
+      featureFlags: [],
+      createdAt: now,
+    },
+    {
+      id: "user-coo-1",
+      name: "Halima Garba",
+      email: "coo@edos.gov",
+      authorityLevel: 2,
+      roleKey: "coo",
       departmentId: "dept-operations",
       featureFlags: [],
       createdAt: now,
@@ -132,9 +142,47 @@ function migrateDepartmentField() {
   }
 }
 
+function ensureTechnicalReviewUsers() {
+  const users = read();
+  const existingRoles = new Set(users.map((user) => user.roleKey));
+  if (existingRoles.has("cto") && existingRoles.has("coo")) return;
+
+  const now = new Date().toISOString();
+  const nextUsers = [...users];
+
+  if (!existingRoles.has("cto")) {
+    nextUsers.push({
+      id: "user-cto-1",
+      name: "Chidi Nwosu",
+      email: "cto@edos.gov",
+      authorityLevel: 2,
+      roleKey: "cto",
+      departmentId: "dept-operations",
+      featureFlags: [],
+      createdAt: now,
+    });
+  }
+
+  if (!existingRoles.has("coo")) {
+    nextUsers.push({
+      id: "user-coo-1",
+      name: "Halima Garba",
+      email: "coo@edos.gov",
+      authorityLevel: 2,
+      roleKey: "coo",
+      departmentId: "dept-operations",
+      featureFlags: [],
+      createdAt: now,
+    });
+  }
+
+  write(nextUsers);
+}
+
 // Auto-seed then migrate on import
 seedIfEmpty();
 migrateDepartmentField();
+ensureTechnicalReviewUsers();
 
 // ---------------------------------------------------------------------------
 // CRUD

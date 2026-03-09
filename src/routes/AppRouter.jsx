@@ -62,6 +62,24 @@ function RoleNotificationsRedirect() {
   return <Navigate to={`${defaultRoute}/notifications`} replace />;
 }
 
+function RoleApprovalsRedirect() {
+  const { role } = useRole();
+
+  if (role === "cto" || role === "coo") {
+    return <Navigate to="/operations/approvals" replace />;
+  }
+
+  if (role === "finance") {
+    return <Navigate to="/finance/approvals" replace />;
+  }
+
+  if (role === "ceo") {
+    return <Navigate to="/ceo/approvals" replace />;
+  }
+
+  return <Navigate to={roles[role]?.defaultRoute || "/executive"} replace />;
+}
+
 function LoadingFallback() {
   return (
     <div className="mx-auto max-w-6xl space-y-4 p-6">
@@ -77,6 +95,7 @@ export default function AppRouter() {
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/" element={<RoleRootRedirect />} />
+          <Route path="/approvals" element={<RoleApprovalsRedirect />} />
 
         <Route path="/executive" element={<ExecutiveLayout />}>
           <Route
@@ -426,7 +445,7 @@ export default function AppRouter() {
           <Route
             path="approvals"
             element={
-              <RequirePermission permission={permissions.VIEW_OPS_APPROVALS}>
+              <RequirePermission permission={permissions.VIEW_TECH_APPROVALS}>
                 <OperationsApprovalsPage />
               </RequirePermission>
             }

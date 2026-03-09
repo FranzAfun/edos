@@ -20,6 +20,7 @@ import {
   APPROVAL_STAGE_LABELS,
   APPROVAL_STAGE_COLORS,
 } from "../../../governance/approvalStages";
+import { semanticStatus } from "@/theme/semanticColors";
 import ApprovalRouteBadge from "../../../components/ui/ApprovalRouteBadge";
 import AntiBypassAlert from "../../../components/ui/AntiBypassAlert";
 import TrustBadge from "../../../components/ui/TrustBadge";
@@ -81,10 +82,17 @@ function EnhancedApprovalCard({ item, userId, onAction }) {
   const requester = userStore.listUsers().find((u) => u.id === item.requestedByUserId);
   const compliance = requester ? complianceStore.getCompliance(requester.id) : null;
   const budget = requester ? budgetStore.getBudgetByDepartment(requester.departmentId) : null;
+  const hasOutstandingReceipts = requester
+    ? complianceStore.hasOutstandingReceipts(requester.id)
+    : false;
+  const outstandingReceiptCount = requester
+    ? complianceStore.getOutstandingReceiptCount(requester.id)
+    : 0;
 
   const isBlockedByCompliance = compliance?.isFundingBlocked === true || compliance?.outstandingEvidenceCount > 0;
+  const isBlockedByReceipts = hasOutstandingReceipts;
   const isDepartmentFrozen = budget?.frozen === true;
-  const isApprovalBlocked = isBlockedByCompliance || isDepartmentFrozen;
+  const isApprovalBlocked = isBlockedByCompliance || isBlockedByReceipts || isDepartmentFrozen;
 
   // Historical comparison (F4)
   const historicalRequests = useMemo(() => {
@@ -148,7 +156,7 @@ function EnhancedApprovalCard({ item, userId, onAction }) {
     onAction();
   }, [item, userId, note, onAction]);
 
-  const stageColor = APPROVAL_STAGE_COLORS[item.currentStage] || "bg-gray-100 text-gray-800";
+  const stageColor = APPROVAL_STAGE_COLORS[item.currentStage] || semanticStatus.info;
 
   return (
     <>
@@ -156,7 +164,13 @@ function EnhancedApprovalCard({ item, userId, onAction }) {
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${stageColor}`}>
+              <span
+                className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
+                style={{
+                  backgroundColor: stageColor.bg,
+                  color: stageColor.text,
+                }}
+              >
                 {APPROVAL_STAGE_LABELS[item.currentStage]}
               </span>
               <span className="text-xs text-gray-400 uppercase">{item.sourceType}</span>
@@ -169,6 +183,13 @@ function EnhancedApprovalCard({ item, userId, onAction }) {
               {new Date(item.createdAt).toLocaleDateString()} &middot; By: {requester?.name || "Unknown"}
             </p>
             <div className="mt-2"><ApprovalRouteBadge amount={item.amount} /></div>
+            {hasOutstandingReceipts && (
+              <div className="mt-2">
+                <StatusBadge variant="warning">
+                  Compliance Warning{outstandingReceiptCount > 0 ? ` (${outstandingReceiptCount} outstanding receipt${outstandingReceiptCount === 1 ? "" : "s"})` : ""}
+                </StatusBadge>
+              </div>
+            )}
             <ComplianceBadge userId={item.requestedByUserId} />
             <div className="mt-2">
               <AntiBypassAlert userId={item.requestedByUserId} departmentId={requester?.departmentId} />
@@ -216,6 +237,7 @@ function EnhancedApprovalCard({ item, userId, onAction }) {
               {isDepartmentFrozen && "Department budget is frozen. "}
               {compliance?.isFundingBlocked && "User is funding-blocked. "}
               {compliance?.outstandingEvidenceCount > 0 && "User has outstanding evidence to submit."}
+              {hasOutstandingReceipts && "Outstanding receipts must be uploaded before this request can move past Financial Officer review. "}
             </div>
           )}
           {showAdjust && (
@@ -242,7 +264,11 @@ function EnhancedApprovalCard({ item, userId, onAction }) {
               Adjust Amount
             </button>
             <button onClick={() => setConfirmAction("clarify")} disabled={busy}
-              className="rounded border border-amber-400 bg-amber-50 px-3 py-1 text-xs text-amber-700 hover:bg-amber-100 disabled:opacity-50">
+              className="rounded px-3 py-1 text-xs disabled:opacity-50"
+              style={{
+                backgroundColor: semanticStatus.warning.bg,
+                color: semanticStatus.warning.text,
+              }}>
               Return for Clarification
             </button>
           </div>
@@ -266,10 +292,30 @@ function ComplianceBadge({ userId }) {
   const compliance = complianceStore.getCompliance(userId);
   if (!compliance) return null;
   if (compliance.isFundingBlocked) {
-    return <span className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold bg-red-100 text-red-800">Funding Blocked</span>;
+    return (
+      <span
+        className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold"
+        style={{
+          backgroundColor: semanticStatus.error.bg,
+          color: semanticStatus.error.text,
+        }}
+      >
+        Funding Blocked
+      </span>
+    );
   }
   if (compliance.outstandingEvidenceCount > 0) {
-    return <span className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800">Evidence Pending ({compliance.outstandingEvidenceCount})</span>;
+    return (
+      <span
+        className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold"
+        style={{
+          backgroundColor: semanticStatus.warning.bg,
+          color: semanticStatus.warning.text,
+        }}
+      >
+        Evidence Pending ({compliance.outstandingEvidenceCount})
+      </span>
+    );
   }
   return null;
 }

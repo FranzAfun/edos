@@ -1,32 +1,34 @@
+import { AUTHORITY_LEVEL, ROLES } from "./roles";
+
 export const AUTHORITIES = {
-  executive: {
-    level: 1,
-    label: "Executive Authority",
-    enforcementWeight: 1,
-  },
-  dept_head: {
-    level: 2,
-    label: "Department Head Authority",
-    enforcementWeight: 2,
-  },
-  finance: {
-    level: 3,
-    label: "Financial Officer Authority",
-    enforcementWeight: 3,
-  },
-  operations: {
-    level: 4,
-    label: "Operations Authority",
-    enforcementWeight: 4,
-  },
-  ceo: {
-    level: 5,
-    label: "Chief Executive Authority",
-    enforcementWeight: 5,
-  },
-  admin: {
-    level: 0,
+  [ROLES.ADMIN]: {
+    level: AUTHORITY_LEVEL.ADMIN,
     label: "System Administration",
-    enforcementWeight: 0,
+    enforcementWeight: AUTHORITY_LEVEL.ADMIN,
+  },
+  [ROLES.CEO]: {
+    level: AUTHORITY_LEVEL.CEO,
+    label: "Chief Executive Authority",
+    enforcementWeight: AUTHORITY_LEVEL.CEO,
+  },
+  [ROLES.CTO]: {
+    level: AUTHORITY_LEVEL.CTO,
+    label: "Chief Technology Officer Authority",
+    enforcementWeight: AUTHORITY_LEVEL.CTO,
+  },
+  [ROLES.COO]: {
+    level: AUTHORITY_LEVEL.COO,
+    label: "Chief Operations Officer Authority",
+    enforcementWeight: AUTHORITY_LEVEL.COO,
+  },
+  [ROLES.FINANCE]: {
+    level: AUTHORITY_LEVEL.FINANCE,
+    label: "Financial Officer Authority",
+    enforcementWeight: AUTHORITY_LEVEL.FINANCE,
+  },
+  [ROLES.EXECUTIVE]: {
+    level: AUTHORITY_LEVEL.EXECUTIVE,
+    label: "Executive Authority",
+    enforcementWeight: AUTHORITY_LEVEL.EXECUTIVE,
   },
 };

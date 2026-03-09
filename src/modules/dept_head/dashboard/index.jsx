@@ -17,6 +17,7 @@ import * as approvalStore from "../../../shared/services/approvalStore";
 import * as kpiStore from "../../../shared/services/kpiStore";
 import * as notificationStore from "../../../shared/services/notificationStore";
 import * as departmentStore from "../../../shared/services/departmentStore";
+import { isTerminal } from "../../../governance/approvalStages";
 import useRole from "../../../hooks/useRole";
 
 function resolveUser(roleKey) {
@@ -56,7 +57,7 @@ export default function DeptHeadDashboard() {
   }, [subordinates]);
 
   const pendingCount = subordinateRequests.filter(
-    (r) => !["APPROVED", "REJECTED"].includes(r.currentStage)
+    (r) => !isTerminal(r.currentStage)
   ).length;
 
   return (
@@ -182,7 +183,7 @@ function SubordinateRequestCard({ request, currentUser }) {
     setConfirmRecommend(false);
   }, [request, currentUser]);
 
-  const isPending = !["APPROVED", "REJECTED"].includes(request.currentStage);
+  const isPending = !isTerminal(request.currentStage);
 
   return (
     <>

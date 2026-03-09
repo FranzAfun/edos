@@ -20,6 +20,7 @@ import * as approvalStore from "../../../shared/services/approvalStore";
 import * as userStore from "../../../shared/services/userStore";
 import * as notificationStore from "../../../shared/services/notificationStore";
 import useRole from "../../../hooks/useRole";
+import { isOperationalRole } from "../../../config/roles";
 
 const STATUS_VARIANT = {
   AWAITING_RECEIPT: "warning",
@@ -53,7 +54,7 @@ export default function ReceiptsPage() {
   const verifiedCount = receipts.filter((r) => r.verificationStatus === "VERIFIED").length;
   const discrepancyCount = receipts.filter((r) => r.verificationStatus === "DISCREPANCY" || r.verificationStatus === "ESCALATED").length;
 
-  const isOps = role === "operations";
+  const isOps = isOperationalRole(role);
 
   return (
     <div>
@@ -73,7 +74,7 @@ export default function ReceiptsPage() {
         </PageSection>
       )}
 
-      {/* F8: Verification panel for Operations */}
+      {/* F8: Verification panel for CTO/COO */}
       {isOps && (
         <PageSection title="Verify Receipts" subtitle="Review uploaded receipts for accuracy">
           <Grid cols={1}>
@@ -157,14 +158,14 @@ function UploadReceiptPanel({ onUploaded }) {
         actualAmount: Number(values.actualAmount),
         receiptDate: values.receiptDate,
       });
-      const opsUser = resolveUser("operations");
-      if (opsUser) {
+      const reviewerUsers = [resolveUser("cto"), resolveUser("coo")].filter(Boolean);
+      reviewerUsers.forEach((reviewerUser) => {
         notificationStore.createNotification({
-          toUserId: opsUser.id,
+          toUserId: reviewerUser.id,
           type: "RECEIPT_UPLOADED",
           message: `Receipt uploaded for verification — GHS ${Number(values.actualAmount).toLocaleString()}.`,
         });
-      }
+      });
       reset();
       setSelectedId("");
       onUploaded();
@@ -249,7 +250,7 @@ function UploadReceiptPanel({ onUploaded }) {
 }
 
 /**
- * F8: Operations receipt verification card
+ * F8: CTO/COO receipt verification card
  */
 function VerifyReceiptCard({ receipt, onVerified, role }) {
   const [confirmAction, setConfirmAction] = useState(null);

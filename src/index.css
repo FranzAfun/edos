@@ -14,9 +14,11 @@
   --color-text-muted: #94A3B8;
   --color-border: #E2E8F0;
   --color-accent: #2563EB;
-  --color-success: #16A34A;
-  --color-warning: #D97706;
-  --color-danger: #DC2626;
+  --color-success: rgb(16 185 129);
+  --color-warning: rgb(245 158 11);
+  --color-danger: rgb(239 68 68);
+  --color-info: rgb(113 180 255);
+  --color-status-text: #0F172A;
 
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
@@ -37,9 +39,7 @@
   --color-text-muted: #64748B;
   --color-border: #334155;
   --color-accent: #3B82F6;
-  --color-success: #22C55E;
-  --color-warning: #F59E0B;
-  --color-danger: #EF4444;
+  --color-status-text: #FFFFFF;
 }
 
 body {

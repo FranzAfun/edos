@@ -23,6 +23,9 @@
 import { APPROVAL_STAGES } from "../../governance/approvalStages";
 
 const KEY = "edos_approvals";
+const LEGACY_STAGE_MAP = {
+  PENDING_OPERATIONS: APPROVAL_STAGES.PENDING_TECH_REVIEW,
+};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -41,8 +44,40 @@ function read() {
   }
 }
 
+function normalizeStage(stage) {
+  return LEGACY_STAGE_MAP[stage] || stage;
+}
+
 function write(data) {
   localStorage.setItem(KEY, JSON.stringify(data));
+}
+
+function migrateLegacyStages() {
+  const approvals = read();
+  let changed = false;
+
+  const migrated = approvals.map((approval) => {
+    const currentStage = normalizeStage(approval.currentStage);
+    const history = (approval.history || []).map((entry) => {
+      const stage = normalizeStage(entry.stage);
+      if (stage !== entry.stage) changed = true;
+      return { ...entry, stage };
+    });
+
+    if (currentStage !== approval.currentStage) {
+      changed = true;
+    }
+
+    return {
+      ...approval,
+      currentStage,
+      history,
+    };
+  });
+
+  if (changed) {
+    write(migrated);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -64,10 +99,10 @@ function seedIfEmpty() {
       sourceType: "BUDGET",
       sourceId: null,
       requestedByUserId: "user-exec-1",
-      currentStage: APPROVAL_STAGES.PENDING_FO,
+      currentStage: APPROVAL_STAGES.PENDING_TECH_REVIEW,
       history: [
         {
-          stage: APPROVAL_STAGES.PENDING_FO,
+          stage: APPROVAL_STAGES.PENDING_TECH_REVIEW,
           action: "CREATED",
           userId: "user-exec-1",
           note: "Initial submission",
@@ -84,10 +119,10 @@ function seedIfEmpty() {
       sourceType: "PROCUREMENT",
       sourceId: null,
       requestedByUserId: "user-depthead-1",
-      currentStage: APPROVAL_STAGES.PENDING_OPERATIONS,
+      currentStage: APPROVAL_STAGES.PENDING_FO,
       history: [
         {
-          stage: APPROVAL_STAGES.PENDING_FO,
+          stage: APPROVAL_STAGES.PENDING_TECH_REVIEW,
           action: "CREATED",
           userId: "user-depthead-1",
           note: "Initial submission",
@@ -96,8 +131,8 @@ function seedIfEmpty() {
         {
           stage: APPROVAL_STAGES.PENDING_FO,
           action: "APPROVED",
-          userId: "user-finance-1",
-          note: "Financial review passed",
+          userId: "user-cto-1",
+          note: "Technical review passed",
           timestamp: now,
         },
       ],
@@ -110,6 +145,7 @@ function seedIfEmpty() {
 
 // Auto-seed on import
 seedIfEmpty();
+migrateLegacyStages();
 
 // ---------------------------------------------------------------------------
 // CRUD
@@ -129,10 +165,10 @@ export function createApproval(payload) {
   const entry = {
     ...payload,
     id: generateId(),
-    currentStage: APPROVAL_STAGES.PENDING_FO,
+    currentStage: APPROVAL_STAGES.PENDING_TECH_REVIEW,
     history: [
       {
-        stage: APPROVAL_STAGES.PENDING_FO,
+        stage: APPROVAL_STAGES.PENDING_TECH_REVIEW,
         action: "CREATED",
         userId: payload.requestedByUserId,
         note: payload.note || "Initial submission",

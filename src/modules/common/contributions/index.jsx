@@ -16,6 +16,7 @@ import useFormValidation from "../../../shared/hooks/useFormValidation";
 import * as specialContributionStore from "../../../shared/services/specialContributionStore";
 import * as userStore from "../../../shared/services/userStore";
 import useRole from "../../../hooks/useRole";
+import { isOperationalRole } from "../../../config/roles";
 
 const STATUS_VARIANT = {
   PENDING: "warning",
@@ -47,7 +48,7 @@ export default function SpecialContributionsPage() {
     .reduce((s, c) => s + (c.bonusScore || 0), 0);
 
   const canReview = role === "ceo" || role === "admin";
-  const canSubmit = role === "executive" || role === "dept_head" || role === "operations";
+  const canSubmit = role === "executive" || role === "dept_head" || isOperationalRole(role);
 
   return (
     <div>

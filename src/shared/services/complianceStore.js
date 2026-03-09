@@ -9,15 +9,19 @@
  * {
  *   userId: string,
  *   outstandingEvidenceCount: number,
+ *   outstandingReceiptCount?: number,
  *   isFundingBlocked: boolean,
  *   lastUpdated: string,
  *   flaggedReason: string
  * }
  */
 
+import * as approvalStoreModule from "./approvalStore";
+import * as receiptStoreModule from "./receiptStore";
 import * as userStoreModule from "./userStore";
 
 const KEY = "edos_user_compliance";
+const OUTSTANDING_RECEIPT_STATUSES = new Set(["AWAITING_RECEIPT"]);
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -66,11 +70,38 @@ seedIfEmpty();
 // ---------------------------------------------------------------------------
 
 export function listCompliance() {
-  return read();
+  return read().map((entry) => ({
+    ...entry,
+    outstandingReceiptCount: getOutstandingReceiptCount(entry.userId),
+  }));
 }
 
 export function getCompliance(userId) {
-  return read().find((c) => c.userId === userId) || null;
+  const compliance = read().find((c) => c.userId === userId);
+  if (!compliance) return null;
+
+  return {
+    ...compliance,
+    outstandingReceiptCount: getOutstandingReceiptCount(userId),
+  };
+}
+
+export function getOutstandingReceiptCount(userId) {
+  const approvalIds = new Set(
+    approvalStoreModule.getApprovalsByRequester(userId).map((approval) => approval.id)
+  );
+
+  return receiptStoreModule
+    .listReceipts()
+    .filter(
+      (receipt) =>
+        approvalIds.has(receipt.approvalId) &&
+        OUTSTANDING_RECEIPT_STATUSES.has(receipt.verificationStatus)
+    ).length;
+}
+
+export function hasOutstandingReceipts(userId) {
+  return getOutstandingReceiptCount(userId) > 0;
 }
 
 export function incrementOutstanding(userId) {

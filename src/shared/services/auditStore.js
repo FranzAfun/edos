@@ -31,11 +31,11 @@ function seedIfEmpty() {
   write([
     {
       id: "aud-seed-1",
-      userId: "user-finance-1",
+      userId: "user-cto-1",
       action: "APPROVAL_ADVANCED",
       entityType: "approval",
       entityId: "appr-seed-2",
-      details: { fromStage: "PENDING_FO", toStage: "PENDING_OPERATIONS", note: "Financial review passed" },
+      details: { fromStage: "PENDING_TECH_REVIEW", toStage: "PENDING_FO", note: "Technical review passed" },
       timestamp: now,
     },
     {

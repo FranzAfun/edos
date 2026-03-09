@@ -13,23 +13,31 @@ import * as approvalStore from "../../../shared/services/approvalStore";
 import * as receiptStore from "../../../shared/services/receiptStore";
 import * as attendanceStore from "../../../shared/services/attendanceStore";
 import * as assetStore from "../../../shared/services/assetStore";
+import { APPROVAL_STAGES } from "../../../governance/approvalStages";
+import useRole from "../../../hooks/useRole";
+import { getOperationalRoleLabel } from "../../../config/roles";
 
 export default function OperationsDashboard() {
-  useDocumentTitle("Operations Dashboard");
+  const { role } = useRole();
+  const roleLabel = getOperationalRoleLabel(role);
+
+  useDocumentTitle(`${roleLabel} Dashboard`);
   const approvals = useMemo(() => approvalStore.listApprovals(), []);
   const receipts = useMemo(() => receiptStore.listReceipts(), []);
   const assets = useMemo(() => assetStore.listAssets(), []);
   const participationRate = useMemo(() => attendanceStore.getParticipationRate(), []);
 
-  const opsQueue = approvals.filter((a) => a.currentStage === "PENDING_OPERATIONS").length;
+  const techQueue = approvals.filter(
+    (a) => a.currentStage === APPROVAL_STAGES.PENDING_TECH_REVIEW
+  ).length;
   const uploadedReceipts = receipts.filter((r) => r.verificationStatus === "UPLOADED").length;
   const agingAlerts = useMemo(() => assetStore.getAgingAlerts(), []);
 
   return (
     <div>
-      <PageSection title="Operations Dashboard" subtitle="Operational status and pending actions">
+      <PageSection title={`${roleLabel} Dashboard`} subtitle="Operational status and pending actions">
         <Grid cols={4}>
-          <MetricCard label="Ops Queue" value={opsQueue} />
+          <MetricCard label="Tech Queue" value={techQueue} />
           <MetricCard label="Receipts to Verify" value={uploadedReceipts} />
           <MetricCard label="Participation Rate" value={`${participationRate}%`} />
           <MetricCard label="Asset Alerts" value={agingAlerts.length} />
@@ -39,10 +47,10 @@ export default function OperationsDashboard() {
       <PageSection title="Pending Actions">
         <Grid cols={2}>
           <Card>
-            <h3 className="text-sm font-semibold mb-2">Approval Queue</h3>
+            <h3 className="text-sm font-semibold mb-2">Technical Review Queue</h3>
             <p className="text-xs text-gray-500">
-              {opsQueue > 0
-                ? `${opsQueue} approval(s) pending Operations review.`
+              {techQueue > 0
+                ? `${techQueue} approval(s) pending CTO/COO technical review.`
                 : "No pending approvals."
               }
             </p>

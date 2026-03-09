@@ -19,6 +19,7 @@ import * as assetStore from "../../../shared/services/assetStore";
 import * as departmentStore from "../../../shared/services/departmentStore";
 import * as userStore from "../../../shared/services/userStore";
 import useRole from "../../../hooks/useRole";
+import { isOperationalRole } from "../../../config/roles";
 
 const CONDITION_VARIANT = {
   New: "success",
@@ -44,7 +45,7 @@ export default function AssetManagementPage() {
     setDeptValues(assetStore.getAssetValueByDepartment());
   }, []);
 
-  const canManage = role === "admin" || role === "operations" || role === "finance";
+  const canManage = role === "admin" || role === "finance" || isOperationalRole(role);
 
   const tableData = assets.map((a) => {
     const dep = assetStore.computeDepreciation(a);

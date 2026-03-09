@@ -17,6 +17,7 @@ import * as userStore from "../../../shared/services/userStore";
 import * as approvalStore from "../../../shared/services/approvalStore";
 import * as notificationStore from "../../../shared/services/notificationStore";
 import useRole from "../../../hooks/useRole";
+import { semanticStatus } from "@/theme/semanticColors";
 
 const PILLARS = ["Education", "Manufacturing", "Softwares", "Open Labs"];
 
@@ -154,7 +155,14 @@ export default function FundRequestForm() {
         subtitle="Complete all fields to submit a funding request for approval."
       >
         {submitted && (
-          <div className="mb-4 rounded border border-green-300 bg-green-50 p-3 text-sm text-green-800" role="status">
+          <div
+            className="mb-4 rounded p-3 text-sm"
+            role="status"
+            style={{
+              backgroundColor: semanticStatus.success.bg,
+              color: semanticStatus.success.text,
+            }}
+          >
             Fund request submitted successfully. It will be routed for approval.
           </div>
         )}
@@ -282,7 +290,14 @@ export default function FundRequestForm() {
 
             {/* Budget Warning */}
             {budgetWarning && (
-              <div className="mb-4 rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800" role="alert">
+              <div
+                className="mb-4 rounded p-3 text-sm"
+                role="alert"
+                style={{
+                  backgroundColor: semanticStatus.warning.bg,
+                  color: semanticStatus.warning.text,
+                }}
+              >
                 {budgetWarning}
               </div>
             )}

@@ -1,21 +1,37 @@
 /**
  * StatusBadge - Reusable status indicator
  */
+import { semanticStatus } from "@/theme/semanticColors";
+
 const VARIANTS = {
-  success: "bg-[rgba(34,197,94,0.16)] text-[#22C55E]",
-  warning: "bg-[rgba(245,158,11,0.16)] text-[#F59E0B]",
-  danger: "bg-[rgba(239,68,68,0.16)] text-[#EF4444]",
-  info: "bg-[rgba(59,130,246,0.16)] text-[#3B82F6]",
-  neutral: "bg-[var(--color-surface-hover)] text-[var(--color-text-secondary)]",
-  purple: "bg-[rgba(139,92,246,0.16)] text-[#8B5CF6]",
+  success: semanticStatus.success,
+  warning: semanticStatus.warning,
+  danger: semanticStatus.error,
+  info: semanticStatus.info,
+  neutral: {
+    bg: semanticStatus.info.bg,
+    text: semanticStatus.info.text,
+    border: semanticStatus.info.border,
+  },
+  purple: {
+    bg: semanticStatus.info.bg,
+    text: semanticStatus.info.text,
+    border: semanticStatus.info.border,
+  },
 };
 
 export default function StatusBadge({ label, children, variant = "neutral", className = "" }) {
   const content = label ?? children;
+  const palette = VARIANTS[variant] || VARIANTS.neutral;
+  const style = {
+    backgroundColor: palette.bg || palette.backgroundColor,
+    color: palette.text || palette.color,
+  };
 
   return (
     <span
-      className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${VARIANTS[variant] || VARIANTS.neutral} ${className}`}
+      className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${className}`}
+      style={style}
     >
       {content}
     </span>

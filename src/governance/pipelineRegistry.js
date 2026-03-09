@@ -35,6 +35,11 @@ export const PIPELINE_REGISTRY = {
     requiredAuthorityLevel: 3,
     requiresEvidence: false,
     requiresScoring: false,
-    approvalChain: ["finance", "operations", "ceo"],
+    approvalChain: ["technical_review", "finance", "ceo"],
+    reviewerRoles: {
+      technical_review: ["cto", "coo"],
+      finance: ["finance"],
+      ceo: ["ceo"],
+    },
   },
 };

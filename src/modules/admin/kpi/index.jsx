@@ -4,6 +4,7 @@ import Card from "../../../components/ui/Card";
 import Grid from "../../../components/layout/Grid";
 import ModuleBoundary from "../../../shared/components/ModuleBoundary";
 import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
+import StatusBadge from "../../../shared/ui/StatusBadge";
 import useAllKpis from "./hooks/useAllKpis";
 import useAllEvidence from "./hooks/useAllEvidence";
 import { createKpiTask, gradeEvidence } from "./services/kpiAdminService";
@@ -13,6 +14,11 @@ import useDocumentTitle from "../../../hooks/useDocumentTitle";
 const IMPACT_CATEGORIES = ["Operational", "Important", "Strategic"];
 const EVIDENCE_TYPES = ["File", "Image", "Link", "Report", "Text"];
 const GRADE_OPTIONS = ["COMPLETED", "PARTIAL", "REJECTED", "LATE"];
+const TASK_STATUS_VARIANT = {
+  ASSIGNED: "info",
+  SUBMITTED: "warning",
+  GRADED: "success",
+};
 
 export default function AdminKpiPage() {
   useDocumentTitle("Admin KPI Management");
@@ -39,9 +45,12 @@ export default function AdminKpiPage() {
                     <h3 className="text-base font-semibold">{task.title}</h3>
                     <p className="text-sm text-gray-500 mt-1">{task.description}</p>
                   </div>
-                  <span className="text-xs px-2 py-1 rounded bg-gray-100 whitespace-nowrap">
+                  <StatusBadge
+                    variant={TASK_STATUS_VARIANT[task.status] || "info"}
+                    className="whitespace-nowrap"
+                  >
                     {task.status}
-                  </span>
+                  </StatusBadge>
                 </div>
                 <div className="flex flex-wrap gap-4 text-xs text-gray-500 mt-2">
                   <span>Assigned: {task.assignedToUserId}</span>
@@ -274,7 +283,7 @@ function EvidenceRow({ evidence, task, onGraded }) {
           )}
 
           {task?.status === "GRADED" && (
-            <span className="text-xs px-2 py-1 rounded bg-green-100 text-green-800">Graded</span>
+            <StatusBadge variant="success">Graded</StatusBadge>
           )}
         </div>
       </Card>

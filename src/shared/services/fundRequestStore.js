@@ -7,13 +7,14 @@
  * {
  *   id, userId, departmentId, pillar, program, purpose,
  *   amount, vendorQuotation, expectedOutcome, attachmentName,
- *   status (DRAFT | SUBMITTED | AUTHORIZED | AWAITING_RECEIPT | VERIFIED),
+ *   status (SUBMITTED | PENDING_FO | PENDING_CEO | APPROVED | REJECTED | REJECTED_COMPLIANCE),
  *   approvalId (linked approval),
  *   createdAt
  * }
  */
 
 const KEY = "edos_fund_requests";
+const REJECTED_REQUEST_STATUSES = new Set(["REJECTED", "REJECTED_COMPLIANCE"]);
 
 function generateId() {
   return `fr-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -117,7 +118,7 @@ export function detectAntiBypass(userId, departmentId) {
     (r) =>
       (r.userId === userId || r.departmentId === departmentId) &&
       r.createdAt >= sevenDaysAgo &&
-      r.status !== "REJECTED"
+      !REJECTED_REQUEST_STATUSES.has(r.status)
   );
   const total = recent.reduce((sum, r) => sum + (r.amount || 0), 0);
   return { flagged: total > 3000, total, count: recent.length, requests: recent };

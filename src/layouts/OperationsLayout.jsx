@@ -4,10 +4,14 @@ import Sidebar from "../components/Sidebar";
 import AuthorityHeader from "../components/layout/AuthorityHeader";
 import MobileSidebarToggle from "../components/ui/MobileSidebarToggle";
 import { useAuthority } from "../context/useAuthority";
+import useRole from "../hooks/useRole";
+import { getOperationalRoleLabel } from "../config/roles";
 
 function OperationsLayout() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const authority = useAuthority();
+  const { role } = useRole();
+  const roleLabel = getOperationalRoleLabel(role);
 
   if (!authority) {
     return null;
@@ -17,7 +21,7 @@ function OperationsLayout() {
     <div className="flex h-screen overflow-hidden bg-[var(--color-background)]">
       
       {/* Sidebar */}
-      <Sidebar title="EDOS - Operations" mobileOpen={mobileSidebarOpen} onCloseMobile={() => setMobileSidebarOpen(false)} />
+      <Sidebar title={`EDOS - ${roleLabel}`} mobileOpen={mobileSidebarOpen} onCloseMobile={() => setMobileSidebarOpen(false)} />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="md:hidden flex items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">

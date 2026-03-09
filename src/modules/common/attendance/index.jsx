@@ -14,6 +14,7 @@ import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
 import * as attendanceStore from "../../../shared/services/attendanceStore";
 import * as userStore from "../../../shared/services/userStore";
 import useRole from "../../../hooks/useRole";
+import { isOperationalRole } from "../../../config/roles";
 
 function resolveUser(roleKey) {
   const users = userStore.getUsersByRole(roleKey);
@@ -52,7 +53,7 @@ export default function AttendancePage() {
     reload();
   }, [currentUser, todayAttendance, reload]);
 
-  const canViewAll = role === "admin" || role === "ceo" || role === "operations";
+  const canViewAll = role === "admin" || role === "ceo" || isOperationalRole(role);
 
   const tableData = allRecords.map((r) => {
     const user = userStore.getUserById(r.userId);

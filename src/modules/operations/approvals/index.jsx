@@ -6,7 +6,7 @@ import ModuleBoundary from "../../../shared/components/ModuleBoundary";
 import useApprovalQueue from "../../common/approvals/hooks/useApprovalQueue";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import {
-  getOperationsQueue,
+  getTechReviewQueue,
   approveApproval,
   rejectApproval,
 } from "../../common/approvals/services/approvalService";
@@ -14,6 +14,7 @@ import {
   APPROVAL_STAGE_LABELS,
   APPROVAL_STAGE_COLORS,
 } from "../../../governance/approvalStages";
+import { semanticStatus } from "@/theme/semanticColors";
 import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
 import * as userStore from "../../../shared/services/userStore";
 import * as complianceStore from "../../../shared/services/complianceStore";
@@ -25,21 +26,21 @@ function resolveUserId(roleKey) {
 }
 
 export default function OperationsApprovalsPage() {
-  useDocumentTitle("Operations Approvals");
+  useDocumentTitle("Technical Approvals");
   const { role } = useRole();
   const userId = resolveUserId(role);
-  const query = useApprovalQueue(getOperationsQueue);
+  const query = useApprovalQueue(getTechReviewQueue);
 
   return (
     <div>
       <PageSection
-        title="Operations Approval Queue"
-        subtitle="Operations review – second stage of the approval pipeline."
+        title="Technical Approval Queue"
+        subtitle="CTO/COO technical review before finance and CEO approval."
       >
         <ModuleBoundary
           query={query}
-          title="Operations Queue"
-          emptyText="No approvals pending Operations review."
+          title="Technical Review Queue"
+          emptyText="No approvals pending CTO/COO technical review."
         >
           <Grid cols={1}>
             {(query.data || []).map((item) => (
@@ -86,8 +87,7 @@ function ApprovalCard({ item, userId, onAction }) {
     }
   }, [item.id, userId, note, onAction]);
 
-  const stageColor =
-    APPROVAL_STAGE_COLORS[item.currentStage] || "bg-gray-100 text-gray-800";
+  const stageColor = APPROVAL_STAGE_COLORS[item.currentStage] || semanticStatus.info;
 
   return (
     <>
@@ -96,7 +96,11 @@ function ApprovalCard({ item, userId, onAction }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <span
-                className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${stageColor}`}
+                className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
+                style={{
+                  backgroundColor: stageColor.bg,
+                  color: stageColor.text,
+                }}
               >
                 {APPROVAL_STAGE_LABELS[item.currentStage]}
               </span>
@@ -171,7 +175,13 @@ function ComplianceBadge({ userId }) {
 
   if (compliance.isFundingBlocked) {
     return (
-      <span className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold bg-red-100 text-red-800">
+      <span
+        className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold"
+        style={{
+          backgroundColor: semanticStatus.error.bg,
+          color: semanticStatus.error.text,
+        }}
+      >
         Funding Blocked
       </span>
     );
@@ -179,7 +189,13 @@ function ComplianceBadge({ userId }) {
 
   if (compliance.outstandingEvidenceCount > 0) {
     return (
-      <span className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800">
+      <span
+        className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-semibold"
+        style={{
+          backgroundColor: semanticStatus.warning.bg,
+          color: semanticStatus.warning.text,
+        }}
+      >
         Evidence Pending ({compliance.outstandingEvidenceCount})
       </span>
     );

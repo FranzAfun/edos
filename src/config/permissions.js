@@ -21,7 +21,7 @@ export const permissions = {
   ADMIN_MANAGE_USERS: "admin_manage_users",
   VIEW_NOTIFICATIONS: "view_notifications",
   VIEW_FO_APPROVALS: "view_fo_approvals",
-  VIEW_OPS_APPROVALS: "view_ops_approvals",
+  VIEW_TECH_APPROVALS: "view_tech_approvals",
   VIEW_FUND_REQUEST: "view_fund_request",
   VIEW_RECEIPTS: "view_receipts",
   VIEW_REVENUE: "view_revenue",

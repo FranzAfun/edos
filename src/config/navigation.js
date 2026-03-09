@@ -1,4 +1,43 @@
 import { permissions as PERMISSIONS } from "./permissions";
+import { ROLES } from "./roles";
+
+const OPERATIONAL_NAVIGATION = [
+  {
+    label: "Dashboard",
+    path: "/operations",
+    permission: PERMISSIONS.VIEW_OPERATIONS_DASHBOARD,
+  },
+  {
+    label: "Technical Approvals",
+    path: "/operations/approvals",
+    permission: PERMISSIONS.VIEW_TECH_APPROVALS,
+  },
+  {
+    label: "Receipt Verification",
+    path: "/operations/receipts",
+    permission: PERMISSIONS.VIEW_RECEIPTS,
+  },
+  {
+    label: "Assets",
+    path: "/operations/assets",
+    permission: PERMISSIONS.VIEW_ASSETS,
+  },
+  {
+    label: "Participation / Activity",
+    path: "/operations/attendance",
+    permission: PERMISSIONS.VIEW_ATTENDANCE,
+  },
+  {
+    label: "Communications",
+    path: "/operations/communications",
+    permission: PERMISSIONS.VIEW_COMMUNICATIONS,
+  },
+  {
+    label: "Notifications",
+    path: "/operations/notifications",
+    permission: PERMISSIONS.VIEW_NOTIFICATIONS,
+  },
+];
 
 /**
  * Navigation registry
@@ -227,43 +266,11 @@ export const NAVIGATION = {
     },
   ],
 
-  operations: [
-    {
-      label: "Dashboard",
-      path: "/operations",
-      permission: PERMISSIONS.VIEW_OPERATIONS_DASHBOARD,
-    },
-    {
-      label: "Approvals",
-      path: "/operations/approvals",
-      permission: PERMISSIONS.VIEW_OPS_APPROVALS,
-    },
-    {
-      label: "Receipts",
-      path: "/operations/receipts",
-      permission: PERMISSIONS.VIEW_RECEIPTS,
-    },
-    {
-      label: "Assets",
-      path: "/operations/assets",
-      permission: PERMISSIONS.VIEW_ASSETS,
-    },
-    {
-      label: "Attendance",
-      path: "/operations/attendance",
-      permission: PERMISSIONS.VIEW_ATTENDANCE,
-    },
-    {
-      label: "Communications",
-      path: "/operations/communications",
-      permission: PERMISSIONS.VIEW_COMMUNICATIONS,
-    },
-    {
-      label: "Notifications",
-      path: "/operations/notifications",
-      permission: PERMISSIONS.VIEW_NOTIFICATIONS,
-    },
-  ],
+  [ROLES.CTO]: OPERATIONAL_NAVIGATION,
+
+  [ROLES.COO]: OPERATIONAL_NAVIGATION,
+
+  operations: OPERATIONAL_NAVIGATION,
 
   admin: [
     {

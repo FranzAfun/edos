@@ -8,14 +8,16 @@ import useAllUsers from "./hooks/useAllUsers";
 import { createUser, deleteUser } from "./services/userService";
 import * as departmentStore from "../../../shared/services/departmentStore";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
+import { AUTHORITY_LEVEL, ROLES } from "../../../config/roles";
 
-const AUTHORITY_LEVELS = [
-  { value: 0, label: "0 – Admin" },
-  { value: 1, label: "1 – Executive" },
-  { value: 2, label: "2 – Department Head" },
-  { value: 3, label: "3 – Financial Officer" },
-  { value: 4, label: "4 – Operations" },
-  { value: 5, label: "5 – CEO" },
+const ROLE_OPTIONS = [
+  { value: ROLES.ADMIN, label: "Admin", authorityLevel: AUTHORITY_LEVEL.ADMIN },
+  { value: ROLES.CEO, label: "CEO", authorityLevel: AUTHORITY_LEVEL.CEO },
+  { value: ROLES.CTO, label: "CTO", authorityLevel: AUTHORITY_LEVEL.CTO },
+  { value: ROLES.COO, label: "COO", authorityLevel: AUTHORITY_LEVEL.COO },
+  { value: ROLES.FINANCE, label: "Financial Officer", authorityLevel: AUTHORITY_LEVEL.FINANCE },
+  { value: ROLES.EXECUTIVE, label: "Executive", authorityLevel: AUTHORITY_LEVEL.EXECUTIVE },
+  { value: "dept_head", label: "Department Head", authorityLevel: AUTHORITY_LEVEL.EXECUTIVE },
 ];
 
 const ALL_FEATURES = [
@@ -36,15 +38,6 @@ const FEATURE_LABELS = {
   GRADE_KPI: "Grade KPIs",
   VIEW_KPI: "View KPIs",
   SUBMIT_KPI_EVIDENCE: "Submit KPI Evidence",
-};
-
-const ROLE_MAP = {
-  0: "admin",
-  1: "executive",
-  2: "dept_head",
-  3: "finance",
-  4: "operations",
-  5: "ceo",
 };
 
 export default function AdminUsersPage() {
@@ -82,7 +75,7 @@ function CreateUserForm({ onCreated }) {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    authorityLevel: 1,
+    roleKey: ROLES.EXECUTIVE,
     departmentId: "",
     featureFlags: [],
   });
@@ -107,16 +100,15 @@ function CreateUserForm({ onCreated }) {
     e.preventDefault();
     if (!form.name.trim()) return;
     setSaving(true);
-    const level = Number(form.authorityLevel);
+    const selectedRole = ROLE_OPTIONS.find((option) => option.value === form.roleKey);
     await createUser({
       ...form,
-      authorityLevel: level,
-      roleKey: ROLE_MAP[level] || "executive",
+      authorityLevel: selectedRole?.authorityLevel ?? AUTHORITY_LEVEL.EXECUTIVE,
     });
     setForm({
       name: "",
       email: "",
-      authorityLevel: 1,
+      roleKey: ROLES.EXECUTIVE,
       departmentId: "",
       featureFlags: [],
     });
@@ -144,13 +136,13 @@ function CreateUserForm({ onCreated }) {
             className="rounded border px-2 py-1 text-sm"
           />
           <select
-            value={form.authorityLevel}
-            onChange={(e) => update("authorityLevel", e.target.value)}
+            value={form.roleKey}
+            onChange={(e) => update("roleKey", e.target.value)}
             className="rounded border px-2 py-1 text-sm"
           >
-            {AUTHORITY_LEVELS.map((lvl) => (
-              <option key={lvl.value} value={lvl.value}>
-                {lvl.label}
+            {ROLE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
           </select>

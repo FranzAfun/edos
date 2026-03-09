@@ -1,0 +1,83 @@
+# EDOS Backend Migration Specification & Roadmap
+
+## Overview
+The EDOS (ERA Digital Operating System) is currently a React 19 frontend utilizing `localStorage` for data persistence. This document outlines the comprehensive plan to migrate to a real backend and database architecture as of March 4, 2026.
+
+---
+
+## 1. Technical Stack (Recommended)
+- **Runtime**: Node.js (Express or Fastify) or Laravel (PHP).
+- **Database**: MySQL (Laragon environment) or PostgreSQL.
+- **ORM**: Prisma (Node.js) or Eloquent (Laravel).
+- **Authentication**: Session-based cookie authentication (HttpOnly, Secure, SameSite).
+- **Storage**: S3-compatible (AWS S3, MinIO, or Cloudflare R2) for receipts and evidence.
+
+---
+
+## 2. Core Database Schema (Target)
+
+### A. User & Access Control
+- **users**: id, name, email, password_hash, authority_level (0-5), role_key, department_id, feature_flags (JSON), trust_level, created_at.
+- **roles**: id, key, label, tier.
+- **permissions**: id, key, description.
+- **role_permissions**: Junction table for role-based access.
+
+### B. Finance & Treasury
+- **departments**: id, name, code, pillar (Education, Manufacturing, Softwares, Open Labs), created_at.
+- **budgets**: id, department_id, monthly_limit, remaining_limit, frozen (boolean), period (YYYY-MM).
+- **treasury_balance**: **SINGLE ROW TABLE** - The ultimate source of truth for organizational liquidity.
+- **fund_requests**: id, user_id, department_id, pillar, program, purpose, amount, vendor_quotation, attachment_path, status (PENDING_FO to APPROVED/REJECTED).
+- **receipts**: id, approval_id, file_path, actual_amount, verification_status (MATCH/LESS/MORE).
+- **transactions**: Actual expenses recorded **ONLY** after receipt verification.
+- **revenue**: Pillar, program, customer_type, payment_status, profit_category.
+
+### C. Performance & Operations
+- **kpi_tasks**: Title, deadline, evidence_type, weight, impact_multiplier, assigned_user.
+- **kpi_evidence**: task_id, user_id, file_path/link, submitted_at.
+- **kpi_scores**: task_id, user_id, grade_status (COMPLETED, PARTIAL, etc.), computed_score.
+- **assets**: Registration, cost, useful_life, depreciation (straight-line), assigned_user.
+- **attendance**: User_id, clock_in, clock_out, date.
+
+---
+
+## 3. Required API Endpoints (Phase 1-8)
+
+### Phase 1: Authentication & User Management
+- `POST /api/v1/auth/login` / `logout`
+- `GET /api/v1/users` (Admin only)
+- `PATCH /api/v1/users/:id/permissions`
+
+### Phase 2: Financial Workflow (Critical)
+- `POST /api/v1/fund-requests`: Submit with budget availability check.
+- `GET /api/v1/approvals/pending`: Filtered by role (FO, Operations, CEO).
+- `PATCH /api/v1/approvals/:id/stage`: Transition with audit log and threshold routing.
+- `GET /api/v1/budgets/status`: Per-department remaining balance.
+
+### Phase 3: Post-Spending & Treasury
+- `POST /api/v1/receipts/upload`: Triggered after authorization.
+- `PATCH /api/v1/receipts/:id/verify`: Compare approved vs actual; update treasury.
+- `GET /api/v1/treasury/balance`: Single number cash position.
+
+### Phase 4: Performance (KPIs)
+- `POST /api/v1/kpis/tasks`: Admin creation.
+- `POST /api/v1/kpis/evidence`: Executive submission.
+- `PATCH /api/v1/kpis/:id/grade`: Scoring with weight and impact multipliers.
+
+---
+
+## 4. Migration Strategy (5 Steps)
+1. **Environment Setup**: Create `.env` with MySQL credentials pointing to Laragon.
+2. **Schema Migration**: Run SQL scripts to create all 24+ tables identified in the audit.
+3. **Data Seeding**: Move hardcoded seed data from `src/shared/services/*.js` to DB seeders.
+4. **Service Swap**: 
+   - Update `src/services/httpClient.js` to point to the real API.
+   - Refactor `createModuleService.js` to use `httpGet`/`httpPost` instead of `localStorage`.
+5. **Clean Up**: Remove all `*Store.js` files from `src/shared/services/`.
+
+---
+
+## 5. Security & Governance Rules
+- **Anti-Bypass**: API must detect multiple requests within 7 days exceeding 3,000 cedi.
+- **Freeze Enforcement**: No FO approvals allowed if department budget is frozen.
+- **Receipt Blocking**: Block new fund requests for users with >7 day old outstanding receipts.
+- **Treasury Integrity**: Treasury balance MUST NOT be stored in multiple places or department "wallets".

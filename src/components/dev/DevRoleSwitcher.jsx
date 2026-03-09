@@ -1,6 +1,15 @@
 import useRole from "../../hooks/useRole";
 
-const roleOptions = ["executive", "dept_head", "finance", "operations", "ceo", "admin"];
+const DEV_ROLES = ["admin", "ceo", "cto", "coo", "finance", "executive"];
+
+const ROLE_LABELS = {
+  admin: "Admin",
+  ceo: "CEO",
+  cto: "CTO",
+  coo: "COO",
+  finance: "Finance",
+  executive: "Executive"
+};
 
 export default function DevRoleSwitcher() {
   const { role, setRole } = useRole();
@@ -26,9 +35,9 @@ export default function DevRoleSwitcher() {
         className="w-32 rounded border border-amber-300 bg-[var(--color-surface)] px-2 py-1 text-xs text-[var(--color-text-primary)] outline-none focus:ring-1 focus:ring-amber-500"
         aria-label="Development role switcher"
       >
-        {roleOptions.map((item) => (
+        {DEV_ROLES.map((item) => (
           <option key={item} value={item}>
-            {item}
+            {ROLE_LABELS[item]}
           </option>
         ))}
       </select>

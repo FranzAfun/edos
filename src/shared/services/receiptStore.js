@@ -47,6 +47,9 @@ export function getPendingReceipts() {
 
 export function createReceiptPlaceholder(approvalId, fundRequestId, authorizedAt) {
   const all = read();
+  const existing = all.find((receipt) => receipt.approvalId === approvalId);
+  if (existing) return existing;
+
   const entry = {
     id: generateId(),
     approvalId,

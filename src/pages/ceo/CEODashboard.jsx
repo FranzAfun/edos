@@ -19,6 +19,7 @@ import * as approvalStore from "../../shared/services/approvalStore";
 import * as kpiStore from "../../shared/services/kpiStore";
 import * as departmentStore from "../../shared/services/departmentStore";
 import * as userStore from "../../shared/services/userStore";
+import { isRejectedStage, isTerminal } from "../../governance/approvalStages";
 import { getUserKpiPercentage } from "../../shared/services/trustLevelStore";
 
 const COLORS = ["#2563EB", "#16A34A", "#D97706", "#DC2626", "#8B5CF6", "#06B6D4"];
@@ -34,7 +35,7 @@ export default function CEODashboard() {
 
   const totalBudget = budgets.reduce((s, b) => s + (b.monthlyLimit || 0), 0);
   const totalSpent = budgets.reduce((s, b) => s + ((b.monthlyLimit || 0) - (b.remainingLimit || 0)), 0);
-  const pendingApprovals = approvals.filter((a) => !["APPROVED", "REJECTED"].includes(a.currentStage)).length;
+  const pendingApprovals = approvals.filter((a) => !isTerminal(a.currentStage)).length;
   const completedKpis = kpiTasks.filter((t) => t.status === "COMPLETED").length;
   const netPL = confirmedRevenue - totalSpent;
 
@@ -52,7 +53,7 @@ export default function CEODashboard() {
   const approvalBreakdown = [
     { name: "Approved", value: approvals.filter((a) => a.currentStage === "APPROVED").length },
     { name: "Pending", value: pendingApprovals },
-    { name: "Rejected", value: approvals.filter((a) => a.currentStage === "REJECTED").length },
+    { name: "Rejected", value: approvals.filter((a) => isRejectedStage(a.currentStage)).length },
   ].filter((d) => d.value > 0);
 
   return (

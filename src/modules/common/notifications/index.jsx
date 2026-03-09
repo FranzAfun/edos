@@ -9,6 +9,7 @@ import {
   markNotificationAsRead,
   markAllNotificationsAsRead,
 } from "../../../shared/services/notificationService";
+import { semanticStatus } from "@/theme/semanticColors";
 import * as userStore from "../../../shared/services/userStore";
 import useRole from "../../../hooks/useRole";
 
@@ -102,9 +103,20 @@ function NotificationRow({ notification, onRead }) {
         <div>
           <div className="flex items-center gap-2">
             {!notification.read && (
-              <span className="inline-block w-2 h-2 rounded-full bg-blue-500" />
+              <span
+                className="inline-block w-2 h-2 rounded-full"
+                style={{
+                  backgroundColor: semanticStatus.info.bg,
+                }}
+              />
             )}
-            <span className="text-xs font-semibold uppercase text-gray-400">
+            <span
+              className="rounded-full px-2 py-0.5 text-xs font-semibold uppercase"
+              style={{
+                backgroundColor: semanticStatus.info.bg,
+                color: semanticStatus.info.text,
+              }}
+            >
               {notification.type}
             </span>
           </div>

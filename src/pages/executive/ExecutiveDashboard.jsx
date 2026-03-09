@@ -16,6 +16,16 @@ import * as complianceStore from "../../shared/services/complianceStore";
 import * as userStore from "../../shared/services/userStore";
 import useRole from "../../hooks/useRole";
 
+const REJECTED_REQUEST_STATUSES = new Set(["REJECTED", "REJECTED_COMPLIANCE"]);
+
+function isRejectedRequest(status) {
+  return REJECTED_REQUEST_STATUSES.has(status);
+}
+
+function formatRequestStatus(status) {
+  return status ? status.replaceAll("_", " ") : "UNKNOWN";
+}
+
 export default function ExecutiveDashboard() {
   useDocumentTitle("Executive Dashboard");
   const { role } = useRole();
@@ -37,8 +47,10 @@ export default function ExecutiveDashboard() {
     [currentUser]
   );
 
-  const pendingRequests = myRequests.filter((r) => r.status === "pending").length;
-  const approvedRequests = myRequests.filter((r) => r.status === "approved").length;
+  const pendingRequests = myRequests.filter(
+    (r) => r.status !== "APPROVED" && !isRejectedRequest(r.status)
+  ).length;
+  const approvedRequests = myRequests.filter((r) => r.status === "APPROVED").length;
   const activeKpis = myKpis.filter((k) => k.status === "ASSIGNED").length;
   const completedKpis = myKpis.filter((k) => k.status === "COMPLETED").length;
 
@@ -103,8 +115,8 @@ export default function ExecutiveDashboard() {
                       {req.pillar} &middot; {req.program} &middot; GHS {Number(req.amount).toLocaleString()}
                     </p>
                   </div>
-                  <StatusBadge variant={req.status === "approved" ? "success" : req.status === "rejected" ? "danger" : "warning"}>
-                    {req.status}
+                  <StatusBadge variant={req.status === "APPROVED" ? "success" : isRejectedRequest(req.status) ? "danger" : "warning"}>
+                    {formatRequestStatus(req.status)}
                   </StatusBadge>
                 </div>
               </Card>

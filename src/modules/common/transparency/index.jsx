@@ -18,6 +18,7 @@ import * as kpiStore from "../../../shared/services/kpiStore";
 import * as receiptStore from "../../../shared/services/receiptStore";
 import * as assetStore from "../../../shared/services/assetStore";
 import * as departmentStore from "../../../shared/services/departmentStore";
+import { isRejectedStage } from "../../../governance/approvalStages";
 
 export default function TransparencyPage() {
   useDocumentTitle("Transparency");
@@ -34,7 +35,7 @@ export default function TransparencyPage() {
   const totalSpent = budgets.reduce((s, b) => s + ((b.monthlyLimit || 0) - (b.remainingLimit || 0)), 0);
   const netPL = confirmedRevenue - totalSpent;
   const approvedCount = approvals.filter((a) => a.currentStage === "APPROVED").length;
-  const rejectedCount = approvals.filter((a) => a.currentStage === "REJECTED").length;
+  const rejectedCount = approvals.filter((a) => isRejectedStage(a.currentStage)).length;
   const completedKpis = kpiTasks.filter((t) => t.status === "COMPLETED").length;
   const verifiedReceipts = receipts.filter((r) => r.verificationStatus === "VERIFIED").length;
   const totalAssetValue = Math.round(assetStore.getTotalAssetValue());
