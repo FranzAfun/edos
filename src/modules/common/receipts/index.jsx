@@ -67,8 +67,8 @@ export default function ReceiptsPage() {
         </Grid>
       </PageSection>
 
-      {/* F7: Upload panel for executives/dept heads */}
-      {(role === "executive" || role === "dept_head") && (
+      {/* F7: Upload panel for executives */}
+      {role === "executive" && (
         <PageSection title="Upload Receipt" subtitle="Submit receipt for an approved fund request">
           <UploadReceiptPanel onUploaded={reload} role={role} />
         </PageSection>

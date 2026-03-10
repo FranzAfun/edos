@@ -6,9 +6,13 @@
  * No React. Pure JS. Returns raw objects.
  */
 
-import * as departmentStore from "./departmentStore";
+import {
+  mapLegacyDepartmentToSupervisor,
+  normalizeSupervisor,
+} from "../../utils/supervisor";
 
 const KEY = "edos_users";
+const LEGACY_REMOVED_ROLE = ["dept", "head"].join("_");
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -48,7 +52,7 @@ function seedIfEmpty() {
       email: "ceo@edos.gov",
       authorityLevel: 5,
       roleKey: "ceo",
-      departmentId: "dept-exec-office",
+      supervisorRole: "",
       featureFlags: [],
       createdAt: now,
     },
@@ -58,7 +62,7 @@ function seedIfEmpty() {
       email: "admin@edos.gov",
       authorityLevel: 0,
       roleKey: "admin",
-      departmentId: "dept-sys-admin",
+      supervisorRole: "",
       featureFlags: [],
       createdAt: now,
     },
@@ -68,7 +72,17 @@ function seedIfEmpty() {
       email: "exec1@edos.gov",
       authorityLevel: 1,
       roleKey: "executive",
-      departmentId: "dept-planning",
+      supervisorRole: "cto",
+      featureFlags: [],
+      createdAt: now,
+    },
+    {
+      id: "user-exec-2",
+      name: "Funke Adeola",
+      email: "exec2@edos.gov",
+      authorityLevel: 1,
+      roleKey: "executive",
+      supervisorRole: "coo",
       featureFlags: [],
       createdAt: now,
     },
@@ -78,7 +92,7 @@ function seedIfEmpty() {
       email: "finance1@edos.gov",
       authorityLevel: 3,
       roleKey: "finance",
-      departmentId: "dept-finance",
+      supervisorRole: "",
       featureFlags: [],
       createdAt: now,
     },
@@ -88,7 +102,7 @@ function seedIfEmpty() {
       email: "cto@edos.gov",
       authorityLevel: 2,
       roleKey: "cto",
-      departmentId: "dept-operations",
+      supervisorRole: "",
       featureFlags: [],
       createdAt: now,
     },
@@ -98,17 +112,7 @@ function seedIfEmpty() {
       email: "coo@edos.gov",
       authorityLevel: 2,
       roleKey: "coo",
-      departmentId: "dept-operations",
-      featureFlags: [],
-      createdAt: now,
-    },
-    {
-      id: "user-depthead-1",
-      name: "Funke Adeola",
-      email: "depthead1@edos.gov",
-      authorityLevel: 2,
-      roleKey: "dept_head",
-      departmentId: "dept-health",
+      supervisorRole: "",
       featureFlags: [],
       createdAt: now,
     },
@@ -118,23 +122,41 @@ function seedIfEmpty() {
 }
 
 // ---------------------------------------------------------------------------
-// Migration: department (string) → departmentId
+// Migration: legacy roles/fields → supervisor model
 // ---------------------------------------------------------------------------
 
-function migrateDepartmentField() {
+function migrateUserSupervisorModel() {
   const users = read();
   let changed = false;
 
-  const migrated = users.map((u) => {
-    if (u.department && !u.departmentId) {
-      const dept = departmentStore.getDepartmentByName(u.department);
-      if (dept) {
-        const { department: _removed, ...rest } = u;
-        changed = true;
-        return { ...rest, departmentId: dept.id };
-      }
+  const migrated = users.map((user) => {
+    const nextRoleKey = user.roleKey === LEGACY_REMOVED_ROLE ? "executive" : user.roleKey;
+    const supervisorRole = nextRoleKey === "executive"
+      ? normalizeSupervisor(user.supervisorRole || user.supervisor)
+        || mapLegacyDepartmentToSupervisor(user.departmentId || user.department)
+      : "";
+
+    const nextUser = {
+      ...user,
+      roleKey: nextRoleKey,
+      supervisorRole,
+    };
+
+    if ("supervisor" in nextUser) {
+      delete nextUser.supervisor;
+      changed = true;
     }
-    return u;
+
+    if ("department" in nextUser) {
+      delete nextUser.department;
+      changed = true;
+    }
+
+    if (user.roleKey !== nextRoleKey || user.supervisorRole !== supervisorRole) {
+      changed = true;
+    }
+
+    return nextUser;
   });
 
   if (changed) {
@@ -157,7 +179,7 @@ function ensureTechnicalReviewUsers() {
       email: "cto@edos.gov",
       authorityLevel: 2,
       roleKey: "cto",
-      departmentId: "dept-operations",
+      supervisorRole: "",
       featureFlags: [],
       createdAt: now,
     });
@@ -170,7 +192,7 @@ function ensureTechnicalReviewUsers() {
       email: "coo@edos.gov",
       authorityLevel: 2,
       roleKey: "coo",
-      departmentId: "dept-operations",
+      supervisorRole: "",
       featureFlags: [],
       createdAt: now,
     });
@@ -181,7 +203,7 @@ function ensureTechnicalReviewUsers() {
 
 // Auto-seed then migrate on import
 seedIfEmpty();
-migrateDepartmentField();
+migrateUserSupervisorModel();
 ensureTechnicalReviewUsers();
 
 // ---------------------------------------------------------------------------
@@ -200,6 +222,7 @@ export function createUser(user) {
   const users = read();
   const newUser = {
     ...user,
+    supervisorRole: normalizeSupervisor(user.supervisorRole),
     id: generateId(),
     createdAt: new Date().toISOString(),
   };

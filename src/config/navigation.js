@@ -223,34 +223,6 @@ export const NAVIGATION = {
     },
   ],
 
-  dept_head: [
-    {
-      label: "Dashboard",
-      path: "/dept-head",
-      permission: PERMISSIONS.VIEW_DEPT_HEAD_DASHBOARD,
-    },
-    {
-      label: "Receipts",
-      path: "/dept-head/receipts",
-      permission: PERMISSIONS.VIEW_RECEIPTS,
-    },
-    {
-      label: "Attendance",
-      path: "/dept-head/attendance",
-      permission: PERMISSIONS.VIEW_ATTENDANCE,
-    },
-    {
-      label: "Communications",
-      path: "/dept-head/communications",
-      permission: PERMISSIONS.VIEW_COMMUNICATIONS,
-    },
-    {
-      label: "Notifications",
-      path: "/dept-head/notifications",
-      permission: PERMISSIONS.VIEW_NOTIFICATIONS,
-    },
-  ],
-
   [ROLES.CTO]: OPERATIONAL_NAVIGATION,
 
   [ROLES.COO]: OPERATIONAL_NAVIGATION,

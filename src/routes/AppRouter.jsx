@@ -8,7 +8,6 @@ import { SkeletonCard } from "../shared/ui/Skeleton";
 import ExecutiveLayout from "../layouts/ExecutiveLayout";
 import FinanceLayout from "../layouts/FinanceLayout";
 import CEOLayout from "../layouts/CEOLayout";
-import DeptHeadLayout from "../layouts/DeptHeadLayout";
 import OperationsLayout from "../layouts/OperationsLayout";
 import AdminLayout from "../layouts/AdminLayout";
 
@@ -25,7 +24,6 @@ const Oversight = lazy(() => import("../pages/ceo/modules/oversight"));
 const CeoApprovalsPage = lazy(() => import("../modules/ceo/approvals"));
 const FinanceApprovalsPage = lazy(() => import("../modules/finance/approvals"));
 const OperationsApprovalsPage = lazy(() => import("../modules/operations/approvals"));
-const DeptHeadDashboard = lazy(() => import("../modules/dept_head/dashboard"));
 const OperationsDashboard = lazy(() => import("../modules/operations/dashboard"));
 const AdminDashboard = lazy(() => import("../modules/admin/dashboard"));
 const ExecutiveKpiPage = lazy(() => import("../modules/executive/kpi"));
@@ -368,58 +366,6 @@ export default function AppRouter() {
             element={
               <RequirePermission permission={permissions.VIEW_COMMUNICATIONS}>
                 <CommunicationsPage />
-              </RequirePermission>
-            }
-          />
-          <Route
-            path="notifications"
-            element={
-              <RequirePermission permission={permissions.VIEW_NOTIFICATIONS}>
-                <NotificationsPage />
-              </RequirePermission>
-            }
-          />
-          <Route path="*" element={<NotFound />} />
-        </Route>
-
-        <Route path="/dept-head" element={<DeptHeadLayout />}>
-          <Route
-            index
-            element={
-              <RequirePermission permission={permissions.VIEW_DEPT_HEAD_DASHBOARD}>
-                <DeptHeadDashboard />
-              </RequirePermission>
-            }
-          />
-          <Route
-            path="receipts"
-            element={
-              <RequirePermission permission={permissions.VIEW_RECEIPTS}>
-                <ReceiptsPage />
-              </RequirePermission>
-            }
-          />
-          <Route
-            path="attendance"
-            element={
-              <RequirePermission permission={permissions.VIEW_ATTENDANCE}>
-                <AttendancePage />
-              </RequirePermission>
-            }
-          />
-          <Route
-            path="communications"
-            element={
-              <RequirePermission permission={permissions.VIEW_COMMUNICATIONS}>
-                <CommunicationsPage />
-              </RequirePermission>
-            }
-          />
-          <Route
-            path="contributions"
-            element={
-              <RequirePermission permission={permissions.VIEW_CONTRIBUTIONS}>
-                <SpecialContributionsPage />
               </RequirePermission>
             }
           />

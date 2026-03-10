@@ -6,10 +6,10 @@ import ModuleBoundary from "../../../shared/components/ModuleBoundary";
 import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
 import useAllUsers from "./hooks/useAllUsers";
 import { createUser, deleteUser } from "./services/userService";
-import * as departmentStore from "../../../shared/services/departmentStore";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import { AUTHORITY_LEVEL, ROLES } from "../../../config/roles";
 import { semanticStatus } from "@/theme/semanticColors";
+import { getSupervisorLabel, SUPERVISOR_OPTIONS } from "../../../utils/supervisor";
 
 const ROLE_OPTIONS = [
   { value: ROLES.ADMIN, label: "Admin", authorityLevel: AUTHORITY_LEVEL.ADMIN },
@@ -18,7 +18,6 @@ const ROLE_OPTIONS = [
   { value: ROLES.COO, label: "COO", authorityLevel: AUTHORITY_LEVEL.COO },
   { value: ROLES.FINANCE, label: "Financial Officer", authorityLevel: AUTHORITY_LEVEL.FINANCE },
   { value: ROLES.EXECUTIVE, label: "Executive", authorityLevel: AUTHORITY_LEVEL.EXECUTIVE },
-  { value: "dept_head", label: "Department Head", authorityLevel: AUTHORITY_LEVEL.EXECUTIVE },
 ];
 
 const ALL_FEATURES = [
@@ -77,12 +76,12 @@ function CreateUserForm({ onCreated }) {
     name: "",
     email: "",
     roleKey: ROLES.EXECUTIVE,
-    departmentId: "",
+    supervisorRole: "",
     featureFlags: [],
   });
   const [saving, setSaving] = useState(false);
-
-  const allDepartments = departmentStore.listDepartments();
+  const [supervisorError, setSupervisorError] = useState("");
+  const needsSupervisor = form.roleKey === ROLES.EXECUTIVE;
 
   function update(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -100,19 +99,25 @@ function CreateUserForm({ onCreated }) {
   async function handleCreate(e) {
     e.preventDefault();
     if (!form.name.trim()) return;
+    if (needsSupervisor && !form.supervisorRole) {
+      setSupervisorError("Supervisor is required for executives.");
+      return;
+    }
     setSaving(true);
     const selectedRole = ROLE_OPTIONS.find((option) => option.value === form.roleKey);
     await createUser({
       ...form,
+      supervisorRole: needsSupervisor ? form.supervisorRole : "",
       authorityLevel: selectedRole?.authorityLevel ?? AUTHORITY_LEVEL.EXECUTIVE,
     });
     setForm({
       name: "",
       email: "",
       roleKey: ROLES.EXECUTIVE,
-      departmentId: "",
+      supervisorRole: "",
       featureFlags: [],
     });
+    setSupervisorError("");
     setSaving(false);
     onCreated();
   }
@@ -138,7 +143,14 @@ function CreateUserForm({ onCreated }) {
           />
           <select
             value={form.roleKey}
-            onChange={(e) => update("roleKey", e.target.value)}
+            onChange={(e) => {
+              const nextRole = e.target.value;
+              update("roleKey", nextRole);
+              if (nextRole !== ROLES.EXECUTIVE) {
+                update("supervisorRole", "");
+                setSupervisorError("");
+              }
+            }}
             className="rounded border px-2 py-1 text-sm"
           >
             {ROLE_OPTIONS.map((option) => (
@@ -147,18 +159,32 @@ function CreateUserForm({ onCreated }) {
               </option>
             ))}
           </select>
-          <select
-            value={form.departmentId}
-            onChange={(e) => update("departmentId", e.target.value)}
-            className="rounded border px-2 py-1 text-sm"
-          >
-            <option value="">Select Department</option>
-            {allDepartments.map((dept) => (
-              <option key={dept.id} value={dept.id}>
-                {dept.name}
-              </option>
-            ))}
-          </select>
+          {needsSupervisor && (
+            <div className="flex flex-col gap-1">
+              <select
+                value={form.supervisorRole}
+                onChange={(e) => {
+                  update("supervisorRole", e.target.value);
+                  setSupervisorError("");
+                }}
+                className="rounded border px-2 py-1 text-sm"
+                aria-label="Supervisor"
+                required
+              >
+                <option value="">Select Supervisor</option>
+                {SUPERVISOR_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              {supervisorError ? (
+                <p className="text-xs" style={{ color: semanticStatus.error.text }}>
+                  {supervisorError}
+                </p>
+              ) : null}
+            </div>
+          )}
         </div>
 
         <div>
@@ -215,8 +241,7 @@ function UserRow({ user, onDeleted }) {
           <div>
             <h3 className="text-sm font-semibold">{user.name}</h3>
             <p className="text-xs text-gray-500 mt-1">
-              {user.email} &middot; Level {user.authorityLevel} &middot; {user.roleKey} &middot;{" "}
-              {departmentStore.getDepartmentById(user.departmentId)?.name ?? user.departmentId}
+              {user.email} &middot; Level {user.authorityLevel} &middot; {user.roleKey} &middot; Supervisor {getSupervisorLabel(user.supervisorRole)}
             </p>
             {user.featureFlags?.length > 0 && (
               <p className="text-xs text-gray-400 mt-1">

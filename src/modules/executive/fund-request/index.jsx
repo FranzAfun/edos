@@ -2,7 +2,7 @@ import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Fund Request Form (F1)
  * Executive submits: supervisor, program, purpose, amount, vendor quotation,
- * expected outcome, attachment. Budget check before submission.
+ * expected outcome, attachment. Budget check runs when a legacy department budget is available.
  */
 import { useState, useCallback } from "react";
 import PageSection from "../../../components/layout/PageSection";
@@ -12,7 +12,6 @@ import ApprovalRouteBadge from "../../../components/ui/ApprovalRouteBadge";
 import useFormValidation from "../../../shared/hooks/useFormValidation";
 import * as fundRequestStore from "../../../shared/services/fundRequestStore";
 import * as budgetStore from "../../../shared/services/budgetStore";
-import * as departmentStore from "../../../shared/services/departmentStore";
 import * as userStore from "../../../shared/services/userStore";
 import * as approvalStore from "../../../shared/services/approvalStore";
 import * as notificationStore from "../../../shared/services/notificationStore";
@@ -44,11 +43,11 @@ export default function FundRequestForm() {
   const [submitted, setSubmitted] = useState(false);
   const [budgetWarning, setBudgetWarning] = useState(null);
 
-  const departments = departmentStore.listDepartments();
+  const currentUserSupervisor = currentUser?.supervisorRole || "";
 
   const { values, errors, handleChange, validate, reset } = useFormValidation(
     {
-      supervisor: "",
+      supervisor: currentUserSupervisor,
       program: "",
       purpose: "",
       amount: "",
@@ -139,7 +138,7 @@ export default function FundRequestForm() {
 
       setSubmitted(true);
       reset({
-        supervisor: "",
+        supervisor: currentUserSupervisor,
         program: "",
         purpose: "",
         amount: "",
@@ -223,29 +222,6 @@ export default function FundRequestForm() {
                 min="0"
                 step="0.01"
               />
-
-              <FormField
-                label="Department"
-                name="departmentId"
-                type="select"
-                value={values.departmentId}
-                onChange={handleChange}
-              >
-                <select
-                  id="field-departmentId"
-                  name="departmentId"
-                  value={values.departmentId}
-                  onChange={handleChange}
-                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
-                >
-                  <option value="">Select department</option>
-                  {departments.map((department) => (
-                    <option key={department.id} value={department.id}>
-                      {department.name}
-                    </option>
-                  ))}
-                </select>
-              </FormField>
             </div>
 
             <FormField

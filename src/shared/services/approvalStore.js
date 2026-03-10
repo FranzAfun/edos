@@ -128,17 +128,17 @@ function seedIfEmpty() {
     {
       id: "appr-seed-2",
       title: "Staff Training Programme Funding",
-      description: "Annual capacity building grants for department heads.",
+      description: "Annual capacity building grants for field teams.",
       amount: 12000000,
       sourceType: "PROCUREMENT",
       sourceId: null,
-      requestedByUserId: "user-depthead-1",
+      requestedByUserId: "user-exec-2",
       currentStage: APPROVAL_STAGES.PENDING_FO,
       history: [
         {
           stage: APPROVAL_STAGES.PENDING_TECH_REVIEW,
           action: "CREATED",
-          userId: "user-depthead-1",
+          userId: "user-exec-2",
           note: "Initial submission",
           timestamp: now,
         },

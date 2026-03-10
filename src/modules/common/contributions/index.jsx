@@ -48,7 +48,7 @@ export default function SpecialContributionsPage() {
     .reduce((s, c) => s + (c.bonusScore || 0), 0);
 
   const canReview = role === "ceo" || role === "admin";
-  const canSubmit = role === "executive" || role === "dept_head" || isOperationalRole(role);
+  const canSubmit = role === "executive" || isOperationalRole(role);
 
   return (
     <div>

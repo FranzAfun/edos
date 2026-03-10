@@ -3,7 +3,6 @@ export const permissions = {
   VIEW_INTELLIGENCE: "view_intelligence",
   VIEW_COMPLIANCE: "view_compliance",
   VIEW_REPORTS: "view_reports",
-  VIEW_DEPT_HEAD_DASHBOARD: "view_dept_head_dashboard",
   VIEW_FINANCE_DASHBOARD: "view_finance_dashboard",
   VIEW_TREASURY: "view_treasury",
   VIEW_AUDIT: "view_audit",
