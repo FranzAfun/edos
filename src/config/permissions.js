@@ -22,6 +22,7 @@ export const permissions = {
   VIEW_FO_APPROVALS: "view_fo_approvals",
   VIEW_TECH_APPROVALS: "view_tech_approvals",
   VIEW_FUND_REQUEST: "view_fund_request",
+  VIEW_CEO_EXPENSE_LOG: "view_ceo_expense_log",
   VIEW_RECEIPTS: "view_receipts",
   VIEW_REVENUE: "view_revenue",
   VIEW_PROFIT_LOSS: "view_profit_loss",

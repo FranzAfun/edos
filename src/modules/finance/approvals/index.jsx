@@ -13,11 +13,14 @@ import ModuleBoundary from "../../../shared/components/ModuleBoundary";
 import useApprovalQueue from "../../common/approvals/hooks/useApprovalQueue";
 import {
   getFoQueue,
+  getReadyForDisbursementQueue,
   approveApproval,
+  markApprovalAsDisbursed,
   rejectApproval,
 } from "../../common/approvals/services/approvalService";
 import { semanticStatus } from "@/theme/semanticColors";
 import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
+import StatusBadge from "../../../shared/ui/StatusBadge";
 import * as userStore from "../../../shared/services/userStore";
 import * as complianceStore from "../../../shared/services/complianceStore";
 import * as budgetStore from "../../../shared/services/budgetStore";
@@ -37,6 +40,7 @@ export default function FinanceApprovalsPage() {
   const { role } = useRole();
   const userId = resolveUserId(role);
   const query = useApprovalQueue(getFoQueue);
+  const disbursementQuery = useApprovalQueue(getReadyForDisbursementQueue);
 
   return (
     <div>
@@ -56,6 +60,28 @@ export default function FinanceApprovalsPage() {
                 item={item}
                 userId={userId}
                 onAction={() => query.reload()}
+              />
+            ))}
+          </Grid>
+        </ModuleBoundary>
+      </PageSection>
+
+      <PageSection
+        title="Ready For Disbursement"
+        subtitle="Approved requests awaiting finance fund release."
+      >
+        <ModuleBoundary
+          query={disbursementQuery}
+          title="Disbursement Queue"
+          emptyText="No requests ready for disbursement."
+        >
+          <Grid cols={1}>
+            {(disbursementQuery.data || []).map((item) => (
+              <DisbursementCard
+                key={item.id}
+                item={item}
+                userId={userId}
+                onAction={() => disbursementQuery.reload()}
               />
             ))}
           </Grid>
@@ -270,6 +296,71 @@ function EnhancedApprovalCard({ item, userId, onAction }) {
       <ConfirmDialog open={confirmAction === "clarify"} title="Return for Clarification"
         message={`Return "${item.title}" to the requester for clarification?`}
         confirmLabel="Return" variant="warning" onConfirm={handleReturnForClarification} onCancel={() => setConfirmAction(null)} busy={busy} />
+    </>
+  );
+}
+
+function DisbursementCard({ item, userId, onAction }) {
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const requester = userStore.listUsers().find((user) => user.id === item.requestedByUserId);
+
+  const handleDisburse = useCallback(async () => {
+    setBusy(true);
+    await markApprovalAsDisbursed({ id: item.id, userId, note });
+    setBusy(false);
+    setConfirmOpen(false);
+    setNote("");
+    onAction();
+  }, [item.id, note, onAction, userId]);
+
+  return (
+    <>
+      <Card>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="mb-1 flex items-center gap-2 flex-wrap">
+              <span className="text-xs text-gray-400 uppercase">{formatApprovalSourceType(item.sourceType)}</span>
+              <StatusBadge variant="warning">Ready for Disbursement</StatusBadge>
+            </div>
+            <h3 className="text-sm font-semibold truncate">{item.title}</h3>
+            <p className="text-xs text-gray-500 mt-1 line-clamp-2">{item.description}</p>
+            <p className="text-xs text-gray-400 mt-1">
+              Request #{item.sourceId || item.id} &middot; Amount: GHS {Number(item.amount).toLocaleString()} &middot; By: {requester?.name || "Unknown"}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-end gap-2 flex-wrap">
+          <input
+            type="text"
+            placeholder="Optional disbursement note..."
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            className="w-full rounded border px-2 py-1 text-xs sm:flex-1"
+            aria-label="Disbursement note"
+          />
+          <button
+            onClick={() => setConfirmOpen(true)}
+            disabled={busy}
+            className="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 disabled:opacity-50"
+          >
+            Mark as Disbursed
+          </button>
+        </div>
+      </Card>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Mark as Disbursed"
+        message={`Confirm funds disbursement for "${item.title}"?`}
+        confirmLabel="Mark as Disbursed"
+        variant="accent"
+        onConfirm={handleDisburse}
+        onCancel={() => setConfirmOpen(false)}
+        busy={busy}
+      />
     </>
   );
 }

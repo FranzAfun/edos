@@ -41,8 +41,8 @@ export const PIPELINE_REGISTRY = {
     },
     approvalChain: ["tech", "fo", "ceo"],
     conditionalChains: {
-      fo_final: ["tech", "fo", "approved"],
-      ceo_review: ["tech", "fo", "ceo", "approved"],
+      fo_final: ["tech", "fo", "approved", "ready_for_disbursement", "disbursed"],
+      ceo_review: ["tech", "fo", "ceo", "approved", "ready_for_disbursement", "disbursed"],
     },
     reviewerRoles: {
       tech: ["cto", "coo"],

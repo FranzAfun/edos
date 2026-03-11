@@ -17,6 +17,7 @@ import * as approvalStore from "../../../shared/services/approvalStore";
 import * as departmentStore from "../../../shared/services/departmentStore";
 import * as assetStore from "../../../shared/services/assetStore";
 import * as receiptStore from "../../../shared/services/receiptStore";
+import * as financialTransactionStore from "../../../shared/services/financialTransactionStore";
 import { formatApprovalSourceType, formatApprovalStage } from "../../../utils/approvalLabels";
 import { getSupervisorLabel } from "../../../utils/supervisor";
 
@@ -62,6 +63,7 @@ const REPORT_TYPES = [
   { key: "revenue", label: "Revenue Report" },
   { key: "budget", label: "Budget Report" },
   { key: "approvals", label: "Approvals Report" },
+  { key: "expenses", label: "Expense Records" },
   { key: "assets", label: "Asset Report" },
   { key: "receipts", label: "Receipts Report" },
   { key: "treasury", label: "Treasury Summary" },
@@ -93,6 +95,7 @@ export default function ReportsPage() {
         {activeReport === "revenue" && <RevenueReport />}
         {activeReport === "budget" && <BudgetReport />}
         {activeReport === "approvals" && <ApprovalsReport />}
+        {activeReport === "expenses" && <ExpenseReport />}
         {activeReport === "assets" && <AssetReport />}
         {activeReport === "receipts" && <ReceiptsReport />}
         {activeReport === "treasury" && <TreasurySummary />}
@@ -271,6 +274,25 @@ function ReceiptsReport() {
     <div>
       <ExportButtons data={receipts} columns={columns} title="Receipts_Report" />
       <DataTable columns={columns} data={receipts} pageSize={10} emptyText="No receipt data." />
+    </div>
+  );
+}
+
+function ExpenseReport() {
+  const expenses = useMemo(() => financialTransactionStore.listTransactionsByType("CEO_EXPENSE"), []);
+  const columns = [
+    { key: "purpose", label: "Purpose" },
+    { key: "program", label: "Program" },
+    { key: "vendor", label: "Vendor" },
+    { key: "amount", label: "Amount (GHS)" },
+    { key: "status", label: "Status" },
+    { key: "createdAt", label: "Recorded" },
+  ];
+
+  return (
+    <div>
+      <ExportButtons data={expenses} columns={columns} title="Expense_Records_Report" />
+      <DataTable columns={columns} data={expenses} pageSize={10} emptyText="No expense records." />
     </div>
   );
 }

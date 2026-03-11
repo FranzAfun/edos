@@ -109,7 +109,7 @@ export default function AdminDashboard() {
           />
           <MetricCard
             label="Approved"
-            value={approvals.filter((a) => a.currentStage === "APPROVED").length}
+            value={approvals.filter((a) => ["APPROVED", "READY_FOR_DISBURSEMENT", "DISBURSED"].includes(a.currentStage)).length}
           />
         </Grid>
       </PageSection>

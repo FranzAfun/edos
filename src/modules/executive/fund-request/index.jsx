@@ -4,34 +4,23 @@ import useDocumentTitle from "../../../hooks/useDocumentTitle";
  * Executive submits: supervisor, program, purpose, amount, vendor quotation,
  * expected outcome, attachment. Budget check runs when a legacy department budget is available.
  */
-import { useState, useCallback } from "react";
+import { useState, useMemo } from "react";
 import PageSection from "../../../components/layout/PageSection";
 import Card from "../../../components/ui/Card";
 import FormField from "../../../shared/ui/FormField";
-import ApprovalRouteBadge from "../../../components/ui/ApprovalRouteBadge";
 import useFormValidation from "../../../shared/hooks/useFormValidation";
 import * as fundRequestStore from "../../../shared/services/fundRequestStore";
 import * as budgetStore from "../../../shared/services/budgetStore";
 import * as userStore from "../../../shared/services/userStore";
-import * as approvalStore from "../../../shared/services/approvalStore";
-import * as notificationStore from "../../../shared/services/notificationStore";
 import useRole from "../../../hooks/useRole";
 import { semanticStatus } from "@/theme/semanticColors";
-import { SUPERVISOR_OPTIONS, getSupervisorLabel } from "../../../utils/supervisor";
+import { createApproval } from "../../common/approvals/services/approvalService";
+import { SUPERVISOR_OPTIONS } from "../../../utils/supervisor";
 
 function resolveUser(roleKey) {
   const users = userStore.getUsersByRole(roleKey);
   return users.length > 0 ? users[0] : null;
 }
-
-const RULES = {
-  supervisor: (v) => (!v ? "Supervisor is required" : null),
-  program: (v) => (!v?.trim() ? "Program name is required" : null),
-  purpose: (v) => (!v?.trim() ? "Purpose is required" : v.trim().length < 10 ? "Purpose must be at least 10 characters" : null),
-  amount: (v) => (!v || Number(v) <= 0 ? "Amount must be greater than 0" : null),
-  vendorQuotation: (v) => (!v?.trim() ? "Vendor quotation details are required" : null),
-  expectedOutcome: (v) => (!v?.trim() ? "Expected outcome is required" : null),
-};
 
 export default function FundRequestForm() {
   useDocumentTitle("Fund Request");
@@ -39,11 +28,25 @@ export default function FundRequestForm() {
   const currentUser = resolveUser(role);
   const currentUserId = currentUser?.id;
   const currentUserDeptId = currentUser?.departmentId;
-  const currentUserName = currentUser?.name;
   const [submitted, setSubmitted] = useState(false);
   const [budgetWarning, setBudgetWarning] = useState(null);
 
-  const currentUserSupervisor = currentUser?.supervisorRole || "";
+  const requiresSupervisor = role === "executive";
+  const currentUserSupervisor = requiresSupervisor
+    ? currentUser?.supervisorRole || ""
+    : (role === "cto" || role === "coo" ? role : "");
+
+  const rules = useMemo(
+    () => ({
+      supervisor: (value) => (requiresSupervisor && !value ? "Supervisor is required" : null),
+      program: (value) => (!value?.trim() ? "Program name is required" : null),
+      purpose: (value) => (!value?.trim() ? "Purpose is required" : value.trim().length < 10 ? "Purpose must be at least 10 characters" : null),
+      amount: (value) => (!value || Number(value) <= 0 ? "Amount must be greater than 0" : null),
+      vendorQuotation: (value) => (!value?.trim() ? "Vendor quotation details are required" : null),
+      expectedOutcome: (value) => (!value?.trim() ? "Expected outcome is required" : null),
+    }),
+    [requiresSupervisor]
+  );
 
   const { values, errors, handleChange, validate, reset } = useFormValidation(
     {
@@ -56,12 +59,12 @@ export default function FundRequestForm() {
       attachmentName: "",
       departmentId: currentUserDeptId || "",
     },
-    RULES
+    rules
   );
 
-  const checkBudget = useCallback(() => {
-    const deptId = values.departmentId || currentUserDeptId;
-    if (!deptId || !values.amount) {
+  function checkBudget(nextAmount = values.amount, nextDepartmentId = values.departmentId) {
+    const deptId = nextDepartmentId || currentUserDeptId;
+    if (!deptId || !nextAmount) {
       setBudgetWarning(null);
       return;
     }
@@ -77,80 +80,73 @@ export default function FundRequestForm() {
       return;
     }
 
-    if (Number(values.amount) > budget.remainingLimit) {
+    if (Number(nextAmount) > budget.remainingLimit) {
       setBudgetWarning(
-        `Insufficient budget. Remaining: GHS ${budget.remainingLimit.toLocaleString()}. Requested: GHS ${Number(values.amount).toLocaleString()}.`
+        `Insufficient budget. Remaining: GHS ${budget.remainingLimit.toLocaleString()}. Requested: GHS ${Number(nextAmount).toLocaleString()}.`
       );
       return;
     }
 
     setBudgetWarning(null);
-  }, [values.amount, values.departmentId, currentUserDeptId]);
+  }
 
-  const handleAmountChange = useCallback(
-    (e) => {
-      handleChange(e);
-      setTimeout(() => checkBudget(), 0);
-    },
-    [handleChange, checkBudget]
-  );
+  function handleAmountChange(event) {
+    handleChange(event);
+    checkBudget(event.target.value, values.departmentId);
+  }
 
-  const handleSubmit = useCallback(
-    (e) => {
-      e.preventDefault();
-      if (!validate()) return;
+  async function handleSubmit(event) {
+    event.preventDefault();
+    if (!validate()) return;
 
-      const budget = budgetStore.getBudgetByDepartment(values.departmentId || currentUserDeptId);
-      if (budget?.frozen) return;
+    const budget = budgetStore.getBudgetByDepartment(values.departmentId || currentUserDeptId);
+    if (budget?.frozen) return;
 
-      const fundRequest = fundRequestStore.createFundRequest({
-        userId: currentUserId,
-        departmentId: values.departmentId || currentUserDeptId,
-        supervisor: values.supervisor,
-        program: values.program,
-        purpose: values.purpose,
-        amount: Number(values.amount),
-        vendorQuotation: values.vendorQuotation,
-        expectedOutcome: values.expectedOutcome,
-        attachmentName: values.attachmentName || null,
-      });
+    const fundRequest = fundRequestStore.createFundRequest({
+      userId: currentUserId,
+      requesterRole: role,
+      departmentId: values.departmentId || currentUserDeptId,
+      supervisor: values.supervisor,
+      program: values.program,
+      purpose: values.purpose,
+      amount: Number(values.amount),
+      vendorQuotation: values.vendorQuotation,
+      expectedOutcome: values.expectedOutcome,
+      attachmentName: values.attachmentName || null,
+    });
 
-      const approval = approvalStore.createApproval({
-        title: `Fund Request: ${values.program}`,
-        description: values.purpose,
-        amount: Number(values.amount),
-        sourceType: "FUND_REQUEST",
-        sourceId: fundRequest.id,
-        supervisor: values.supervisor,
-        requestedByUserId: currentUserId,
-      });
+    const approvalResponse = await createApproval({
+      title: `Fund Request: ${values.program}`,
+      description: values.purpose,
+      amount: Number(values.amount),
+      sourceType: "FUND_REQUEST",
+      sourceId: fundRequest.id,
+      supervisor: values.supervisor,
+      requestedByUserId: currentUserId,
+    });
 
-      fundRequestStore.updateFundRequest(fundRequest.id, { approvalId: approval.id });
+    if (!approvalResponse?.success || !approvalResponse.data) {
+      return;
+    }
 
-      const technicalReviewer = resolveUser(values.supervisor);
-      if (technicalReviewer) {
-        notificationStore.createNotification({
-          toUserId: technicalReviewer.id,
-          type: "FUND_REQUEST",
-          message: `New fund request: "${values.program}" for GHS ${Number(values.amount).toLocaleString()} from ${currentUserName || "Unknown"} awaits ${getSupervisorLabel(values.supervisor)} review.`,
-        });
-      }
+    const approval = approvalResponse.data;
 
-      setSubmitted(true);
-      reset({
-        supervisor: currentUserSupervisor,
-        program: "",
-        purpose: "",
-        amount: "",
-        vendorQuotation: "",
-        expectedOutcome: "",
-        attachmentName: "",
-        departmentId: currentUserDeptId || "",
-      });
-      setTimeout(() => setSubmitted(false), 4000);
-    },
-    [validate, values, currentUserId, currentUserDeptId, currentUserName, reset]
-  );
+    fundRequestStore.updateFundRequest(fundRequest.id, { approvalId: approval.id });
+
+    setSubmitted(true);
+    reset({
+      supervisor: currentUserSupervisor,
+      program: "",
+      purpose: "",
+      amount: "",
+      vendorQuotation: "",
+      expectedOutcome: "",
+      attachmentName: "",
+      departmentId: currentUserDeptId || "",
+    });
+    setBudgetWarning(null);
+    setTimeout(() => setSubmitted(false), 4000);
+  }
 
   return (
     <div>
@@ -174,31 +170,45 @@ export default function FundRequestForm() {
         <Card>
           <form onSubmit={handleSubmit} noValidate>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-              <FormField
-                label="Supervisor"
-                name="supervisor"
-                type="select"
-                value={values.supervisor}
-                onChange={handleChange}
-                error={errors.supervisor}
-                required
-              >
-                <select
-                  id="field-supervisor"
+              {requiresSupervisor ? (
+                <FormField
+                  label="Supervisor"
                   name="supervisor"
+                  type="select"
                   value={values.supervisor}
                   onChange={handleChange}
+                  error={errors.supervisor}
                   required
-                  className={`w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${errors.supervisor ? "border-[var(--color-danger)] focus:ring-[var(--color-danger)]" : "border-gray-300 focus:ring-[var(--color-accent)]"}`}
                 >
-                  <option value="">Select supervisor</option>
-                  {SUPERVISOR_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </FormField>
+                  <select
+                    id="field-supervisor"
+                    name="supervisor"
+                    value={values.supervisor}
+                    onChange={handleChange}
+                    required
+                    className={`w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${errors.supervisor ? "border-[var(--color-danger)] focus:ring-[var(--color-danger)]" : "border-gray-300 focus:ring-[var(--color-accent)]"}`}
+                  >
+                    <option value="">Select supervisor</option>
+                    {SUPERVISOR_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </FormField>
+              ) : (
+                <Card>
+                  <p className="text-xs text-gray-500">Approval Entry</p>
+                  <p className="mt-2 text-sm font-semibold">
+                    {role === "finance" ? "CEO review first" : "Financial Officer review first"}
+                  </p>
+                  <p className="mt-1 text-xs text-gray-400">
+                    {role === "finance"
+                      ? "Finance requests skip the FO stage and go directly to CEO approval."
+                      : "Senior operational requests start with Financial Officer review."}
+                  </p>
+                </Card>
+              )}
 
               <FormField
                 label="Program"
@@ -264,13 +274,6 @@ export default function FundRequestForm() {
               placeholder="File name (e.g. quotation.pdf)"
               helpText="Enter attachment file name. File uploads will be available when backend is connected."
             />
-
-            {values.amount > 0 && (
-              <div className="mb-4">
-                <p className="mb-1 text-xs font-medium text-gray-500">Approval Path</p>
-                <ApprovalRouteBadge amount={Number(values.amount)} />
-              </div>
-            )}
 
             {budgetWarning && (
               <div

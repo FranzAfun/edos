@@ -63,6 +63,32 @@ function syncFundRequestStatus(approval, status) {
   fundRequestStore.updateFundRequest(approval.sourceId, { status });
 }
 
+function getRequesterRole(requestedByUserId) {
+  return userStore.getUserById(requestedByUserId)?.roleKey || "executive";
+}
+
+function getRequestReference(approval) {
+  return approval?.sourceId || approval?.id || "unknown";
+}
+
+function notifyReadyForDisbursement(approval) {
+  const financeUsers = userStore.getUsersByRole("finance");
+  const message = `Request #${getRequestReference(approval)} approved. Funds ready for disbursement.`;
+
+  financeUsers.forEach((user) => {
+    notifyUser(user.id, "READY_FOR_DISBURSEMENT", message);
+  });
+
+  const requesterRole = getRequesterRole(approval?.requestedByUserId);
+  if (["executive", "cto", "coo"].includes(requesterRole)) {
+    notifyUser(
+      approval?.requestedByUserId,
+      "FUNDS_APPROVED",
+      "Your funds have been approved. Please collect from Finance."
+    );
+  }
+}
+
 function getTechnicalReviewerRole(approval) {
   return normalizeSupervisor(approval?.supervisor) || "";
 }
@@ -93,6 +119,10 @@ function assertReviewerAuthorized(userId, approval) {
     throw new Error("Reviewer not found");
   }
 
+  if (reviewer.id === approval?.requestedByUserId) {
+    throw new Error("Requesters cannot approve their own requests");
+  }
+
   const stage = approval?.currentStage;
   const allowedRoles = stage === APPROVAL_STAGES.PENDING_TECH_REVIEW
     ? [getTechnicalReviewerRole(approval)].filter(Boolean)
@@ -112,12 +142,7 @@ function assertReviewerAuthorized(userId, approval) {
 export const getTechReviewQueue = createModuleService(async (params = {}) => {
   const reviewerRole = normalizeSupervisor(params?.role);
 
-  return approvalStore
-    .getApprovalsByStage(APPROVAL_STAGES.PENDING_TECH_REVIEW)
-    .filter((approval) => {
-      if (!reviewerRole) return true;
-      return getTechnicalReviewerRole(approval) === reviewerRole;
-    });
+  return approvalStore.getTechReviewApprovalsForSupervisor(reviewerRole);
 });
 
 export const getFoQueue = createModuleService(async () => {
@@ -125,9 +150,11 @@ export const getFoQueue = createModuleService(async () => {
 });
 
 export const getCeoQueue = createModuleService(async () => {
-  return approvalStore
-    .getApprovalsByStage(APPROVAL_STAGES.PENDING_CEO)
-    .filter((approval) => fundRequestStore.requiresCeoApproval(approval.amount));
+  return approvalStore.getApprovalsByStage(APPROVAL_STAGES.PENDING_CEO);
+});
+
+export const getReadyForDisbursementQueue = createModuleService(async () => {
+  return approvalStore.getApprovalsByStage(APPROVAL_STAGES.READY_FOR_DISBURSEMENT);
 });
 
 export const getAllApprovals = createModuleService(async () => {
@@ -147,7 +174,7 @@ export const getApprovalDetail = createModuleService(async ({ id }) => {
 /**
  * Approve an approval request – advances to next stage.
  * Sends notification to the reviewer of the next stage,
- * or to the requester if fully approved.
+ * or moves approved items into finance-owned disbursement.
  */
 export const approveApproval = createModuleService(
   async ({ id, userId, note }) => {
@@ -207,24 +234,51 @@ export const approveApproval = createModuleService(
         `"${updated.title}" passed Financial Officer review and awaits CEO approval.`
       );
     } else if (nextStage === APPROVAL_STAGES.APPROVED) {
-      if (updated.sourceType === "FUND_REQUEST") {
-        receiptStore.createReceiptPlaceholder(
-          updated.id,
-          updated.sourceId,
-          new Date().toISOString()
-        );
-      }
+      const readyApproval = approvalStore.updateApprovalStage(id, {
+        nextStage: APPROVAL_STAGES.READY_FOR_DISBURSEMENT,
+        action: "READY_FOR_DISBURSEMENT",
+        userId,
+        note: "Approved and forwarded to Finance for disbursement.",
+      });
 
-      notifyUser(
-        updated.requestedByUserId,
-        "APPROVAL_FINAL",
-        `Your request "${updated.title}" has been fully APPROVED.`
-      );
+      syncFundRequestStatus(readyApproval, APPROVAL_STAGES.READY_FOR_DISBURSEMENT);
+      notifyReadyForDisbursement(readyApproval);
+
+      return readyApproval;
     }
 
     return updated;
   }
 );
+
+export const markApprovalAsDisbursed = createModuleService(async ({ id, userId, note }) => {
+  const current = approvalStore.getApprovalById(id);
+  if (!current) throw new Error("Approval not found");
+
+  const reviewer = userStore.getUserById(userId);
+  if (!reviewer || reviewer.roleKey !== "finance") {
+    throw new Error("Only finance can mark requests as disbursed");
+  }
+
+  if (current.currentStage !== APPROVAL_STAGES.READY_FOR_DISBURSEMENT) {
+    throw new Error("Request is not ready for disbursement");
+  }
+
+  const updated = approvalStore.updateApprovalStage(id, {
+    nextStage: APPROVAL_STAGES.DISBURSED,
+    action: "DISBURSED",
+    userId,
+    note: note || "Funds disbursed by Finance.",
+  });
+
+  syncFundRequestStatus(updated, APPROVAL_STAGES.DISBURSED);
+
+  if (updated.sourceType === "FUND_REQUEST") {
+    receiptStore.createReceiptPlaceholder(updated.id, updated.sourceId, new Date().toISOString());
+  }
+
+  return updated;
+});
 
 /**
  * Reject an approval request from any stage.
@@ -266,17 +320,38 @@ export const rejectApproval = createModuleService(
  * Starts at PENDING_TECH_REVIEW. Notifies the assigned CTO/COO reviewer.
  */
 export const createApproval = createModuleService(async (payload) => {
-  const entry = approvalStore.createApproval(payload);
+  const requesterRole = getRequesterRole(payload.requestedByUserId);
+  const initialStage = fundRequestStore.getInitialApprovalStageForRole(requesterRole);
+  const entry = approvalStore.createApproval({
+    ...payload,
+    initialStage,
+  });
   const technicalReviewerRole = getTechnicalReviewerRole(entry);
   const technicalReviewerLabel = getSupervisorLabel(technicalReviewerRole) || "Technical";
 
-  if (technicalReviewerRole) {
+  syncFundRequestStatus(entry, initialStage);
+
+  if (initialStage === APPROVAL_STAGES.PENDING_TECH_REVIEW && technicalReviewerRole) {
     notifyRoles(
       [technicalReviewerRole],
       "APPROVAL_CREATED",
       `New approval request: "${entry.title}" (GHS ${Number(
         entry.amount
       ).toLocaleString()}) awaits ${technicalReviewerLabel} review.`
+    );
+  } else if (initialStage === APPROVAL_STAGES.PENDING_FO) {
+    const foUser = getUserForRole("finance");
+    notifyUser(
+      foUser?.id,
+      "APPROVAL_CREATED",
+      `New approval request: "${entry.title}" (GHS ${Number(entry.amount).toLocaleString()}) awaits Financial Officer review.`
+    );
+  } else if (initialStage === APPROVAL_STAGES.PENDING_CEO) {
+    const ceoUser = getUserForRole("ceo");
+    notifyUser(
+      ceoUser?.id,
+      "APPROVAL_CREATED",
+      `New approval request: "${entry.title}" (GHS ${Number(entry.amount).toLocaleString()}) awaits CEO approval.`
     );
   }
 

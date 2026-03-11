@@ -21,6 +21,7 @@ import * as userStore from "../../../shared/services/userStore";
 import * as notificationStore from "../../../shared/services/notificationStore";
 import useRole from "../../../hooks/useRole";
 import { isOperationalRole } from "../../../config/roles";
+import { APPROVAL_STAGES } from "../../../governance/approvalStages";
 
 const STATUS_VARIANT = {
   AWAITING_RECEIPT: "warning",
@@ -46,6 +47,7 @@ function resolveUser(roleKey) {
 export default function ReceiptsPage() {
   useDocumentTitle("Receipts");
   const { role } = useRole();
+  const currentUser = resolveUser(role);
   const [receipts, setReceipts] = useState(() => receiptStore.listReceipts());
   const reload = useCallback(() => setReceipts(receiptStore.listReceipts()), []);
 
@@ -55,6 +57,7 @@ export default function ReceiptsPage() {
   const discrepancyCount = receipts.filter((r) => r.verificationStatus === "DISCREPANCY" || r.verificationStatus === "ESCALATED").length;
 
   const isOps = isOperationalRole(role);
+  const canUploadReceipts = ["executive", "cto", "coo", "finance"].includes(role);
 
   return (
     <div>
@@ -67,10 +70,10 @@ export default function ReceiptsPage() {
         </Grid>
       </PageSection>
 
-      {/* F7: Upload panel for executives */}
-      {role === "executive" && (
-        <PageSection title="Upload Receipt" subtitle="Submit receipt for an approved fund request">
-          <UploadReceiptPanel onUploaded={reload} role={role} />
+      {/* F7: Upload panel for requesters */}
+      {canUploadReceipts && (
+        <PageSection title="Upload Receipt" subtitle="Submit receipt for a disbursed fund request">
+          <UploadReceiptPanel onUploaded={reload} currentUserId={currentUser?.id} />
         </PageSection>
       )}
 
@@ -130,9 +133,20 @@ export default function ReceiptsPage() {
 /**
  * F7: Upload receipt for an awaiting placeholder
  */
-function UploadReceiptPanel({ onUploaded }) {
+function UploadReceiptPanel({ onUploaded, currentUserId }) {
   const awaitingReceipts = receiptStore.getPendingReceipts().filter(
-    (r) => r.verificationStatus === "AWAITING_RECEIPT"
+    (receipt) => {
+      if (receipt.verificationStatus !== "AWAITING_RECEIPT") {
+        return false;
+      }
+
+      const approval = approvalStore.getApprovalById(receipt.approvalId);
+      if (!approval || approval.requestedByUserId !== currentUserId) {
+        return false;
+      }
+
+      return approval.currentStage === APPROVAL_STAGES.DISBURSED;
+    }
   );
   const [selectedId, setSelectedId] = useState("");
 

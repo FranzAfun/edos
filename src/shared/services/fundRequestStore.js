@@ -7,7 +7,7 @@
  * {
  *   id, userId, departmentId, supervisor, program, purpose,
  *   amount, vendorQuotation, expectedOutcome, attachmentName,
- *   status (SUBMITTED | PENDING_TECH_REVIEW | PENDING_FO | PENDING_CEO | APPROVED | REJECTED | REJECTED_COMPLIANCE),
+ *   status (PENDING_TECH_REVIEW | PENDING_FO | PENDING_CEO | APPROVED | READY_FOR_DISBURSEMENT | DISBURSED | REJECTED | REJECTED_COMPLIANCE),
  *   approvalId (linked approval),
  *   createdAt
  * }
@@ -21,9 +21,37 @@ const REJECTED_REQUEST_STATUSES = new Set(["REJECTED", "REJECTED_COMPLIANCE"]);
 export const FO_FINAL_APPROVAL_LIMIT = 1000;
 export const CEO_JUSTIFICATION_THRESHOLD = 3000;
 
+export function getInitialApprovalStageForRole(roleKey) {
+  if (roleKey === "finance" || roleKey === "ceo") {
+    return APPROVAL_STAGES.PENDING_CEO;
+  }
+
+  if (roleKey === "cto" || roleKey === "coo") {
+    return APPROVAL_STAGES.PENDING_FO;
+  }
+
+  return APPROVAL_STAGES.PENDING_TECH_REVIEW;
+}
+
 const SMALL_REQUEST_APPROVAL_PIPELINE = [
   APPROVAL_STAGES.PENDING_TECH_REVIEW,
   APPROVAL_STAGES.PENDING_FO,
+  APPROVAL_STAGES.APPROVED,
+];
+
+const SENIOR_REQUEST_APPROVAL_PIPELINE = [
+  APPROVAL_STAGES.PENDING_FO,
+  APPROVAL_STAGES.APPROVED,
+];
+
+const SENIOR_REQUEST_CEO_PIPELINE = [
+  APPROVAL_STAGES.PENDING_FO,
+  APPROVAL_STAGES.PENDING_CEO,
+  APPROVAL_STAGES.APPROVED,
+];
+
+const FINANCE_REQUEST_APPROVAL_PIPELINE = [
+  APPROVAL_STAGES.PENDING_CEO,
   APPROVAL_STAGES.APPROVED,
 ];
 
@@ -92,7 +120,7 @@ function seedIfEmpty() {
       vendorQuotation: "TechVendor Ghana Ltd - GHS 2,500",
       expectedOutcome: "50 students equipped with digital devices for Q2 program",
       attachmentName: "quotation_tablets.pdf",
-      status: "SUBMITTED",
+      status: APPROVAL_STAGES.PENDING_TECH_REVIEW,
       approvalId: "appr-seed-1",
       createdAt: now,
     },
@@ -107,7 +135,7 @@ function seedIfEmpty() {
       vendorQuotation: "MaterialsPlus - GHS 800",
       expectedOutcome: "Sustain production for March",
       attachmentName: null,
-      status: "SUBMITTED",
+      status: APPROVAL_STAGES.PENDING_TECH_REVIEW,
       approvalId: null,
       createdAt: now,
     },
@@ -133,11 +161,12 @@ export function getFundRequestsByDepartment(departmentId) {
 
 export function createFundRequest(payload) {
   const all = read();
+  const requesterRole = payload.requesterRole || "executive";
   const entry = {
     ...payload,
-    supervisor: normalizeSupervisor(payload.supervisor) || "cto",
+    supervisor: normalizeSupervisor(payload.supervisor) || payload.supervisor || "",
     id: generateId(),
-    status: "SUBMITTED",
+    status: getInitialApprovalStageForRole(requesterRole),
     createdAt: new Date().toISOString(),
   };
   all.push(entry);
@@ -176,7 +205,31 @@ export function detectAntiBypass(userId, departmentId) {
  * UI tracker reflects the actual governance order and hides
  * the CEO stage when FO is the final approver.
  */
-export function getApprovalRoute(amount) {
+export function getApprovalRoute(amount, requesterRole = "executive") {
+  if (requesterRole === "finance" || requesterRole === "ceo") {
+    return {
+      route: "CEO_ONLY",
+      label: "CEO Direct Approval",
+      stages: FINANCE_REQUEST_APPROVAL_PIPELINE,
+    };
+  }
+
+  if (requesterRole === "cto" || requesterRole === "coo") {
+    if (amount <= FO_FINAL_APPROVAL_LIMIT) {
+      return {
+        route: "FO_ONLY",
+        label: "FO Final Approval",
+        stages: SENIOR_REQUEST_APPROVAL_PIPELINE,
+      };
+    }
+
+    return {
+      route: amount <= CEO_JUSTIFICATION_THRESHOLD ? "FO_CEO" : "CEO_JUSTIFICATION",
+      label: amount <= CEO_JUSTIFICATION_THRESHOLD ? "FO + CEO Approval" : "CEO Mandatory Justification Review",
+      stages: SENIOR_REQUEST_CEO_PIPELINE,
+    };
+  }
+
   if (amount <= FO_FINAL_APPROVAL_LIMIT) {
     return {
       route: "FO_ONLY",

@@ -62,6 +62,7 @@ export const roles = {
       permissions.VIEW_AUDIT,
       permissions.VIEW_BUDGETS,
       permissions.VIEW_FO_APPROVALS,
+      permissions.VIEW_FUND_REQUEST,
       permissions.VIEW_NOTIFICATIONS,
       permissions.VIEW_REVENUE,
       permissions.VIEW_PROFIT_LOSS,
@@ -79,6 +80,7 @@ export const roles = {
     permissions: [
       permissions.VIEW_OPERATIONS_DASHBOARD,
       permissions.VIEW_TECH_APPROVALS,
+      permissions.VIEW_FUND_REQUEST,
       permissions.VIEW_NOTIFICATIONS,
       permissions.VIEW_RECEIPTS,
       permissions.VIEW_ASSETS,
@@ -95,6 +97,7 @@ export const roles = {
     permissions: [
       permissions.VIEW_OPERATIONS_DASHBOARD,
       permissions.VIEW_TECH_APPROVALS,
+      permissions.VIEW_FUND_REQUEST,
       permissions.VIEW_NOTIFICATIONS,
       permissions.VIEW_RECEIPTS,
       permissions.VIEW_ASSETS,
@@ -115,6 +118,7 @@ export const roles = {
       permissions.VIEW_APPROVALS,
       permissions.VIEW_NOTIFICATIONS,
       permissions.VIEW_CEO_INTELLIGENCE,
+      permissions.VIEW_CEO_EXPENSE_LOG,
       permissions.VIEW_CONTRIBUTIONS,
       permissions.VIEW_TRANSPARENCY,
       permissions.VIEW_REPORTS,

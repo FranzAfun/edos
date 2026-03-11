@@ -19,6 +19,7 @@ import * as budgetStore from "../../shared/services/budgetStore";
 import * as approvalStore from "../../shared/services/approvalStore";
 import * as receiptStore from "../../shared/services/receiptStore";
 import * as departmentStore from "../../shared/services/departmentStore";
+import * as financialTransactionStore from "../../shared/services/financialTransactionStore";
 
 const COLORS = ["#2563EB", "#16A34A", "#D97706", "#DC2626", "#8B5CF6"];
 
@@ -29,11 +30,13 @@ export default function FinanceDashboard() {
   const approvals = useMemo(() => approvalStore.listApprovals(), []);
   const receipts = useMemo(() => receiptStore.listReceipts(), []);
   const departments = useMemo(() => departmentStore.listDepartments(), []);
+  const ceoExpenses = useMemo(() => financialTransactionStore.listTransactionsByType("CEO_EXPENSE"), []);
 
   const totalRevenue = revenueStore.getTotalRevenue();
   const confirmedRevenue = revenueStore.getConfirmedRevenue();
   const totalBudget = budgets.reduce((s, b) => s + (b.monthlyLimit || 0), 0);
-  const totalSpent = budgets.reduce((s, b) => s + ((b.monthlyLimit || 0) - (b.remainingLimit || 0)), 0);
+  const ceoExpenseTotal = ceoExpenses.reduce((sum, entry) => sum + (entry.amount || 0), 0);
+  const totalSpent = budgets.reduce((s, b) => s + ((b.monthlyLimit || 0) - (b.remainingLimit || 0)), 0) + ceoExpenseTotal;
   const pendingReceipts = receipts.filter((r) => r.verificationStatus === "AWAITING_RECEIPT").length;
   const foQueue = approvals.filter((a) => a.currentStage === "PENDING_FO").length;
 
@@ -102,10 +105,32 @@ export default function FinanceDashboard() {
         </Grid>
       </PageSection>
 
+      <PageSection title="Expense Records" subtitle="Direct CEO expenses posted to finance.">
+        <Grid cols={1}>
+          {ceoExpenses.length > 0 ? ceoExpenses.slice(0, 5).map((expense) => (
+            <Card key={expense.id}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-sm font-semibold">{expense.purpose}</h3>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {expense.program} | {expense.vendor} | {new Date(expense.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-semibold">GHS {Number(expense.amount || 0).toLocaleString()}</p>
+                  <StatusBadge variant="info">{expense.status}</StatusBadge>
+                </div>
+              </div>
+            </Card>
+          )) : <Card><p className="text-sm text-gray-500">No CEO expense records yet.</p></Card>}
+        </Grid>
+      </PageSection>
+
       <PageSection title="Financial Health">
         <Grid cols={4}>
           <MetricCard label="Total Budget" value={`GHS ${totalBudget.toLocaleString()}`} />
           <MetricCard label="Total Spent" value={`GHS ${totalSpent.toLocaleString()}`} />
+          <MetricCard label="CEO Direct Expenses" value={`GHS ${ceoExpenseTotal.toLocaleString()}`} />
           <MetricCard label="Outstanding Revenue" value={`GHS ${(totalRevenue - confirmedRevenue).toLocaleString()}`} />
           <MetricCard label="Frozen Depts" value={budgets.filter((b) => b.frozen).length} />
         </Grid>

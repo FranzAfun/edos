@@ -38,6 +38,7 @@ const RevenuePage = lazy(() => import("../modules/finance/revenue"));
 const TreasuryPage = lazy(() => import("../modules/finance/treasury"));
 const ProfitLossPage = lazy(() => import("../modules/finance/profit-loss"));
 const CEOIntelligencePage = lazy(() => import("../modules/ceo/intelligence"));
+const CEOExpenseLogPage = lazy(() => import("../modules/ceo/expense-log"));
 const SpecialContributionsPage = lazy(() => import("../modules/common/contributions"));
 const AssetManagementPage = lazy(() => import("../modules/common/assets"));
 const AttendancePage = lazy(() => import("../modules/common/attendance"));
@@ -78,6 +79,24 @@ function RoleApprovalsRedirect() {
   return <Navigate to={roles[role]?.defaultRoute || "/executive"} replace />;
 }
 
+function RoleFundRequestRedirect() {
+  const { role } = useRole();
+
+  if (role === "executive") {
+    return <Navigate to="/executive/fund-request" replace />;
+  }
+
+  if (role === "cto" || role === "coo") {
+    return <Navigate to="/operations/fund-request" replace />;
+  }
+
+  if (role === "finance") {
+    return <Navigate to="/finance/fund-request" replace />;
+  }
+
+  return <Navigate to={roles[role]?.defaultRoute || "/executive"} replace />;
+}
+
 function LoadingFallback() {
   return (
     <div className="mx-auto max-w-6xl space-y-4 p-6">
@@ -94,6 +113,8 @@ export default function AppRouter() {
         <Routes>
           <Route path="/" element={<RoleRootRedirect />} />
           <Route path="/approvals" element={<RoleApprovalsRedirect />} />
+          <Route path="/fund-request" element={<RoleFundRequestRedirect />} />
+          <Route path="/fund-request/new" element={<RoleFundRequestRedirect />} />
 
         <Route path="/executive" element={<ExecutiveLayout />}>
           <Route
@@ -230,6 +251,14 @@ export default function AppRouter() {
             }
           />
           <Route
+            path="fund-request"
+            element={
+              <RequirePermission permission={permissions.VIEW_FUND_REQUEST}>
+                <FundRequestForm />
+              </RequirePermission>
+            }
+          />
+          <Route
             path="revenue"
             element={
               <RequirePermission permission={permissions.VIEW_REVENUE}>
@@ -330,6 +359,14 @@ export default function AppRouter() {
             }
           />
           <Route
+            path="expense-log"
+            element={
+              <RequirePermission permission={permissions.VIEW_CEO_EXPENSE_LOG}>
+                <CEOExpenseLogPage />
+              </RequirePermission>
+            }
+          />
+          <Route
             path="contributions"
             element={
               <RequirePermission permission={permissions.VIEW_CONTRIBUTIONS}>
@@ -394,6 +431,14 @@ export default function AppRouter() {
             element={
               <RequirePermission permission={permissions.VIEW_TECH_APPROVALS}>
                 <OperationsApprovalsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="fund-request"
+            element={
+              <RequirePermission permission={permissions.VIEW_FUND_REQUEST}>
+                <FundRequestForm />
               </RequirePermission>
             }
           />

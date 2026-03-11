@@ -8,6 +8,11 @@ const OPERATIONAL_NAVIGATION = [
     permission: PERMISSIONS.VIEW_OPERATIONS_DASHBOARD,
   },
   {
+    label: "Fund Request",
+    path: "/operations/fund-request",
+    permission: PERMISSIONS.VIEW_FUND_REQUEST,
+  },
+  {
     label: "Technical Approvals",
     path: "/operations/approvals",
     permission: PERMISSIONS.VIEW_TECH_APPROVALS,
@@ -113,6 +118,11 @@ export const NAVIGATION = {
       permission: PERMISSIONS.VIEW_FINANCE_DASHBOARD,
     },
     {
+      label: "Fund Request",
+      path: "/finance/fund-request",
+      permission: PERMISSIONS.VIEW_FUND_REQUEST,
+    },
+    {
       label: "Approvals",
       path: "/finance/approvals",
       permission: PERMISSIONS.VIEW_FO_APPROVALS,
@@ -181,9 +191,14 @@ export const NAVIGATION = {
       permission: PERMISSIONS.VIEW_APPROVALS,
     },
     {
-      label: "Intelligence",
+      label: "Financial Insights",
       path: "/ceo/intelligence",
       permission: PERMISSIONS.VIEW_CEO_INTELLIGENCE,
+    },
+    {
+      label: "Expense Log",
+      path: "/ceo/expense-log",
+      permission: PERMISSIONS.VIEW_CEO_EXPENSE_LOG,
     },
     {
       label: "Strategy",

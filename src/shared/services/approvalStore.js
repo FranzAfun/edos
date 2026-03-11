@@ -176,14 +176,15 @@ export function getApprovalById(id) {
 export function createApproval(payload) {
   const all = read();
   const now = new Date().toISOString();
+  const initialStage = payload.initialStage || APPROVAL_STAGES.PENDING_TECH_REVIEW;
   const entry = {
     ...payload,
     supervisor: normalizeSupervisor(payload.supervisor) || payload.supervisor,
     id: generateId(),
-    currentStage: APPROVAL_STAGES.PENDING_TECH_REVIEW,
+    currentStage: initialStage,
     history: [
       {
-        stage: APPROVAL_STAGES.PENDING_TECH_REVIEW,
+        stage: initialStage,
         action: "CREATED",
         userId: payload.requestedByUserId,
         note: payload.note || "Initial submission",
@@ -229,6 +230,22 @@ export function updateApprovalStage(id, { nextStage, action, userId, note }) {
 
 export function getApprovalsByStage(stage) {
   return read().filter((a) => a.currentStage === stage);
+}
+
+export function getTechReviewApprovalsForSupervisor(supervisorRole) {
+  const reviewerRole = normalizeSupervisor(supervisorRole);
+
+  return read().filter((approval) => {
+    if (approval.currentStage !== APPROVAL_STAGES.PENDING_TECH_REVIEW) {
+      return false;
+    }
+
+    if (!reviewerRole) {
+      return true;
+    }
+
+    return normalizeSupervisor(approval.supervisor) === reviewerRole;
+  });
 }
 
 export function getApprovalsByRequester(userId) {

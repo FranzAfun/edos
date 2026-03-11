@@ -16,6 +16,7 @@ import * as complianceStore from "../../shared/services/complianceStore";
 import * as userStore from "../../shared/services/userStore";
 import useRole from "../../hooks/useRole";
 import { getSupervisorLabel } from "../../utils/supervisor";
+import { APPROVAL_STAGES } from "../../governance/approvalStages";
 
 const REJECTED_REQUEST_STATUSES = new Set(["REJECTED", "REJECTED_COMPLIANCE"]);
 
@@ -25,6 +26,14 @@ function isRejectedRequest(status) {
 
 function formatRequestStatus(status) {
   return status ? status.replaceAll("_", " ") : "UNKNOWN";
+}
+
+function isSuccessfulRequest(status) {
+  return [
+    APPROVAL_STAGES.APPROVED,
+    APPROVAL_STAGES.READY_FOR_DISBURSEMENT,
+    APPROVAL_STAGES.DISBURSED,
+  ].includes(status);
 }
 
 export default function ExecutiveDashboard() {
@@ -49,9 +58,9 @@ export default function ExecutiveDashboard() {
   );
 
   const pendingRequests = myRequests.filter(
-    (r) => r.status !== "APPROVED" && !isRejectedRequest(r.status)
+    (r) => !isSuccessfulRequest(r.status) && !isRejectedRequest(r.status)
   ).length;
-  const approvedRequests = myRequests.filter((r) => r.status === "APPROVED").length;
+  const approvedRequests = myRequests.filter((r) => isSuccessfulRequest(r.status)).length;
   const activeKpis = myKpis.filter((k) => k.status === "ASSIGNED").length;
   const completedKpis = myKpis.filter((k) => k.status === "COMPLETED").length;
 
@@ -116,7 +125,7 @@ export default function ExecutiveDashboard() {
                       {getSupervisorLabel(req.supervisor)} &middot; {req.program} &middot; GHS {Number(req.amount).toLocaleString()}
                     </p>
                   </div>
-                  <StatusBadge variant={req.status === "APPROVED" ? "success" : isRejectedRequest(req.status) ? "danger" : "warning"}>
+                  <StatusBadge variant={isSuccessfulRequest(req.status) ? "success" : isRejectedRequest(req.status) ? "danger" : "warning"}>
                     {formatRequestStatus(req.status)}
                   </StatusBadge>
                 </div>

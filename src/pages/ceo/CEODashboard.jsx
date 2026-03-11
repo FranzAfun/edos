@@ -19,7 +19,7 @@ import * as approvalStore from "../../shared/services/approvalStore";
 import * as kpiStore from "../../shared/services/kpiStore";
 import * as departmentStore from "../../shared/services/departmentStore";
 import * as userStore from "../../shared/services/userStore";
-import { isRejectedStage, isTerminal } from "../../governance/approvalStages";
+import { isRejectedStage, isSuccessfulStage, isTerminal } from "../../governance/approvalStages";
 import { getUserKpiPercentage } from "../../shared/services/trustLevelStore";
 import { getSupervisorLabel } from "../../utils/supervisor";
 
@@ -55,7 +55,7 @@ export default function CEODashboard() {
   });
 
   const approvalBreakdown = [
-    { name: "Approved", value: approvals.filter((a) => a.currentStage === "APPROVED").length },
+    { name: "Approved", value: approvals.filter((a) => isSuccessfulStage(a.currentStage)).length },
     { name: "Pending", value: pendingApprovals },
     { name: "Rejected", value: approvals.filter((a) => isRejectedStage(a.currentStage)).length },
   ].filter((d) => d.value > 0);

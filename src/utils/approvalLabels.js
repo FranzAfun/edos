@@ -11,6 +11,8 @@ const STAGE_LABEL_OVERRIDES = {
   REJECTED_COMPLIANCE: "Rejected by Compliance",
   REJECTED: "Rejected",
   APPROVED: "Approved",
+  READY_FOR_DISBURSEMENT: "Ready for Disbursement",
+  DISBURSED: "Disbursed",
   RETURNED_FOR_CLARIFICATION: "Returned for Clarification",
 };
 

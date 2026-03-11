@@ -26,7 +26,9 @@ import * as revenueStore from "../../../shared/services/revenueStore";
 import * as treasuryStore from "../../../shared/services/treasuryStore";
 import * as budgetStore from "../../../shared/services/budgetStore";
 import * as approvalStore from "../../../shared/services/approvalStore";
+import * as financialTransactionStore from "../../../shared/services/financialTransactionStore";
 import { getSupervisorLabel } from "../../../utils/supervisor";
+import { isSuccessfulStage } from "../../../governance/approvalStages";
 
 const CHART_COLORS = [
   "var(--color-accent, #2563EB)",
@@ -45,19 +47,21 @@ export default function ProfitLossPage() {
   const treasury = treasuryStore.getTreasury();
   const budgets = budgetStore.listBudgets();
   const approvals = approvalStore.listApprovals();
+  const ceoExpenses = financialTransactionStore.listTransactionsByType("CEO_EXPENSE");
 
   const confirmedRevenue = revenueStore.getConfirmedRevenue();
   const totalBudgetAllocated = budgets.reduce(
     (s, b) => s + (b.monthlyLimit || 0),
     0
   );
+  const directExpenseTotal = ceoExpenses.reduce((sum, entry) => sum + (entry.amount || 0), 0);
   const totalSpent = budgets.reduce(
     (s, b) => s + ((b.monthlyLimit || 0) - (b.remainingLimit || 0)),
     0
-  );
+  ) + directExpenseTotal;
   const approvedExpenses = approvals
-    .filter((a) => a.currentStage === "APPROVED")
-    .reduce((s, a) => s + (a.amount || 0), 0);
+    .filter((a) => isSuccessfulStage(a.currentStage))
+    .reduce((s, a) => s + (a.amount || 0), 0) + directExpenseTotal;
 
   const netPL = confirmedRevenue - totalSpent;
 
@@ -239,7 +243,7 @@ export default function ProfitLossPage() {
               GHS {approvedExpenses.toLocaleString()}
             </p>
             <p className="text-xs text-gray-400 mt-1">
-              Pipeline committed spending
+              Pipeline committed spending and direct CEO expenses
             </p>
           </Card>
         </Grid>
