@@ -133,7 +133,7 @@ function BudgetRow({ budget, onAction }) {
           className={`rounded px-3 py-1 text-xs text-white disabled:opacity-50 ${
             budget.frozen
               ? "bg-green-600 hover:bg-green-700"
-              : "bg-blue-600 hover:bg-blue-700"
+              : "btn-primary"
           }`}
         >
           {budget.frozen ? "Unfreeze" : "Freeze"}

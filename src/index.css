@@ -37,12 +37,39 @@ body {
   color: var(--color-text-primary);
 }
 
-/* Native select popups are browser/OS-rendered and can keep a light menu in dark theme.
-   Force option contrast so dropdown items remain readable everywhere. */
-select option,
-select optgroup {
-  background-color: #ffffff;
-  color: #0f172a;
+/* Remove default browser styling so themed dropdown styles render consistently. */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+select::-ms-expand {
+  display: none;
+}
+
+/* Dark theme dropdown/select palette */
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] .dropdown-menu {
+  background-color: #1c1c21;
+  color: #ffffff;
+  border: 1px solid #2a2a32;
+}
+
+:root[data-theme="dark"] select option,
+:root[data-theme="dark"] select optgroup {
+  background: #1c1c21;
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .dropdown-item:hover {
+  background: #2a2a32;
+}
+
+:root[data-theme="dark"] .dropdown-item.active,
+:root[data-theme="dark"] .dropdown-item.selected {
+  background: #39366f;
+  color: #ffffff;
 }
 
 h1,

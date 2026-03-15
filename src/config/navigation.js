@@ -37,11 +37,6 @@ const OPERATIONAL_NAVIGATION = [
     path: "/operations/communications",
     permission: PERMISSIONS.VIEW_COMMUNICATIONS,
   },
-  {
-    label: "Notifications",
-    path: "/operations/notifications",
-    permission: PERMISSIONS.VIEW_NOTIFICATIONS,
-  },
 ];
 
 /**
@@ -68,17 +63,6 @@ export const NAVIGATION = {
       permission: PERMISSIONS.VIEW_FUND_REQUEST,
     },
     {
-      label: "Intelligence",
-      path: "/executive/intelligence",
-      permission: PERMISSIONS.VIEW_INTELLIGENCE,
-      feature: "EXEC_INTELLIGENCE_V2",
-    },
-    {
-      label: "Compliance",
-      path: "/executive/compliance",
-      permission: PERMISSIONS.VIEW_COMPLIANCE,
-    },
-    {
       label: "Reports",
       path: "/executive/reports",
       permission: PERMISSIONS.VIEW_REPORTS,
@@ -103,11 +87,6 @@ export const NAVIGATION = {
       label: "Communications",
       path: "/executive/communications",
       permission: PERMISSIONS.VIEW_COMMUNICATIONS,
-    },
-    {
-      label: "Notifications",
-      path: "/executive/notifications",
-      permission: PERMISSIONS.VIEW_NOTIFICATIONS,
     },
   ],
 
@@ -172,11 +151,6 @@ export const NAVIGATION = {
       path: "/finance/communications",
       permission: PERMISSIONS.VIEW_COMMUNICATIONS,
     },
-    {
-      label: "Notifications",
-      path: "/finance/notifications",
-      permission: PERMISSIONS.VIEW_NOTIFICATIONS,
-    },
   ],
 
   ceo: [
@@ -235,11 +209,6 @@ export const NAVIGATION = {
       label: "Communications",
       path: "/ceo/communications",
       permission: PERMISSIONS.VIEW_COMMUNICATIONS,
-    },
-    {
-      label: "Notifications",
-      path: "/ceo/notifications",
-      permission: PERMISSIONS.VIEW_NOTIFICATIONS,
     },
   ],
 
@@ -305,11 +274,6 @@ export const NAVIGATION = {
       label: "Communications",
       path: "/admin/communications",
       permission: PERMISSIONS.VIEW_COMMUNICATIONS,
-    },
-    {
-      label: "Notifications",
-      path: "/admin/notifications",
-      permission: PERMISSIONS.VIEW_NOTIFICATIONS,
     },
   ],
 };

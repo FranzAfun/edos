@@ -2,7 +2,7 @@ import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Reports Module (F25, F26)
  * F25: Financial Reports — Revenue, Budget, Treasury, P&L reports
- * F26: Export to PDF/Excel using jspdf + xlsx
+ * F26: Export reports to PDF for auditing
  */
 import { useState, useMemo, useCallback } from "react";
 import PageSection from "../../../components/layout/PageSection";
@@ -21,31 +21,85 @@ import * as financialTransactionStore from "../../../shared/services/financialTr
 import { formatApprovalSourceType, formatApprovalStage } from "../../../utils/approvalLabels";
 import { getSupervisorLabel } from "../../../utils/supervisor";
 
-async function exportToExcel(data, columns, fileName) {
-  const XLSX = await import("xlsx");
-  const headers = columns.map((c) => c.label);
-  const rows = data.map((row) =>
-    columns.map((c) => {
-      const val = row[c.key];
-      return val != null ? val : "";
-    })
-  );
-  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Report");
-  XLSX.writeFile(wb, `${fileName}.xlsx`);
+const EXPORT_LOGO_PATH = "/era_full_logo_for_white_bg.png";
+let cachedLogoAsset = null;
+
+function toExportFileName(title) {
+  return String(title || "report")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+async function getExportLogoAsset() {
+  if (cachedLogoAsset) return cachedLogoAsset;
+
+  try {
+    const response = await fetch(EXPORT_LOGO_PATH);
+    if (!response.ok) return null;
+
+    const blob = await response.blob();
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+    const dimensions = await new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        resolve({
+          width: img.naturalWidth || img.width || 1,
+          height: img.naturalHeight || img.height || 1,
+        });
+      };
+      img.onerror = () => resolve({ width: 1, height: 1 });
+      img.src = dataUrl;
+    });
+
+    cachedLogoAsset = {
+      dataUrl,
+      width: dimensions.width,
+      height: dimensions.height,
+    };
+    return cachedLogoAsset;
+  } catch {
+    return null;
+  }
 }
 
 async function exportToPdf(data, columns, title) {
   const { default: jsPDF } = await import("jspdf");
   const autoTable = (await import("jspdf-autotable")).default;
   const doc = new jsPDF();
+
+  const logoAsset = await getExportLogoAsset();
+  let startY = 20;
+
+  if (logoAsset?.dataUrl) {
+    const maxLogoWidth = 72;
+    const maxLogoHeight = 42;
+    const logoRatio = logoAsset.width / logoAsset.height;
+    let logoWidth = maxLogoWidth;
+    let logoHeight = logoWidth / logoRatio;
+
+    if (logoHeight > maxLogoHeight) {
+      logoHeight = maxLogoHeight;
+      logoWidth = logoHeight * logoRatio;
+    }
+
+    doc.addImage(logoAsset.dataUrl, "PNG", 14, 10, logoWidth, logoHeight);
+    startY = 10 + logoHeight + 6;
+  }
+
   doc.setFontSize(14);
-  doc.text(title, 14, 20);
+  doc.text(title, 14, startY);
   doc.setFontSize(8);
-  doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 28);
+  doc.text(`Generated: ${new Date().toLocaleString()}`, 14, startY + 8);
   autoTable(doc, {
-    startY: 32,
+    startY: startY + 12,
     head: [columns.map((c) => c.label)],
     body: data.map((row) =>
       columns.map((c) => {
@@ -56,7 +110,7 @@ async function exportToPdf(data, columns, title) {
     styles: { fontSize: 7 },
     headStyles: { fillColor: [15, 23, 42] },
   });
-  doc.save(`${title.replace(/\s+/g, "_")}.pdf`);
+  doc.save(`${toExportFileName(title)}.pdf`);
 }
 
 const REPORT_TYPES = [
@@ -81,10 +135,10 @@ export default function ReportsPage() {
             <button
               key={rt.key}
               onClick={() => setActiveReport(rt.key)}
-              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+              className={`report-tab px-3 py-1.5 rounded text-sm font-medium transition-colors ${
                 activeReport === rt.key
                   ? "bg-[var(--color-accent)] text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  : "report-tab-inactive"
               }`}
             >
               {rt.label}
@@ -107,12 +161,6 @@ export default function ReportsPage() {
 function ExportButtons({ data, columns, title }) {
   const [exporting, setExporting] = useState(false);
 
-  const handleExcel = useCallback(async () => {
-    setExporting(true);
-    try { await exportToExcel(data, columns, title); } catch (e) { console.error(e); }
-    setExporting(false);
-  }, [data, columns, title]);
-
   const handlePdf = useCallback(async () => {
     setExporting(true);
     try { await exportToPdf(data, columns, title); } catch (e) { console.error(e); }
@@ -122,16 +170,9 @@ function ExportButtons({ data, columns, title }) {
   return (
     <div className="flex gap-2 mb-4">
       <button
-        onClick={handleExcel}
-        disabled={exporting || data.length === 0}
-        className="rounded border px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-      >
-        Export Excel
-      </button>
-      <button
         onClick={handlePdf}
         disabled={exporting || data.length === 0}
-        className="rounded border px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+        className="icon-btn px-3 py-1.5 text-xs font-semibold disabled:pointer-events-none disabled:opacity-50"
       >
         Export PDF
       </button>
@@ -157,7 +198,7 @@ function RevenueReport() {
   }));
   return (
     <div>
-      <ExportButtons data={rows} columns={columns} title="Revenue_Report" />
+      <ExportButtons data={rows} columns={columns} title="Revenue Report" />
       <DataTable columns={columns} data={rows} pageSize={10} emptyText="No revenue data." />
     </div>
   );
@@ -192,7 +233,7 @@ function BudgetReport() {
   ];
   return (
     <div>
-      <ExportButtons data={budgets} columns={columns} title="Budget_Report" />
+      <ExportButtons data={budgets} columns={columns} title="Budget Report" />
       <DataTable columns={columns} data={budgets} pageSize={12} emptyText="No budget data." />
     </div>
   );
@@ -217,7 +258,7 @@ function ApprovalsReport() {
   ];
   return (
     <div>
-      <ExportButtons data={approvals} columns={columns} title="Approvals_Report" />
+      <ExportButtons data={approvals} columns={columns} title="Approvals Report" />
       <DataTable columns={columns} data={approvals} pageSize={10} emptyText="No approval data." />
     </div>
   );
@@ -254,7 +295,7 @@ function AssetReport() {
   ];
   return (
     <div>
-      <ExportButtons data={assets} columns={columns} title="Asset_Report" />
+      <ExportButtons data={assets} columns={columns} title="Asset Report" />
       <DataTable columns={columns} data={assets} pageSize={10} emptyText="No asset data." />
     </div>
   );
@@ -272,7 +313,7 @@ function ReceiptsReport() {
   ];
   return (
     <div>
-      <ExportButtons data={receipts} columns={columns} title="Receipts_Report" />
+      <ExportButtons data={receipts} columns={columns} title="Receipts Report" />
       <DataTable columns={columns} data={receipts} pageSize={10} emptyText="No receipt data." />
     </div>
   );
@@ -291,7 +332,7 @@ function ExpenseReport() {
 
   return (
     <div>
-      <ExportButtons data={expenses} columns={columns} title="Expense_Records_Report" />
+      <ExportButtons data={expenses} columns={columns} title="Expense Records Report" />
       <DataTable columns={columns} data={expenses} pageSize={10} emptyText="No expense records." />
     </div>
   );
@@ -319,7 +360,7 @@ function TreasurySummary() {
   ];
   return (
     <div>
-      <ExportButtons data={summaryData} columns={columns} title="Treasury_Summary" />
+      <ExportButtons data={summaryData} columns={columns} title="Treasury Summary" />
       <Grid cols={3}>
         {summaryData.map((s) => (
           <Card key={s.metric}>

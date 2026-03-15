@@ -151,7 +151,7 @@ function SubmitContributionForm({ userId, onSubmitted }) {
 
   return (
     <Card>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <FormField
           label="Contribution Description"
           name="description"
@@ -173,7 +173,7 @@ function SubmitContributionForm({ userId, onSubmitted }) {
         />
         <button
           type="submit"
-          className="rounded bg-[var(--color-accent)] px-4 py-2 text-sm text-white hover:bg-blue-700"
+          className="btn-primary rounded px-4 py-2 text-sm"
         >
           Submit Contribution
         </button>

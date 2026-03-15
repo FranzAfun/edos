@@ -78,7 +78,7 @@ export default function CEOExpenseLogPage() {
 
       <PageSection title="Log Expense" subtitle="These entries bypass approvals and are recorded directly for finance.">
         <Card>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} noValidate className="space-y-4">
             <Grid cols={2}>
               <FormField
                 label="Purpose"
@@ -135,7 +135,7 @@ export default function CEOExpenseLogPage() {
             <button
               type="submit"
               disabled={saving}
-              className="rounded bg-[var(--color-accent)] px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+              className="btn-primary rounded px-4 py-2 text-sm disabled:opacity-50"
             >
               {saving ? "Recording..." : "Record Expense"}
             </button>

@@ -116,7 +116,7 @@ export default function AssetManagementPage() {
         <PageSection title="Register Asset" subtitle="Add a new asset to the register">
           <button
             onClick={() => setShowForm((v) => !v)}
-            className="mb-4 rounded bg-[var(--color-accent)] px-4 py-2 text-sm text-white hover:bg-blue-700"
+            className="btn-primary mb-4 rounded px-4 py-2 text-sm"
           >
             {showForm ? "Hide Form" : "Add New Asset"}
           </button>
@@ -231,7 +231,7 @@ function AssetForm({ departments, onCreated }) {
 
   return (
     <Card>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <Grid cols={3}>
           <FormField label="Asset Name" name="name" required value={values.name} onChange={handleChange} error={touched.name ? errors.name : null} />
           <FormField label="Category" name="category" type="select" required value={values.category} onChange={handleChange} error={touched.category ? errors.category : null} options={assetStore.CATEGORIES.map((c) => ({ value: c, label: c }))} />
@@ -247,7 +247,7 @@ function AssetForm({ departments, onCreated }) {
           <FormField label="Assigned To" name="assignedToUserId" type="select" value={values.assignedToUserId} onChange={handleChange} options={users.map((u) => ({ value: u.id, label: u.name }))} />
           <FormField label="Purchase Date" name="purchaseDate" type="date" required value={values.purchaseDate} onChange={handleChange} error={touched.purchaseDate ? errors.purchaseDate : null} />
         </Grid>
-        <button type="submit" className="rounded bg-[var(--color-accent)] px-4 py-2 text-sm text-white hover:bg-blue-700">
+        <button type="submit" className="btn-primary rounded px-4 py-2 text-sm">
           Register Asset
         </button>
       </form>

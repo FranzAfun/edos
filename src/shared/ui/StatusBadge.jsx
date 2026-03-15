@@ -14,9 +14,9 @@ const VARIANTS = {
     border: semanticStatus.info.border,
   },
   purple: {
-    bg: semanticStatus.info.bg,
-    text: semanticStatus.info.text,
-    border: semanticStatus.info.border,
+    bg: "#f3e8ff",
+    text: "#6b21a8",
+    border: "#d8b4fe",
   },
 };
 

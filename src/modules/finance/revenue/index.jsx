@@ -164,7 +164,7 @@ function RevenueForm({ onRecorded, role }) {
 
   return (
     <Card>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <Grid cols={3}>
           <FormField
             label="Supervisor"
@@ -258,7 +258,7 @@ function RevenueForm({ onRecorded, role }) {
         </Grid>
         <button
           type="submit"
-          className="rounded bg-[var(--color-accent)] px-4 py-2 text-sm text-white hover:bg-blue-700"
+          className="btn-primary rounded px-4 py-2 text-sm"
         >
           Record Revenue
         </button>

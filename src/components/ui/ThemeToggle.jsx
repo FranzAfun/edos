@@ -70,7 +70,7 @@ export default function ThemeToggle() {
   return (
     <button
       type="button"
-      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text-primary)]"
+      className="icon-btn h-8 w-8"
       aria-label="Toggle theme"
       onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
     >

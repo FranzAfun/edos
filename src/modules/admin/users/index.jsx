@@ -4,6 +4,7 @@ import Card from "../../../components/ui/Card";
 import Grid from "../../../components/layout/Grid";
 import ModuleBoundary from "../../../shared/components/ModuleBoundary";
 import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
+import SelectField from "../../../shared/ui/SelectField";
 import useAllUsers from "./hooks/useAllUsers";
 import { createUser, deleteUser } from "./services/userService";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
@@ -141,7 +142,7 @@ function CreateUserForm({ onCreated }) {
             onChange={(e) => update("email", e.target.value)}
             className="rounded border px-2 py-1 text-sm"
           />
-          <select
+          <SelectField
             value={form.roleKey}
             onChange={(e) => {
               const nextRole = e.target.value;
@@ -158,10 +159,10 @@ function CreateUserForm({ onCreated }) {
                 {option.label}
               </option>
             ))}
-          </select>
+          </SelectField>
           {needsSupervisor && (
             <div className="flex flex-col gap-1">
-              <select
+              <SelectField
                 value={form.supervisorRole}
                 onChange={(e) => {
                   update("supervisorRole", e.target.value);
@@ -177,7 +178,7 @@ function CreateUserForm({ onCreated }) {
                     {option.label}
                   </option>
                 ))}
-              </select>
+              </SelectField>
               {supervisorError ? (
                 <p className="text-xs" style={{ color: semanticStatus.error.text }}>
                   {supervisorError}
@@ -206,7 +207,7 @@ function CreateUserForm({ onCreated }) {
         <button
           type="submit"
           disabled={saving || !form.name.trim()}
-          className="self-start rounded bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+          className="btn-primary self-start rounded px-4 py-1.5 text-sm disabled:opacity-50"
         >
           {saving ? "Creating…" : "Create User"}
         </button>

@@ -1,4 +1,5 @@
 import useRole from "../../hooks/useRole";
+import SelectField from "../../shared/ui/SelectField";
 
 const DEV_ROLES = ["admin", "ceo", "cto", "coo", "finance", "executive"];
 
@@ -29,7 +30,7 @@ export default function DevRoleSwitcher() {
       <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
         Dev Role
       </div>
-      <select
+      <SelectField
         value={role}
         onChange={handleRoleChange}
         className="w-32 rounded border border-amber-300 bg-[var(--color-surface)] px-2 py-1 text-xs text-[var(--color-text-primary)] outline-none focus:ring-1 focus:ring-amber-500"
@@ -40,7 +41,7 @@ export default function DevRoleSwitcher() {
             {ROLE_LABELS[item]}
           </option>
         ))}
-      </select>
+      </SelectField>
     </div>
   );
 }

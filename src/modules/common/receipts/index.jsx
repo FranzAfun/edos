@@ -14,6 +14,7 @@ import StatusBadge from "../../../shared/ui/StatusBadge";
 import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
 import DataTable from "../../../shared/ui/DataTable";
 import FormField from "../../../shared/ui/FormField";
+import SelectField from "../../../shared/ui/SelectField";
 import useFormValidation from "../../../shared/hooks/useFormValidation";
 import * as receiptStore from "../../../shared/services/receiptStore";
 import * as approvalStore from "../../../shared/services/approvalStore";
@@ -194,9 +195,9 @@ function UploadReceiptPanel({ onUploaded, currentUserId }) {
 
   return (
     <Card>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <FormField label="Select Receipt Placeholder" required>
-          <select
+          <SelectField
             value={selectedId}
             onChange={(e) => setSelectedId(e.target.value)}
             className="w-full rounded border px-3 py-2 text-sm"
@@ -211,7 +212,7 @@ function UploadReceiptPanel({ onUploaded, currentUserId }) {
                 </option>
               );
             })}
-          </select>
+          </SelectField>
         </FormField>
         <Grid cols={2}>
           <FormField
@@ -255,7 +256,7 @@ function UploadReceiptPanel({ onUploaded, currentUserId }) {
         <button
           type="submit"
           disabled={!selectedId}
-          className="rounded bg-[var(--color-accent)] px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+          className="btn-primary rounded px-4 py-2 text-sm disabled:opacity-50"
         >
           Upload Receipt
         </button>

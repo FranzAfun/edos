@@ -10,6 +10,7 @@ import useAllEvidence from "./hooks/useAllEvidence";
 import { createKpiTask, gradeEvidence } from "./services/kpiAdminService";
 import { getExecutives } from "../../admin/users/services/userService";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
+import SelectField from "../../../shared/ui/SelectField";
 
 const IMPACT_CATEGORIES = ["Operational", "Important", "Strategic"];
 const EVIDENCE_TYPES = ["File", "Image", "Link", "Report", "Text"];
@@ -159,7 +160,7 @@ function CreateKpiForm({ onCreated }) {
             onChange={(e) => update("deadline", e.target.value)}
             className="rounded border px-2 py-1 text-sm"
           />
-          <select
+          <SelectField
             value={form.evidenceType}
             onChange={(e) => update("evidenceType", e.target.value)}
             className="rounded border px-2 py-1 text-sm"
@@ -169,7 +170,7 @@ function CreateKpiForm({ onCreated }) {
                 {t}
               </option>
             ))}
-          </select>
+          </SelectField>
           <input
             type="number"
             placeholder="Weight"
@@ -179,7 +180,7 @@ function CreateKpiForm({ onCreated }) {
             onChange={(e) => update("weight", e.target.value)}
             className="rounded border px-2 py-1 text-sm"
           />
-          <select
+          <SelectField
             value={form.impactCategory}
             onChange={(e) => update("impactCategory", e.target.value)}
             className="rounded border px-2 py-1 text-sm"
@@ -189,8 +190,8 @@ function CreateKpiForm({ onCreated }) {
                 {c}
               </option>
             ))}
-          </select>
-          <select
+          </SelectField>
+          <SelectField
             value={form.assignedToUserId}
             onChange={(e) => update("assignedToUserId", e.target.value)}
             className="rounded border px-2 py-1 text-sm"
@@ -203,7 +204,7 @@ function CreateKpiForm({ onCreated }) {
                 {exec.name} ({exec.id})
               </option>
             ))}
-          </select>
+          </SelectField>
         </div>
         <textarea
           placeholder="Description"
@@ -215,7 +216,7 @@ function CreateKpiForm({ onCreated }) {
         <button
           type="submit"
           disabled={saving || !form.title.trim()}
-          className="self-start rounded bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+          className="btn-primary self-start rounded px-4 py-1.5 text-sm disabled:opacity-50"
         >
           {saving ? "Creating…" : "Create KPI"}
         </button>
@@ -256,12 +257,19 @@ function EvidenceRow({ evidence, task, onGraded }) {
               User: {evidence.userId} &middot; Type: {evidence.type} &middot; Submitted:{" "}
               {new Date(evidence.submittedAt).toLocaleDateString()}
             </p>
-            <p className="text-sm mt-1">{evidence.linkOrText}</p>
+            <p className="text-sm mt-1">
+              {evidence.type === "Link"
+                ? evidence.evidenceLink || evidence.linkOrText || "-"
+                : evidence.fileName || evidence.linkOrText || "-"}
+            </p>
+            {evidence.comments ? (
+              <p className="mt-1 text-xs text-gray-500">Comments: {evidence.comments}</p>
+            ) : null}
           </div>
 
           {task?.status !== "GRADED" && (
             <div className="flex items-center gap-2 shrink-0">
-              <select
+              <SelectField
                 value={grade}
                 onChange={(e) => setGrade(e.target.value)}
                 className="rounded border px-2 py-1 text-xs"
@@ -271,7 +279,7 @@ function EvidenceRow({ evidence, task, onGraded }) {
                     {g}
                   </option>
                 ))}
-              </select>
+              </SelectField>
               <button
                 onClick={() => setConfirmGrade(true)}
                 disabled={grading}

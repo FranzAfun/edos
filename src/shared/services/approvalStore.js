@@ -30,6 +30,19 @@ const LEGACY_STAGE_MAP = {
   PENDING_OPERATIONS: APPROVAL_STAGES.PENDING_TECH_REVIEW,
 };
 
+const listeners = new Set();
+
+export function subscribe(callback) {
+  listeners.add(callback);
+  return () => listeners.delete(callback);
+}
+
+function notifySubscribers() {
+  listeners.forEach((fn) => {
+    try { fn(); } catch { /* swallow */ }
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -195,6 +208,7 @@ export function createApproval(payload) {
   };
   all.push(entry);
   write(all);
+  notifySubscribers();
   return entry;
 }
 
@@ -221,6 +235,7 @@ export function updateApprovalStage(id, { nextStage, action, userId, note }) {
   };
 
   write(all);
+  notifySubscribers();
   return all[idx];
 }
 

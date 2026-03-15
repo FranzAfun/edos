@@ -1,8 +1,0 @@
-<svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ERA logo">
-  <path d="M10 10H70V20H10V10Z" fill="currentColor"/>
-  <path d="M10 25H62V35H10V25Z" fill="currentColor"/>
-  <path d="M10 40H70V50H10V40Z" fill="currentColor"/>
-  <path d="M86 10H134C147 10 156 18 156 30C156 42 147 50 134 50H86V10ZM97 20V40H132C139 40 145 36 145 30C145 24 139 20 132 20H97Z" fill="currentColor"/>
-  <path d="M170 10H190L167 50H155L170 10Z" fill="currentColor"/>
-  <path d="M167 34H193V50H182V44H170V50H159V42L167 34Z" fill="currentColor"/>
-</svg>

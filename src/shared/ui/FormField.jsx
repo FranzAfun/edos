@@ -1,6 +1,8 @@
 /**
  * FormField - Reusable form field with label, validation, and accessible error messages (F36)
  */
+import SelectField from "./SelectField";
+
 export default function FormField({
   label,
   name,
@@ -12,6 +14,7 @@ export default function FormField({
   placeholder = "",
   disabled = false,
   children,
+  options = [],
   className = "",
   helpText,
   ...rest
@@ -76,7 +79,7 @@ export default function FormField({
           {label}
           {required && <span className="text-[var(--color-danger)] ml-0.5" aria-hidden="true">*</span>}
         </label>
-        <select
+        <SelectField
           id={id}
           name={name}
           value={value || ""}
@@ -87,7 +90,18 @@ export default function FormField({
           aria-describedby={hasError ? errorId : undefined}
           className={`w-full rounded border bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-1 ${hasError ? "border-[var(--color-danger)] focus:ring-[var(--color-danger)]" : "border-[var(--color-border)] focus:ring-[var(--color-accent)]"}`}
           {...rest}
-        />
+        >
+          {options.map((option) => {
+            const valueKey = typeof option === "object" ? option.value : option;
+            const labelValue = typeof option === "object" ? option.label : option;
+
+            return (
+              <option key={String(valueKey)} value={valueKey}>
+                {labelValue}
+              </option>
+            );
+          })}
+        </SelectField>
         {helpText && !hasError && <p className="mt-1 text-xs font-medium text-[var(--color-text-muted)]">{helpText}</p>}
         {hasError && (
           <p id={errorId} className="mt-1 text-xs text-[var(--color-danger)]" role="alert">

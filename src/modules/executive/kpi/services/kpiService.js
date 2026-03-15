@@ -13,9 +13,34 @@ export const getMyKpis = createModuleService(async ({ userId }) => {
   return tasks;
 });
 
+export const getMyKpiEvidence = createModuleService(async ({ userId }) => {
+  return kpiStore.listEvidenceByUser(userId);
+});
+
 export const submitKpiEvidence = createModuleService(
-  async ({ taskId, userId, type, linkOrText }) => {
-    const entry = kpiStore.submitEvidence({ taskId, userId, type, linkOrText });
+  async ({
+    taskId,
+    userId,
+    type,
+    linkOrText,
+    evidenceLink,
+    fileName,
+    fileSize,
+    fileType,
+    comments,
+  }) => {
+    const entry = kpiStore.submitEvidence({
+      taskId,
+      userId,
+      type,
+      linkOrText,
+      evidenceLink,
+      fileName,
+      fileSize,
+      fileType,
+      comments,
+      reviewerStatus: "Pending",
+    });
 
     // Notify admin users
     const admins = userStore.getUsersByRole("admin");

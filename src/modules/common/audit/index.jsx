@@ -8,6 +8,7 @@ import PageSection from "../../../components/layout/PageSection";
 import Grid from "../../../components/layout/Grid";
 import MetricCard from "../../../components/ui/MetricCard";
 import DataTable from "../../../shared/ui/DataTable";
+import SelectField from "../../../shared/ui/SelectField";
 import * as auditStore from "../../../shared/services/auditStore";
 import * as userStore from "../../../shared/services/userStore";
 import { formatTokenLabel } from "../../../utils/formatLabel";
@@ -62,7 +63,7 @@ export default function AuditTrailPage({
 
       <PageSection title="Filter">
         <div className="flex gap-4 mb-4">
-          <select
+          <SelectField
             value={selectedCategory}
             onChange={(event) => setSelectedCategory(event.target.value)}
             className="rounded border px-3 py-1.5 text-sm"
@@ -72,8 +73,8 @@ export default function AuditTrailPage({
             {Object.values(auditStore.AUDIT_CATEGORIES).map((category) => (
               <option key={category} value={category}>{formatTokenLabel(category)}</option>
             ))}
-          </select>
-          <select
+          </SelectField>
+          <SelectField
             value={filterAction}
             onChange={(e) => setFilterAction(e.target.value)}
             className="rounded border px-3 py-1.5 text-sm"
@@ -82,8 +83,8 @@ export default function AuditTrailPage({
             {actions.map((a) => (
               <option key={a} value={a}>{formatTokenLabel(a)}</option>
             ))}
-          </select>
-          <select
+          </SelectField>
+          <SelectField
             value={filterEntity}
             onChange={(e) => setFilterEntity(e.target.value)}
             className="rounded border px-3 py-1.5 text-sm"
@@ -92,7 +93,7 @@ export default function AuditTrailPage({
             {entityTypes.map((e) => (
               <option key={e} value={e}>{formatTokenLabel(e)}</option>
             ))}
-          </select>
+          </SelectField>
         </div>
       </PageSection>
 

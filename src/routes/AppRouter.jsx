@@ -15,8 +15,6 @@ import NotFound from "../pages/NotFound";
 import RequirePermission from "./RequirePermission";
 
 const ExecutiveDashboard = lazy(() => import("../pages/executive/ExecutiveDashboard"));
-const Intelligence = lazy(() => import("../pages/executive/modules/intelligence"));
-const Compliance = lazy(() => import("../pages/executive/modules/compliance"));
 const FinanceDashboard = lazy(() => import("../pages/finance/FinanceDashboard"));
 const CEODashboard = lazy(() => import("../pages/ceo/CEODashboard"));
 const Strategy = lazy(() => import("../pages/ceo/modules/strategy"));
@@ -124,22 +122,6 @@ export default function AppRouter() {
             element={
               <RequirePermission permission={permissions.VIEW_EXECUTIVE_DASHBOARD}>
                 <ExecutiveDashboard />
-              </RequirePermission>
-            }
-          />
-          <Route
-            path="intelligence"
-            element={
-              <RequirePermission permission={permissions.VIEW_INTELLIGENCE}>
-                <Intelligence />
-              </RequirePermission>
-            }
-          />
-          <Route
-            path="compliance"
-            element={
-              <RequirePermission permission={permissions.VIEW_COMPLIANCE}>
-                <Compliance />
               </RequirePermission>
             }
           />

@@ -217,7 +217,7 @@ function ComposeForm({ currentUser, onSent }) {
 
   return (
     <Card>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <div className="flex gap-4 mb-2">
           {["message", "announcement"].map((t) => (
             <label key={t} className="flex items-center gap-1 text-sm cursor-pointer">
@@ -264,7 +264,7 @@ function ComposeForm({ currentUser, onSent }) {
         />
         <button
           type="submit"
-          className="rounded bg-[var(--color-accent)] px-4 py-2 text-sm text-white hover:bg-blue-700"
+          className="btn-primary rounded px-4 py-2 text-sm"
         >
           {messageType === "announcement" ? "Post Announcement" : "Send Message"}
         </button>

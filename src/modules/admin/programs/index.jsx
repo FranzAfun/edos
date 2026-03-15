@@ -4,6 +4,7 @@ import Card from "../../../components/ui/Card";
 import FormField from "../../../shared/ui/FormField";
 import DataTable from "../../../shared/ui/DataTable";
 import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
+import SelectField from "../../../shared/ui/SelectField";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import {
   getPrograms,
@@ -96,7 +97,7 @@ export default function AdminProgramsPage() {
               placeholder="e.g. Digital Literacy Training"
             />
             <FormField label="Supervisor" name="supervisor" required>
-              <select
+              <SelectField
                 id="field-supervisor"
                 name="supervisor"
                 value={supervisor}
@@ -108,13 +109,13 @@ export default function AdminProgramsPage() {
                     {option.label}
                   </option>
                 ))}
-              </select>
+              </SelectField>
             </FormField>
             <div className="mb-4 flex gap-2">
               <button
                 type="submit"
                 disabled={!name.trim()}
-                className="rounded bg-[var(--color-accent)] px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+                className="btn-primary rounded px-4 py-2 text-sm disabled:opacity-50"
               >
                 {editingId ? "Save Program" : "Create Program"}
               </button>

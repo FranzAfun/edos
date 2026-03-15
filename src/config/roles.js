@@ -38,7 +38,6 @@ export const roles = {
     tier: AUTHORITY_LEVEL.EXECUTIVE,
     permissions: [
       permissions.VIEW_EXECUTIVE_DASHBOARD,
-      permissions.VIEW_INTELLIGENCE,
       permissions.VIEW_COMPLIANCE,
       permissions.VIEW_REPORTS,
       permissions.EXEC_VIEW_KPI,
