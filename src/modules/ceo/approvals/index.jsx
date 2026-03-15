@@ -21,6 +21,8 @@ import { semanticStatus } from "@/theme/semanticColors";
 import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
 import * as userStore from "../../../shared/services/userStore";
 import * as complianceStore from "../../../shared/services/complianceStore";
+import * as fundRequestStore from "../../../shared/services/fundRequestStore";
+import * as programStore from "../../../shared/services/programStore";
 import * as approvalStoreRaw from "../../../shared/services/approvalStore";
 import * as notificationStore from "../../../shared/services/notificationStore";
 import { detectAntiBypass } from "../../../shared/services/fundRequestStore";
@@ -30,6 +32,26 @@ import { formatApprovalSourceType } from "../../../utils/approvalLabels";
 function resolveUserId(roleKey) {
   const users = userStore.getUsersByRole(roleKey);
   return users.length > 0 ? users[0].id : null;
+}
+
+function resolveProgramNameFromApproval(item) {
+  if (item.sourceType !== "FUND_REQUEST" || !item.sourceId) {
+    return "—";
+  }
+
+  const request = fundRequestStore.getFundRequestById(item.sourceId);
+  if (!request) {
+    return "—";
+  }
+
+  if (request.programId) {
+    const program = programStore.getProgramById(request.programId);
+    if (program?.name) {
+      return program.name;
+    }
+  }
+
+  return request.program || "—";
 }
 
 export default function CeoApprovalsPage() {
@@ -62,6 +84,7 @@ function CeoApprovalCard({ item, userId, onAction }) {
   const [adjustedAmount, setAdjustedAmount] = useState("");
   const [showAdjust, setShowAdjust] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
+  const programName = resolveProgramNameFromApproval(item);
 
   const requester = userStore.listUsers().find((u) => u.id === item.requestedByUserId);
   const requiresJustification = item.amount > 3000;
@@ -142,6 +165,7 @@ function CeoApprovalCard({ item, userId, onAction }) {
               Amount: GHS {Number(item.amount).toLocaleString()} &middot; Requested{" "}
               {new Date(item.createdAt).toLocaleDateString()} &middot; By: {requester?.name || "Unknown"}
             </p>
+            <p className="text-xs text-gray-400 mt-1">Program: {programName}</p>
             {noticeMessages.length > 0 ? <InlineNotice className="mt-3">{noticeMessages.join(" ")}</InlineNotice> : null}
           </div>
         </div>

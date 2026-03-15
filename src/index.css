@@ -1,24 +1,19 @@
 @import "tailwindcss";
+@import "./styles/theme.css";
 
 :root {
   --font-body: "Inter", sans-serif;
-  --font-heading: "Space Grotesk", sans-serif;
+  --font-heading: "Plus Jakarta Sans", sans-serif;
 
-  --color-primary: #0F172A;
   --color-secondary: #1E293B;
-  --color-background: #F8FAFC;
-  --color-surface: #FFFFFF;
   --color-surface-hover: #F1F5F9;
-  --color-text-primary: #0F172A;
-  --color-text-secondary: #475569;
   --color-text-muted: #94A3B8;
-  --color-border: #E2E8F0;
-  --color-accent: #2563EB;
+  --color-border: var(--border-color);
   --color-success: rgb(16 185 129);
   --color-warning: rgb(245 158 11);
   --color-danger: rgb(239 68 68);
   --color-info: rgb(113 180 255);
-  --color-status-text: #0F172A;
+  --color-status-text: var(--text-primary);
 
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
@@ -29,17 +24,11 @@
 }
 
 :root[data-theme="dark"] {
-  --color-primary: #E2E8F0;
   --color-secondary: #CBD5E1;
-  --color-background: #0F172A;
-  --color-surface: #1E293B;
-  --color-surface-hover: #334155;
-  --color-text-primary: #F8FAFC;
-  --color-text-secondary: #CBD5E1;
+  --color-surface-hover: #2A2A32;
   --color-text-muted: #64748B;
-  --color-border: #334155;
-  --color-accent: #3B82F6;
-  --color-status-text: #FFFFFF;
+  --color-border: var(--border-color);
+  --color-status-text: var(--text-primary);
 }
 
 body {
@@ -60,4 +49,14 @@ h1,
 h2,
 h3 {
   font-family: var(--font-heading);
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }

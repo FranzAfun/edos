@@ -1,7 +1,7 @@
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 /**
  * Fund Request Form (F1)
- * Executive submits: supervisor, program, purpose, amount, vendor quotation,
+ * Executive submits: program, purpose, amount, vendor quotation,
  * expected outcome, attachment. Budget check runs when a legacy department budget is available.
  */
 import { useState, useMemo } from "react";
@@ -12,10 +12,10 @@ import useFormValidation from "../../../shared/hooks/useFormValidation";
 import * as fundRequestStore from "../../../shared/services/fundRequestStore";
 import * as budgetStore from "../../../shared/services/budgetStore";
 import * as userStore from "../../../shared/services/userStore";
+import * as programStore from "../../../shared/services/programStore";
 import useRole from "../../../hooks/useRole";
 import { semanticStatus } from "@/theme/semanticColors";
 import { createApproval } from "../../common/approvals/services/approvalService";
-import { SUPERVISOR_OPTIONS } from "../../../utils/supervisor";
 
 function resolveUser(roleKey) {
   const users = userStore.getUsersByRole(roleKey);
@@ -30,28 +30,22 @@ export default function FundRequestForm() {
   const currentUserDeptId = currentUser?.departmentId;
   const [submitted, setSubmitted] = useState(false);
   const [budgetWarning, setBudgetWarning] = useState(null);
-
-  const requiresSupervisor = role === "executive";
-  const currentUserSupervisor = requiresSupervisor
-    ? currentUser?.supervisorRole || ""
-    : (role === "cto" || role === "coo" ? role : "");
+  const activePrograms = programStore.getPrograms().filter((program) => program.status === "active");
 
   const rules = useMemo(
     () => ({
-      supervisor: (value) => (requiresSupervisor && !value ? "Supervisor is required" : null),
-      program: (value) => (!value?.trim() ? "Program name is required" : null),
+      programId: (value) => (!value?.trim() ? "Program is required" : null),
       purpose: (value) => (!value?.trim() ? "Purpose is required" : value.trim().length < 10 ? "Purpose must be at least 10 characters" : null),
       amount: (value) => (!value || Number(value) <= 0 ? "Amount must be greater than 0" : null),
       vendorQuotation: (value) => (!value?.trim() ? "Vendor quotation details are required" : null),
       expectedOutcome: (value) => (!value?.trim() ? "Expected outcome is required" : null),
     }),
-    [requiresSupervisor]
+    []
   );
 
   const { values, errors, handleChange, validate, reset } = useFormValidation(
     {
-      supervisor: currentUserSupervisor,
-      program: "",
+      programId: "",
       purpose: "",
       amount: "",
       vendorQuotation: "",
@@ -99,6 +93,11 @@ export default function FundRequestForm() {
     event.preventDefault();
     if (!validate()) return;
 
+    const selectedProgram = programStore.getProgramById(values.programId);
+    if (!selectedProgram || selectedProgram.status !== "active") {
+      return;
+    }
+
     const budget = budgetStore.getBudgetByDepartment(values.departmentId || currentUserDeptId);
     if (budget?.frozen) return;
 
@@ -106,8 +105,9 @@ export default function FundRequestForm() {
       userId: currentUserId,
       requesterRole: role,
       departmentId: values.departmentId || currentUserDeptId,
-      supervisor: values.supervisor,
-      program: values.program,
+      supervisor: selectedProgram.supervisor,
+      programId: selectedProgram.id,
+      program: selectedProgram.name,
       purpose: values.purpose,
       amount: Number(values.amount),
       vendorQuotation: values.vendorQuotation,
@@ -116,12 +116,12 @@ export default function FundRequestForm() {
     });
 
     const approvalResponse = await createApproval({
-      title: `Fund Request: ${values.program}`,
+      title: `Fund Request: ${selectedProgram.name}`,
       description: values.purpose,
       amount: Number(values.amount),
       sourceType: "FUND_REQUEST",
       sourceId: fundRequest.id,
-      supervisor: values.supervisor,
+      supervisor: selectedProgram.supervisor,
       requestedByUserId: currentUserId,
     });
 
@@ -135,8 +135,7 @@ export default function FundRequestForm() {
 
     setSubmitted(true);
     reset({
-      supervisor: currentUserSupervisor,
-      program: "",
+      programId: "",
       purpose: "",
       amount: "",
       vendorQuotation: "",
@@ -168,57 +167,46 @@ export default function FundRequestForm() {
         )}
 
         <Card>
+          {activePrograms.length === 0 && (
+            <div
+              className="mb-4 rounded p-3 text-sm"
+              role="alert"
+              style={{
+                backgroundColor: semanticStatus.warning.bg,
+                color: semanticStatus.warning.text,
+              }}
+            >
+              No active programs available. Ask Admin to create and activate a program first.
+            </div>
+          )}
           <form onSubmit={handleSubmit} noValidate>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-              {requiresSupervisor ? (
-                <FormField
-                  label="Supervisor"
-                  name="supervisor"
-                  type="select"
-                  value={values.supervisor}
-                  onChange={handleChange}
-                  error={errors.supervisor}
-                  required
-                >
-                  <select
-                    id="field-supervisor"
-                    name="supervisor"
-                    value={values.supervisor}
-                    onChange={handleChange}
-                    required
-                    className={`w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${errors.supervisor ? "border-[var(--color-danger)] focus:ring-[var(--color-danger)]" : "border-gray-300 focus:ring-[var(--color-accent)]"}`}
-                  >
-                    <option value="">Select supervisor</option>
-                    {SUPERVISOR_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </FormField>
-              ) : (
-                <Card>
-                  <p className="text-xs text-gray-500">Approval Entry</p>
-                  <p className="mt-2 text-sm font-semibold">
-                    {role === "finance" ? "CEO review first" : "Financial Officer review first"}
-                  </p>
-                  <p className="mt-1 text-xs text-gray-400">
-                    {role === "finance"
-                      ? "Finance requests skip the FO stage and go directly to CEO approval."
-                      : "Senior operational requests start with Financial Officer review."}
-                  </p>
-                </Card>
-              )}
-
               <FormField
                 label="Program"
-                name="program"
-                value={values.program}
+                name="programId"
+                type="select"
+                value={values.programId}
                 onChange={handleChange}
-                error={errors.program}
+                error={errors.programId}
                 required
-                placeholder="e.g. Digital Literacy Initiative"
-              />
+                helpText="Supervisor is assigned automatically from selected program."
+              >
+                <select
+                  id="field-programId"
+                  name="programId"
+                  value={values.programId}
+                  onChange={handleChange}
+                  className="w-full rounded border px-3 py-2 text-sm"
+                  required
+                >
+                  <option value="">Select program</option>
+                  {activePrograms.map((program) => (
+                    <option key={program.id} value={program.id}>
+                      {program.name}
+                    </option>
+                  ))}
+                </select>
+              </FormField>
 
               <FormField
                 label="Amount (GHS)"
@@ -291,7 +279,7 @@ export default function FundRequestForm() {
             <div className="flex justify-end pt-2">
               <button
                 type="submit"
-                disabled={!!budgetWarning && budgetWarning.includes("frozen")}
+                disabled={activePrograms.length === 0 || (!!budgetWarning && budgetWarning.includes("frozen"))}
                 className="rounded bg-[var(--color-accent)] px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Submit Request

@@ -15,7 +15,7 @@ document.documentElement.setAttribute("data-theme", initialTheme);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <div className="min-h-screen w-full overflow-x-hidden">
+    <div className="app-container min-h-screen w-full overflow-x-hidden">
       <RoleProvider>
         <FeatureProvider>
           <AuthorityProvider>

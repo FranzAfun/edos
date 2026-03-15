@@ -24,6 +24,8 @@ import StatusBadge from "../../../shared/ui/StatusBadge";
 import * as userStore from "../../../shared/services/userStore";
 import * as complianceStore from "../../../shared/services/complianceStore";
 import * as budgetStore from "../../../shared/services/budgetStore";
+import * as fundRequestStore from "../../../shared/services/fundRequestStore";
+import * as programStore from "../../../shared/services/programStore";
 import * as approvalStoreRaw from "../../../shared/services/approvalStore";
 import * as notificationStore from "../../../shared/services/notificationStore";
 import { detectAntiBypass } from "../../../shared/services/fundRequestStore";
@@ -33,6 +35,26 @@ import { formatApprovalSourceType } from "../../../utils/approvalLabels";
 function resolveUserId(roleKey) {
   const users = userStore.getUsersByRole(roleKey);
   return users.length > 0 ? users[0].id : null;
+}
+
+function resolveProgramNameFromApproval(item) {
+  if (item.sourceType !== "FUND_REQUEST" || !item.sourceId) {
+    return "—";
+  }
+
+  const request = fundRequestStore.getFundRequestById(item.sourceId);
+  if (!request) {
+    return "—";
+  }
+
+  if (request.programId) {
+    const program = programStore.getProgramById(request.programId);
+    if (program?.name) {
+      return program.name;
+    }
+  }
+
+  return request.program || "—";
 }
 
 export default function FinanceApprovalsPage() {
@@ -98,6 +120,7 @@ function EnhancedApprovalCard({ item, userId, onAction }) {
   const [showAdjust, setShowAdjust] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
+  const programName = useMemo(() => resolveProgramNameFromApproval(item), [item]);
 
   const requester = userStore.listUsers().find((u) => u.id === item.requestedByUserId);
   const compliance = requester ? complianceStore.getCompliance(requester.id) : null;
@@ -224,6 +247,7 @@ function EnhancedApprovalCard({ item, userId, onAction }) {
               Amount: GHS {Number(item.amount).toLocaleString()} &middot; Requested{" "}
               {new Date(item.createdAt).toLocaleDateString()} &middot; By: {requester?.name || "Unknown"}
             </p>
+            <p className="text-xs text-gray-400 mt-1">Program: {programName}</p>
             {noticeMessages.length > 0 ? (
               <InlineNotice className="mt-3">{noticeMessages.join(" ")}</InlineNotice>
             ) : null}
@@ -305,6 +329,7 @@ function DisbursementCard({ item, userId, onAction }) {
   const [note, setNote] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const requester = userStore.listUsers().find((user) => user.id === item.requestedByUserId);
+  const programName = useMemo(() => resolveProgramNameFromApproval(item), [item]);
 
   const handleDisburse = useCallback(async () => {
     setBusy(true);
@@ -329,6 +354,7 @@ function DisbursementCard({ item, userId, onAction }) {
             <p className="text-xs text-gray-400 mt-1">
               Request #{item.sourceId || item.id} &middot; Amount: GHS {Number(item.amount).toLocaleString()} &middot; By: {requester?.name || "Unknown"}
             </p>
+            <p className="text-xs text-gray-400 mt-1">Program: {programName}</p>
           </div>
         </div>
 

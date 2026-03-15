@@ -267,6 +267,11 @@ export const NAVIGATION = {
       permission: PERMISSIONS.ADMIN_MANAGE_USERS,
     },
     {
+      label: "Programs",
+      path: "/admin/programs",
+      permission: PERMISSIONS.ADMIN_MANAGE_USERS,
+    },
+    {
       label: "Budgets",
       path: "/admin/budgets",
       permission: PERMISSIONS.VIEW_BUDGETS,

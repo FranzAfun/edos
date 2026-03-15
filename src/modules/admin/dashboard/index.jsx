@@ -16,6 +16,7 @@ import * as complianceStore from "../../../shared/services/complianceStore";
 import * as approvalStore from "../../../shared/services/approvalStore";
 import * as auditStore from "../../../shared/services/auditStore";
 import { isTerminal } from "../../../governance/approvalStages";
+import { formatTokenLabel } from "../../../utils/formatLabel";
 
 export default function AdminDashboard() {
   useDocumentTitle("Admin Dashboard");
@@ -84,8 +85,8 @@ export default function AdminDashboard() {
               <div className="space-y-2">
                 {auditLog.slice(0, 5).map((entry) => (
                   <div key={entry.id} className="text-xs text-gray-500">
-                    <span className="font-medium">{entry.action}</span> on{" "}
-                    {entry.entityType} &middot;{" "}
+                    <span className="font-medium">{formatTokenLabel(entry.action)}</span> on{" "}
+                    {formatTokenLabel(entry.entityType)} &middot;{" "}
                     {new Date(entry.timestamp).toLocaleString()}
                   </div>
                 ))}

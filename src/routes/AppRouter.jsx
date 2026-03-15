@@ -29,6 +29,7 @@ const AdminDashboard = lazy(() => import("../modules/admin/dashboard"));
 const ExecutiveKpiPage = lazy(() => import("../modules/executive/kpi"));
 const AdminKpiPage = lazy(() => import("../modules/admin/kpi"));
 const AdminUsersPage = lazy(() => import("../modules/admin/users"));
+const AdminProgramsPage = lazy(() => import("../modules/admin/programs"));
 const AdminBudgetsPage = lazy(() => import("../modules/admin/budgets"));
 const NotificationsPage = lazy(() => import("../modules/common/notifications"));
 const FundRequestForm = lazy(() => import("../modules/executive/fund-request"));
@@ -522,6 +523,14 @@ export default function AppRouter() {
             element={
               <RequirePermission permission={permissions.ADMIN_MANAGE_USERS}>
                 <AdminUsersPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="programs"
+            element={
+              <RequirePermission permission={permissions.ADMIN_MANAGE_USERS} allowedRoles={["admin"]}>
+                <AdminProgramsPage />
               </RequirePermission>
             }
           />

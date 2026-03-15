@@ -14,12 +14,34 @@ import { semanticStatus } from "@/theme/semanticColors";
 import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
 import * as userStore from "../../../shared/services/userStore";
 import * as complianceStore from "../../../shared/services/complianceStore";
+import * as fundRequestStore from "../../../shared/services/fundRequestStore";
+import * as programStore from "../../../shared/services/programStore";
 import useRole from "../../../hooks/useRole";
 import { formatApprovalSourceType } from "../../../utils/approvalLabels";
 
 function resolveUserId(roleKey) {
   const users = userStore.getUsersByRole(roleKey);
   return users.length > 0 ? users[0].id : null;
+}
+
+function resolveProgramNameFromApproval(item) {
+  if (item.sourceType !== "FUND_REQUEST" || !item.sourceId) {
+    return "—";
+  }
+
+  const request = fundRequestStore.getFundRequestById(item.sourceId);
+  if (!request) {
+    return "—";
+  }
+
+  if (request.programId) {
+    const program = programStore.getProgramById(request.programId);
+    if (program?.name) {
+      return program.name;
+    }
+  }
+
+  return request.program || "—";
 }
 
 export default function OperationsApprovalsPage() {
@@ -59,6 +81,7 @@ function ApprovalCard({ item, userId, onAction }) {
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
+  const programName = resolveProgramNameFromApproval(item);
   const complianceNotice = getComplianceNotice(item.requestedByUserId);
 
   const handleApprove = useCallback(async () => {
@@ -103,6 +126,7 @@ function ApprovalCard({ item, userId, onAction }) {
               Amount: GHS {Number(item.amount).toLocaleString()} &middot; Requested{" "}
               {new Date(item.createdAt).toLocaleDateString()}
             </p>
+            <p className="text-xs text-gray-400 mt-1">Program: {programName}</p>
             {complianceNotice ? <InlineNotice className="mt-3">{complianceNotice}</InlineNotice> : null}
           </div>
         </div>

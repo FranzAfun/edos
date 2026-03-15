@@ -10,6 +10,7 @@ import MetricCard from "../../../components/ui/MetricCard";
 import DataTable from "../../../shared/ui/DataTable";
 import * as auditStore from "../../../shared/services/auditStore";
 import * as userStore from "../../../shared/services/userStore";
+import { formatTokenLabel } from "../../../utils/formatLabel";
 
 export default function AuditTrailPage({
   title = "Audit Trail",
@@ -69,7 +70,7 @@ export default function AuditTrailPage({
           >
             <option value="">All Categories</option>
             {Object.values(auditStore.AUDIT_CATEGORIES).map((category) => (
-              <option key={category} value={category}>{category}</option>
+              <option key={category} value={category}>{formatTokenLabel(category)}</option>
             ))}
           </select>
           <select
@@ -79,7 +80,7 @@ export default function AuditTrailPage({
           >
             <option value="">All Actions</option>
             {actions.map((a) => (
-              <option key={a} value={a}>{a}</option>
+              <option key={a} value={a}>{formatTokenLabel(a)}</option>
             ))}
           </select>
           <select
@@ -89,7 +90,7 @@ export default function AuditTrailPage({
           >
             <option value="">All Entities</option>
             {entityTypes.map((e) => (
-              <option key={e} value={e}>{e}</option>
+              <option key={e} value={e}>{formatTokenLabel(e)}</option>
             ))}
           </select>
         </div>
@@ -111,9 +112,21 @@ export default function AuditTrailPage({
                 return u?.name || v || "System";
               },
             },
-            { key: "action", label: "Action" },
-            { key: "category", label: "Category" },
-            { key: "entityType", label: "Entity Type" },
+            {
+              key: "action",
+              label: "Action",
+              render: (value) => formatTokenLabel(value),
+            },
+            {
+              key: "category",
+              label: "Category",
+              render: (value) => formatTokenLabel(value),
+            },
+            {
+              key: "entityType",
+              label: "Entity Type",
+              render: (value) => formatTokenLabel(value),
+            },
             { key: "entityId", label: "Entity ID" },
             {
               key: "details",

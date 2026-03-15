@@ -5,7 +5,7 @@
  *
  * Fund Request shape:
  * {
- *   id, userId, departmentId, supervisor, program, purpose,
+ *   id, userId, departmentId, supervisor, programId, program, purpose,
  *   amount, vendorQuotation, expectedOutcome, attachmentName,
  *   status (PENDING_TECH_REVIEW | PENDING_FO | PENDING_CEO | APPROVED | READY_FOR_DISBURSEMENT | DISBURSED | REJECTED | REJECTED_COMPLIANCE),
  *   approvalId (linked approval),
@@ -85,13 +85,16 @@ function migrateLegacyFundRequests() {
     const supervisor = normalizeSupervisor(request.supervisor)
       || mapLegacyPillarToSupervisor(request.pillar);
 
-    if (request.supervisor !== supervisor || "pillar" in request) {
+    const programId = request.programId || null;
+
+    if (request.supervisor !== supervisor || "pillar" in request || request.programId !== programId) {
       changed = true;
     }
 
     return {
       ...request,
       supervisor,
+      programId,
     };
   }).map((request) => {
     const nextRequest = { ...request };
@@ -114,6 +117,7 @@ function seedIfEmpty() {
       userId: "user-exec-1",
       departmentId: "dept-education",
       supervisor: "cto",
+      programId: "prog-seed-1",
       program: "Digital Literacy Initiative",
       purpose: "Purchase of 50 tablets for student training program",
       amount: 2500,
@@ -129,6 +133,7 @@ function seedIfEmpty() {
       userId: "user-exec-1",
       departmentId: "dept-manufacturing",
       supervisor: "coo",
+      programId: "prog-seed-2",
       program: "Raw Material Procurement",
       purpose: "Monthly raw materials for production line",
       amount: 800,
@@ -165,6 +170,8 @@ export function createFundRequest(payload) {
   const entry = {
     ...payload,
     supervisor: normalizeSupervisor(payload.supervisor) || payload.supervisor || "",
+    programId: payload.programId || null,
+    program: payload.program || "",
     id: generateId(),
     status: getInitialApprovalStageForRole(requesterRole),
     createdAt: new Date().toISOString(),

@@ -20,6 +20,7 @@ import * as approvalStore from "../../shared/services/approvalStore";
 import * as receiptStore from "../../shared/services/receiptStore";
 import * as departmentStore from "../../shared/services/departmentStore";
 import * as financialTransactionStore from "../../shared/services/financialTransactionStore";
+import { formatTokenLabel } from "../../utils/formatLabel";
 
 const COLORS = ["#2563EB", "#16A34A", "#D97706", "#DC2626", "#8B5CF6"];
 
@@ -118,7 +119,7 @@ export default function FinanceDashboard() {
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-semibold">GHS {Number(expense.amount || 0).toLocaleString()}</p>
-                  <StatusBadge variant="info">{expense.status}</StatusBadge>
+                  <StatusBadge variant="info">{formatTokenLabel(expense.status)}</StatusBadge>
                 </div>
               </div>
             </Card>

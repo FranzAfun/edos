@@ -12,6 +12,7 @@ import { submitKpiEvidence } from "./services/kpiService";
 import * as userStore from "../../../shared/services/userStore";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import useRole from "../../../hooks/useRole";
+import { formatTokenLabel } from "../../../utils/formatLabel";
 
 function resolveExecUserId() {
   const execs = userStore.getUsersByRole("executive");
@@ -134,7 +135,7 @@ export default function ExecutiveKpiPage() {
                   </div>
                   {score ? (
                     <div className="mt-3 rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-sm">
-                      Grade: <span className="font-semibold">{score.gradeStatus}</span>
+                      Grade: <span className="font-semibold">{formatTokenLabel(score.gradeStatus)}</span>
                       <span className="mx-2 text-[var(--color-text-muted)]">•</span>
                       Raw: {score.rawScore}
                       <span className="mx-2 text-[var(--color-text-muted)]">•</span>
@@ -197,12 +198,12 @@ function KpiCard({ task, score, onSubmitted }) {
         <span>Deadline: {task.deadline}</span>
         <span>Weight: {task.weight}</span>
         <span>Impact: {task.impactCategory}</span>
-        <span>Status: {task.status}</span>
+        <span>Status: {formatTokenLabel(task.status)}</span>
       </div>
 
       {score && (
         <div className="text-sm bg-purple-50 rounded p-2 mb-4">
-          Score: <strong>{score.gradeStatus}</strong> — Raw {score.rawScore}, Computed{" "}
+          Score: <strong>{formatTokenLabel(score.gradeStatus)}</strong> — Raw {score.rawScore}, Computed{" "}
           {score.computedScore}
         </div>
       )}

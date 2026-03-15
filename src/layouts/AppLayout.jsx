@@ -6,7 +6,7 @@ function AppLayout({ children }) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-[var(--color-background)]">
+    <div className="app-container flex min-h-screen">
       
       {/* Sidebar */}
       <Sidebar title="EDOS" mobileOpen={mobileSidebarOpen} onCloseMobile={() => setMobileSidebarOpen(false)} />
@@ -21,7 +21,7 @@ function AppLayout({ children }) {
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 bg-[var(--color-background)] p-6 md:p-10">
+        <main className="flex-1 p-6 md:p-10">
           {children}
         </main>
       </div>
