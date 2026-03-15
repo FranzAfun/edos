@@ -45,6 +45,7 @@ const AttendancePage = lazy(() => import("../modules/common/attendance"));
 const CommunicationsPage = lazy(() => import("../modules/common/communications"));
 const ReportsPage = lazy(() => import("../modules/common/reports"));
 const AuditTrailPage = lazy(() => import("../modules/common/audit"));
+const SystemLogsPage = lazy(() => import("../modules/admin/system-logs"));
 const TransparencyPage = lazy(() => import("../modules/common/transparency"));
 
 function RoleRootRedirect() {
@@ -229,8 +230,11 @@ export default function AppRouter() {
           <Route
             path="audit"
             element={
-              <RequirePermission permission={permissions.VIEW_AUDIT}>
-                <AuditTrailPage />
+              <RequirePermission permission={permissions.VIEW_AUDIT} allowedRoles={["finance"]}>
+                <AuditTrailPage
+                  defaultCategory="FINANCIAL_AUDIT"
+                  categoryLocked
+                />
               </RequirePermission>
             }
           />
@@ -363,6 +367,17 @@ export default function AppRouter() {
             element={
               <RequirePermission permission={permissions.VIEW_CEO_EXPENSE_LOG}>
                 <CEOExpenseLogPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="audit"
+            element={
+              <RequirePermission permission={permissions.VIEW_AUDIT} allowedRoles={["ceo"]}>
+                <AuditTrailPage
+                  defaultCategory="FINANCIAL_AUDIT"
+                  categoryLocked
+                />
               </RequirePermission>
             }
           />
@@ -535,10 +550,10 @@ export default function AppRouter() {
             }
           />
           <Route
-            path="audit"
+            path="logs"
             element={
-              <RequirePermission permission={permissions.VIEW_AUDIT}>
-                <AuditTrailPage />
+              <RequirePermission permission={permissions.VIEW_AUDIT} allowedRoles={["admin"]}>
+                <SystemLogsPage />
               </RequirePermission>
             }
           />

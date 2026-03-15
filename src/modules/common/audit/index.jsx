@@ -11,34 +11,49 @@ import DataTable from "../../../shared/ui/DataTable";
 import * as auditStore from "../../../shared/services/auditStore";
 import * as userStore from "../../../shared/services/userStore";
 
-export default function AuditTrailPage() {
-  useDocumentTitle("Audit Trail");
+export default function AuditTrailPage({
+  title = "Audit Trail",
+  subtitle = "System activity log for transparency and accountability",
+  defaultCategory = auditStore.AUDIT_CATEGORIES.FINANCIAL_AUDIT,
+  categoryLocked = false,
+}) {
+  useDocumentTitle(title);
   const [filterAction, setFilterAction] = useState("");
   const [filterEntity, setFilterEntity] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(defaultCategory || "");
 
   const allLogs = useMemo(() => auditStore.listAuditLog(), []);
 
+  const scopedLogs = useMemo(() => {
+    if (!selectedCategory) {
+      return allLogs;
+    }
+
+    return allLogs.filter((log) => log.category === selectedCategory);
+  }, [allLogs, selectedCategory]);
+
   const actions = useMemo(
-    () => [...new Set(allLogs.map((l) => l.action))],
-    [allLogs]
+    () => [...new Set(scopedLogs.map((log) => log.action))],
+    [scopedLogs]
   );
+
   const entityTypes = useMemo(
-    () => [...new Set(allLogs.map((l) => l.entityType))],
-    [allLogs]
+    () => [...new Set(scopedLogs.map((log) => log.entityType))],
+    [scopedLogs]
   );
 
   const filteredLogs = useMemo(() => {
-    let logs = allLogs;
-    if (filterAction) logs = logs.filter((l) => l.action === filterAction);
-    if (filterEntity) logs = logs.filter((l) => l.entityType === filterEntity);
+    let logs = scopedLogs;
+    if (filterAction) logs = logs.filter((log) => log.action === filterAction);
+    if (filterEntity) logs = logs.filter((log) => log.entityType === filterEntity);
     return logs;
-  }, [allLogs, filterAction, filterEntity]);
+  }, [scopedLogs, filterAction, filterEntity]);
 
   return (
     <div>
-      <PageSection title="Audit Trail" subtitle="System activity log for transparency and accountability">
+      <PageSection title={title} subtitle={subtitle}>
         <Grid cols={3}>
-          <MetricCard label="Total Events" value={allLogs.length} />
+          <MetricCard label="Total Events" value={scopedLogs.length} />
           <MetricCard label="Unique Actions" value={actions.length} />
           <MetricCard label="Entity Types" value={entityTypes.length} />
         </Grid>
@@ -46,6 +61,17 @@ export default function AuditTrailPage() {
 
       <PageSection title="Filter">
         <div className="flex gap-4 mb-4">
+          <select
+            value={selectedCategory}
+            onChange={(event) => setSelectedCategory(event.target.value)}
+            className="rounded border px-3 py-1.5 text-sm"
+            disabled={categoryLocked}
+          >
+            <option value="">All Categories</option>
+            {Object.values(auditStore.AUDIT_CATEGORIES).map((category) => (
+              <option key={category} value={category}>{category}</option>
+            ))}
+          </select>
           <select
             value={filterAction}
             onChange={(e) => setFilterAction(e.target.value)}
@@ -86,6 +112,7 @@ export default function AuditTrailPage() {
               },
             },
             { key: "action", label: "Action" },
+            { key: "category", label: "Category" },
             { key: "entityType", label: "Entity Type" },
             { key: "entityId", label: "Entity ID" },
             {

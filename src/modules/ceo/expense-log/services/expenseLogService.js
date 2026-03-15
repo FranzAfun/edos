@@ -33,7 +33,8 @@ export const logCeoExpense = createModuleService(async (payload) => {
 
   auditStore.createAuditEntry({
     userId: payload.createdByUserId,
-    action: "CEO_EXPENSE_RECORDED",
+    category: auditStore.AUDIT_CATEGORIES.FINANCIAL_AUDIT,
+    action: auditStore.FINANCIAL_AUDIT_ACTIONS.CEO_EXPENSE_RECORDED,
     entityType: "financial_transaction",
     entityId: transaction.id,
     details: {

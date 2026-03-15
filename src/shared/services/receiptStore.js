@@ -14,6 +14,8 @@
  * }
  */
 
+import * as auditStore from "./auditStore";
+
 const KEY = "edos_receipts";
 
 function generateId() {
@@ -71,7 +73,7 @@ export function createReceiptPlaceholder(approvalId, fundRequestId, authorizedAt
   return entry;
 }
 
-export function uploadReceipt(id, { fileName, vendorName, actualAmount, receiptDate }) {
+export function uploadReceipt(id, { fileName, vendorName, actualAmount, receiptDate, uploadedBy }) {
   const all = read();
   const idx = all.findIndex((r) => r.id === id);
   if (idx === -1) return null;
@@ -85,6 +87,23 @@ export function uploadReceipt(id, { fileName, vendorName, actualAmount, receiptD
     uploadedAt: new Date().toISOString(),
   };
   write(all);
+
+  auditStore.createAuditEntry({
+    userId: uploadedBy || null,
+    category: auditStore.AUDIT_CATEGORIES.FINANCIAL_AUDIT,
+    action: auditStore.FINANCIAL_AUDIT_ACTIONS.RECEIPT_UPLOADED,
+    entityType: "receipt",
+    entityId: all[idx].id,
+    details: {
+      approvalId: all[idx].approvalId,
+      fundRequestId: all[idx].fundRequestId,
+      vendorName,
+      actualAmount,
+      receiptDate,
+      fileName,
+    },
+  });
+
   return all[idx];
 }
 
@@ -100,6 +119,21 @@ export function verifyReceipt(id, { verifiedBy, status, notes }) {
     notes: notes || "",
   };
   write(all);
+
+  auditStore.createAuditEntry({
+    userId: verifiedBy || null,
+    category: auditStore.AUDIT_CATEGORIES.FINANCIAL_AUDIT,
+    action: auditStore.FINANCIAL_AUDIT_ACTIONS.RECEIPT_VERIFIED,
+    entityType: "receipt",
+    entityId: all[idx].id,
+    details: {
+      approvalId: all[idx].approvalId,
+      fundRequestId: all[idx].fundRequestId,
+      status: all[idx].verificationStatus,
+      notes: all[idx].notes,
+    },
+  });
+
   return all[idx];
 }
 

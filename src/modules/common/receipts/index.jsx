@@ -171,6 +171,7 @@ function UploadReceiptPanel({ onUploaded, currentUserId }) {
         vendorName: values.vendorName,
         actualAmount: Number(values.actualAmount),
         receiptDate: values.receiptDate,
+        uploadedBy: currentUserId,
       });
       const reviewerUsers = [resolveUser("cto"), resolveUser("coo")].filter(Boolean);
       reviewerUsers.forEach((reviewerUser) => {
@@ -184,7 +185,7 @@ function UploadReceiptPanel({ onUploaded, currentUserId }) {
       setSelectedId("");
       onUploaded();
     },
-    [validate, values, selectedId, reset, onUploaded]
+    [validate, values, selectedId, reset, onUploaded, currentUserId]
   );
 
   if (awaitingReceipts.length === 0) {

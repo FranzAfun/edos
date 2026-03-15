@@ -4,10 +4,36 @@
  * Key: edos_audit_log
  *
  * AuditEntry shape:
- * { id, userId, action, entityType, entityId, details (object), timestamp }
+ * { id, userId, category, action, entityType, entityId, details (object), timestamp }
  */
 
 const KEY = "edos_audit_log";
+
+export const AUDIT_CATEGORIES = {
+  SYSTEM_LOG: "SYSTEM_LOG",
+  FINANCIAL_AUDIT: "FINANCIAL_AUDIT",
+};
+
+export const SYSTEM_LOG_ACTIONS = {
+  USER_CREATED: "USER_CREATED",
+  USER_UPDATED: "USER_UPDATED",
+  ROLE_CHANGED: "ROLE_CHANGED",
+  FEATURE_FLAG_CHANGED: "FEATURE_FLAG_CHANGED",
+  SETTINGS_UPDATED: "SETTINGS_UPDATED",
+  LOGIN: "LOGIN",
+  LOGOUT: "LOGOUT",
+};
+
+export const FINANCIAL_AUDIT_ACTIONS = {
+  REQUEST_CREATED: "REQUEST_CREATED",
+  SUPERVISOR_APPROVED: "SUPERVISOR_APPROVED",
+  FINANCE_APPROVED: "FINANCE_APPROVED",
+  CEO_APPROVED: "CEO_APPROVED",
+  FUNDS_DISBURSED: "FUNDS_DISBURSED",
+  RECEIPT_UPLOADED: "RECEIPT_UPLOADED",
+  RECEIPT_VERIFIED: "RECEIPT_VERIFIED",
+  CEO_EXPENSE_RECORDED: "CEO_EXPENSE_RECORDED",
+};
 
 function generateId() {
   return `aud-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -32,6 +58,7 @@ function seedIfEmpty() {
     {
       id: "aud-seed-1",
       userId: "user-cto-1",
+      category: AUDIT_CATEGORIES.SYSTEM_LOG,
       action: "APPROVAL_ADVANCED",
       entityType: "approval",
       entityId: "appr-seed-2",
@@ -41,6 +68,7 @@ function seedIfEmpty() {
     {
       id: "aud-seed-2",
       userId: "user-admin-1",
+      category: AUDIT_CATEGORIES.SYSTEM_LOG,
       action: "USER_CREATED",
       entityType: "user",
       entityId: "user-exec-1",
@@ -68,7 +96,19 @@ export function getAuditByAction(action) {
   return read().filter((a) => a.action === action);
 }
 
+export function getAuditByCategory(category) {
+  return read().filter((a) => a.category === category);
+}
+
 export function createAuditEntry(payload) {
+  if (!payload?.category) {
+    throw new Error("Audit category is required");
+  }
+
+  if (!Object.values(AUDIT_CATEGORIES).includes(payload.category)) {
+    throw new Error(`Invalid audit category: ${payload.category}`);
+  }
+
   const all = read();
   const entry = {
     ...payload,

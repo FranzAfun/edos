@@ -13,6 +13,7 @@ import * as fundRequestStore from "../../../../shared/services/fundRequestStore"
 import * as notificationStore from "../../../../shared/services/notificationStore";
 import * as receiptStore from "../../../../shared/services/receiptStore";
 import * as userStore from "../../../../shared/services/userStore";
+import * as auditStore from "../../../../shared/services/auditStore";
 import {
   APPROVAL_STAGES,
   APPROVAL_STAGE_LABELS,
@@ -69,6 +70,24 @@ function getRequesterRole(requestedByUserId) {
 
 function getRequestReference(approval) {
   return approval?.sourceId || approval?.id || "unknown";
+}
+
+function logFinancialAudit({ userId, action, approval, details = {} }) {
+  if (!approval?.id) return;
+
+  auditStore.createAuditEntry({
+    userId,
+    category: auditStore.AUDIT_CATEGORIES.FINANCIAL_AUDIT,
+    action,
+    entityType: "approval",
+    entityId: approval.id,
+    details: {
+      sourceId: approval.sourceId || null,
+      sourceType: approval.sourceType || null,
+      currentStage: approval.currentStage,
+      ...details,
+    },
+  });
 }
 
 function notifyReadyForDisbursement(approval) {
@@ -208,6 +227,15 @@ export const approveApproval = createModuleService(
     const nextStage = getNextApprovalStage(current);
     if (!nextStage) throw new Error("Approval is already in a terminal state");
 
+    let approvalAction = null;
+    if (current.currentStage === APPROVAL_STAGES.PENDING_TECH_REVIEW) {
+      approvalAction = auditStore.FINANCIAL_AUDIT_ACTIONS.SUPERVISOR_APPROVED;
+    } else if (current.currentStage === APPROVAL_STAGES.PENDING_FO) {
+      approvalAction = auditStore.FINANCIAL_AUDIT_ACTIONS.FINANCE_APPROVED;
+    } else if (current.currentStage === APPROVAL_STAGES.PENDING_CEO) {
+      approvalAction = auditStore.FINANCIAL_AUDIT_ACTIONS.CEO_APPROVED;
+    }
+
     const updated = approvalStore.updateApprovalStage(id, {
       nextStage,
       action: "APPROVED",
@@ -219,6 +247,17 @@ export const approveApproval = createModuleService(
 
     // Determine notification target
     if (nextStage === APPROVAL_STAGES.PENDING_FO) {
+      logFinancialAudit({
+        userId,
+        action: approvalAction,
+        approval: updated,
+        details: {
+          fromStage: current.currentStage,
+          toStage: updated.currentStage,
+          note: note || "",
+        },
+      });
+
       const foUser = getUserForRole("finance");
       const technicalReviewerLabel = getSupervisorLabel(current.supervisor) || "Technical";
       notifyUser(
@@ -227,6 +266,17 @@ export const approveApproval = createModuleService(
         `"${updated.title}" passed ${technicalReviewerLabel} review and awaits Financial Officer review.`
       );
     } else if (nextStage === APPROVAL_STAGES.PENDING_CEO) {
+      logFinancialAudit({
+        userId,
+        action: approvalAction,
+        approval: updated,
+        details: {
+          fromStage: current.currentStage,
+          toStage: updated.currentStage,
+          note: note || "",
+        },
+      });
+
       const ceoUser = getUserForRole("ceo");
       notifyUser(
         ceoUser?.id,
@@ -243,6 +293,17 @@ export const approveApproval = createModuleService(
 
       syncFundRequestStatus(readyApproval, APPROVAL_STAGES.READY_FOR_DISBURSEMENT);
       notifyReadyForDisbursement(readyApproval);
+
+      logFinancialAudit({
+        userId,
+        action: approvalAction,
+        approval: readyApproval,
+        details: {
+          fromStage: current.currentStage,
+          toStage: readyApproval.currentStage,
+          note: note || "",
+        },
+      });
 
       return readyApproval;
     }
@@ -272,6 +333,17 @@ export const markApprovalAsDisbursed = createModuleService(async ({ id, userId, 
   });
 
   syncFundRequestStatus(updated, APPROVAL_STAGES.DISBURSED);
+
+  logFinancialAudit({
+    userId,
+    action: auditStore.FINANCIAL_AUDIT_ACTIONS.FUNDS_DISBURSED,
+    approval: updated,
+    details: {
+      fromStage: current.currentStage,
+      toStage: updated.currentStage,
+      note: note || "",
+    },
+  });
 
   if (updated.sourceType === "FUND_REQUEST") {
     receiptStore.createReceiptPlaceholder(updated.id, updated.sourceId, new Date().toISOString());
@@ -326,6 +398,19 @@ export const createApproval = createModuleService(async (payload) => {
     ...payload,
     initialStage,
   });
+
+  logFinancialAudit({
+    userId: payload.requestedByUserId,
+    action: auditStore.FINANCIAL_AUDIT_ACTIONS.REQUEST_CREATED,
+    approval: entry,
+    details: {
+      title: entry.title,
+      amount: entry.amount,
+      initialStage,
+      supervisor: entry.supervisor || null,
+    },
+  });
+
   const technicalReviewerRole = getTechnicalReviewerRole(entry);
   const technicalReviewerLabel = getSupervisorLabel(technicalReviewerRole) || "Technical";
 

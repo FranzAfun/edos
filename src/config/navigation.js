@@ -201,6 +201,11 @@ export const NAVIGATION = {
       permission: PERMISSIONS.VIEW_CEO_EXPENSE_LOG,
     },
     {
+      label: "Audit",
+      path: "/ceo/audit",
+      permission: PERMISSIONS.VIEW_AUDIT,
+    },
+    {
       label: "Strategy",
       path: "/ceo/strategy",
       permission: PERMISSIONS.VIEW_STRATEGY,
@@ -277,8 +282,8 @@ export const NAVIGATION = {
       permission: PERMISSIONS.VIEW_REPORTS,
     },
     {
-      label: "Audit",
-      path: "/admin/audit",
+      label: "Logs",
+      path: "/admin/logs",
       permission: PERMISSIONS.VIEW_AUDIT,
     },
     {

@@ -1,0 +1,283 @@
+EDOS AUDIT SYSTEM REFACTOR
+
+Objective
+Refactor the current audit system to clearly separate:
+
+1) System Logs (technical platform events)
+2) Financial Audit (money + governance lifecycle)
+
+Both must use the SAME auditStore infrastructure but be categorized and filtered differently in the UI.
+
+
+------------------------------------------------
+STEP 1 — Extend Audit Entry Schema
+------------------------------------------------
+
+Update the audit entry model in:
+
+src/shared/services/auditStore.js
+
+Add a new field:
+
+category
+
+Allowed values:
+
+SYSTEM_LOG
+FINANCIAL_AUDIT
+
+New model:
+
+{
+  id,
+  userId,
+  category,
+  action,
+  entityType,
+  entityId,
+  details,
+  timestamp
+}
+
+Modify createAuditEntry() so that category is REQUIRED.
+
+
+------------------------------------------------
+STEP 2 — Update Existing Audit Writes
+------------------------------------------------
+
+Locate all existing calls to:
+
+createAuditEntry(...)
+
+Update them to include a category field.
+
+Example:
+
+createAuditEntry({
+  userId,
+  category: "FINANCIAL_AUDIT",
+  action: "CEO_EXPENSE_RECORDED",
+  entityType: "expense",
+  entityId: expenseId,
+  details,
+  timestamp: Date.now()
+})
+
+
+------------------------------------------------
+STEP 3 — Define Event Categories
+------------------------------------------------
+
+SYSTEM_LOG examples:
+
+USER_CREATED
+USER_UPDATED
+ROLE_CHANGED
+FEATURE_FLAG_CHANGED
+SETTINGS_UPDATED
+LOGIN
+LOGOUT
+
+FINANCIAL_AUDIT examples:
+
+REQUEST_CREATED
+SUPERVISOR_APPROVED
+FINANCE_APPROVED
+CEO_APPROVED
+FUNDS_DISBURSED
+RECEIPT_UPLOADED
+RECEIPT_VERIFIED
+CEO_EXPENSE_RECORDED
+
+
+------------------------------------------------
+STEP 4 — Create Financial Audit Coverage
+------------------------------------------------
+
+In the approval + finance workflow modules, add audit writes for the lifecycle:
+
+createRequest()
+
+log event:
+REQUEST_CREATED
+
+
+supervisorApprove()
+
+log event:
+SUPERVISOR_APPROVED
+
+
+financeApprove()
+
+log event:
+FINANCE_APPROVED
+
+
+ceoApprove()
+
+log event:
+CEO_APPROVED
+
+
+disburseFunds()
+
+log event:
+FUNDS_DISBURSED
+
+
+uploadReceipt()
+
+log event:
+RECEIPT_UPLOADED
+
+
+verifyReceipt()
+
+log event:
+RECEIPT_VERIFIED
+
+
+All these entries must use:
+
+category: "FINANCIAL_AUDIT"
+
+
+------------------------------------------------
+STEP 5 — Refactor Audit Page Filtering
+------------------------------------------------
+
+Current page:
+
+src/modules/common/audit/index.jsx
+
+Modify the data loading logic so it supports category filtering.
+
+Example:
+
+const logs = listAuditLog()
+
+const filteredLogs = logs.filter(
+  log => log.category === selectedCategory
+)
+
+
+------------------------------------------------
+STEP 6 — Admin System Logs Page
+------------------------------------------------
+
+Create a new route:
+
+/admin/logs
+
+Page component:
+
+SystemLogsPage
+
+Location:
+
+src/modules/admin/system-logs/
+
+
+This page must:
+
+Load logs using:
+
+category === "SYSTEM_LOG"
+
+Reuse the existing AuditTrailPage table UI.
+
+
+------------------------------------------------
+STEP 7 — Financial Audit Pages
+------------------------------------------------
+
+Existing pages remain:
+
+/finance/audit
+/admin/audit (optional removal later)
+/ceo/audit
+
+These pages must only display:
+
+category === "FINANCIAL_AUDIT"
+
+
+------------------------------------------------
+STEP 8 — Sidebar Navigation Changes
+------------------------------------------------
+
+Admin sidebar
+
+Add:
+
+Logs
+→ /admin/logs
+
+Remove "Audit" from admin navigation.
+
+
+Finance sidebar
+
+Keep:
+
+Audit
+→ /finance/audit
+
+
+CEO sidebar
+
+Add:
+
+Audit
+→ /ceo/audit
+
+
+------------------------------------------------
+STEP 9 — Permission Model
+------------------------------------------------
+
+Use existing permission:
+
+VIEW_AUDIT
+
+But enforce:
+
+Admin → System Logs
+
+Finance + CEO → Financial Audit
+
+
+------------------------------------------------
+STEP 10 — Seed Data Cleanup
+------------------------------------------------
+
+Update seed entries in auditStore:
+
+APPROVAL_ADVANCED
+USER_CREATED
+
+Ensure they include category:
+
+SYSTEM_LOG
+
+
+------------------------------------------------
+END RESULT
+------------------------------------------------
+
+System Logs
+
+/admin/logs
+Admin only
+
+
+Financial Audit
+
+/finance/audit
+/ceo/audit
+
+
+All events stored in same auditStore
+but separated using the category field.

@@ -119,6 +119,7 @@ export const roles = {
       permissions.VIEW_NOTIFICATIONS,
       permissions.VIEW_CEO_INTELLIGENCE,
       permissions.VIEW_CEO_EXPENSE_LOG,
+      permissions.VIEW_AUDIT,
       permissions.VIEW_CONTRIBUTIONS,
       permissions.VIEW_TRANSPARENCY,
       permissions.VIEW_REPORTS,
